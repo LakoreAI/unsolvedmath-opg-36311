@@ -117,10 +117,21 @@ publishable breakthrough; matching `1/3` is the target.
   already reaches `0.291n` (average case). The obstacle is the
   **average-case → worst-case gap**, not a sub-solver. See `PHASE1.md` and
   `representation_exponents.md`.
-- **R12 result.** The worst-case open cases `{0,1}`, `{±1}`, `{±2}` are exactly
-  the coefficient sets with no nontrivial sumset factorisation, so
-  Randolph-Węgrzycki's coefficient shifting has nothing to exploit. A `{0,1}`
-  solution needs a different worst-case mechanism. See `coefficient_shifting.md`.
+- **R12 result.** The worst-case open cases `{0,1}`, `{±1}`, `[±2]` have no
+  sumset factorisation with a repeated representation (proved via
+  `|A+B| >= |A|+|B|-1`; see the representation note), so Randolph-Węgrzycki's
+  coefficient shifting has nothing to exploit. A `{0,1}` solution needs a
+  different worst-case mechanism. See `coefficient_shifting.md`.
+- **R19 result.** Either-or subset sum rules out all-distinct inputs as hard, so
+  hard inputs have *some* collisions. Do collisions help? Sweep of number size
+  `2^(beta*n)`, n = 16, 20: at `beta = 1` about 11% of subsets repeat a sum,
+  yet meet-in-the-middle halves have no repeats (work ratio 0.99 even for the
+  best of 32 splits) and birthday sampling needs `2^(0.55n)`. Collisions are
+  *global* (they need many items), so neither half-deduplication nor sampling
+  exploits them. Sampling beats `2^(n/2)` only for `beta < ~0.85`. The hard band
+  is roughly `0.9 <= beta <= 1.25`: collisions exist but are too sparse and too
+  spread out. Next: a collision-finding method whose cost depends on global,
+  not per-half, structure. See `collision_mitm.md`.
 
 ## Phase 2 — the structured 3SUM route
 
