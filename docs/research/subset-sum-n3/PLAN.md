@@ -33,11 +33,24 @@ three-block `2^(n/3)`-size 3SUM becomes subquadratic.
 - [ ] 0.2b. Optimized BCJ `0.291n` recursion (nested modular sub-knapsack
       solvers and weight balancing) — not implemented. The balanced
       `C(n/2,n/8)` sub-enumeration here is the weak HGJ, not the full attack.
-- [x] 0.3. ESS/PESS baseline (`src/equal_subset_sum.py` + tests): exact signed
-      meet-in-the-middle at `O*(3^(n/2))`; documents that the known
-      `O*(2^(n/3))` PESS algorithm (Jin-Williams-Zhang) is not reimplemented.
-- [ ] 0.4. Port the `O*(2^(n/3))` PESS algorithm and the `F = sum_t max(0,
-      count(t)-1)` structural machinery.
+- [x] 0.3. ESS/PESS baselines (`src/equal_subset_sum.py` + tests): signed
+  meet-in-the-middle for ESS at `O*(3^(n/2))`, and binary-search/MITM for
+  PESS at `O*(2^(n/2))`.
+- [ ] 0.4. Port the `O*(2^(n/3))` PESS algorithm and its structural
+  `F = sum_t max(0, count(t)-1)` and subsampling/mod-p machinery. A
+  modular-bucket counting/sampling primitive and a large-slack collision
+  round (`bucket_collision`, Las Vegas `randomized_pigeonhole_equal_subset_sum`
+  with exact fallback) are implemented. The close-pair reduction `W_{X,Y}`
+  with witness lifting (`close_pair_equal_subset_sum`) is implemented and
+  proven complete for nonnegative weights, using a 2^(n-k) reference
+  enumeration of close pairs. The Jin-Wu `O*(2^(0.4n))` algorithm
+  (arXiv:2403.19117) is implemented as `jin_wu_pigeonhole_equal_subset_sum`:
+  exact structured counting (Lemma 7) plus Lemma 5 subsampling, dispatched by
+  the measured slack `Delta*` with `d >= Delta*` (Lemma 6, tested by brute
+  force). Near-geometric instances: cost `~2^9.6` vs MITM `~2^17.6` at
+  `n=24`; on random instances poly(n) overhead dominates at `n <= 24`.
+  Pending: the `2^(n/3)` refinement (poly-size close pairs, small-slack case
+  of Jin-Williams-Zhang), which needs the full paper.
 - [x] 0.5. Regime-aware exponent benchmark (`scripts/analysis/regimes.py`).
 - [x] 0.6. Mixing harness (`scripts/analysis/mixing_harness.py`).
 

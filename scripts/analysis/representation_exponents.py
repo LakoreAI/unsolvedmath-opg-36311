@@ -16,7 +16,8 @@ counts
     Nw(1)=1/16+a/4+b/2+g, Nw(-1)=a/4+b/2+g
 and moduli Mw, Mw*Mk, Mw*Mk*Mv from the "single decomposition" conditions,
 the running time is
-    T = max(Lw, Lw^1/2, Lw^2/Mk, Lk, Lk^2/Mv, Lv, Lv^2 * Mv*Mk*Mw / 2^n).
+    T = max(Hw/2, Lw, Lw^2/Mk, Lk, Lk^2/Mv, Lv, Lv^2 * Mv*Mk*Mw / 2^n),
+where Hw/2 is the base-list (half-vector enumeration) cost at the bottom level.
 
 At alpha=beta=gamma=0 this must reproduce the May-Meurer-corrected HGJ value
 0.337; the minimum reproduces BCJ's 0.291.
@@ -93,15 +94,15 @@ def bcj(alpha, beta, gamma):
     e_mv = e_mw_mk_mv - e_mw_mk
 
     time = max(
+        0.5 * hw,
         lw,
-        0.5 * lw,
         2 * lw - e_mk,
         lk,
         2 * lk - e_mv,
         lv,
         2 * lv + e_mw_mk_mv - 1,
     )
-    memory = max(lw, 0.5 * lw, lk, lv)
+    memory = max(0.5 * hw, lw, lk, lv)
     return time, memory
 
 

@@ -9,14 +9,14 @@ model (R8), which used the wrong sub-solver structure.
 | HGJ 2-part ideal `D(1/2)` | 0.3113 | HGJ 4.1 |
 | HGJ simple algorithm (best beta) | 0.3372 | HGJ 4.2 / May-Meurer |
 | BCJ `alpha=beta=gamma=0` | 0.3371 | BCJ 3.3 (recovers HGJ) |
-| BCJ minimised | 0.2917 | BCJ 3.3 |
+| BCJ minimised | 0.2911 | BCJ 3.3 |
 
-BCJ optimum: alpha=0.0280, beta=0.0180, gamma=0.0040, memory exponent 0.2881.
+BCJ optimum: alpha=0.0270, beta=0.0170, gamma=0.0030, memory exponent 0.2909.
 
 Reading: `D(1/2) = 0.3113` is the *ideal* two-part exponent HGJ aims at.
 The concrete HGJ simple algorithm reaches `0.338` (beta -> 1/4), matching
 the May-Meurer-corrected `0.337`. The BCJ three-level `{-1,0,1}`
-construction minimises at `0.292`, reproducing the published
+construction minimises at `0.291`, reproducing the published
 `0.291`. These are **average-case** bounds for random hard knapsacks;
 they do not give a worst-case `2^(n/3)` algorithm.
 

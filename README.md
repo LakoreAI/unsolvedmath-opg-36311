@@ -35,7 +35,7 @@ the report generator uses PyYAML.
 | Module | Contents |
 | --- | --- |
 | `subset_sum.py` | Exact subset sum: sorted meet-in-the-middle, Schroeppel-Shamir (`ss`), signed dense DP (`dp`), dispatched by `solve(values, target, method)`. |
-| `equal_subset_sum.py` | Equal-Subset-Sum / Pigeonhole-ESS baseline via signed meet-in-the-middle (`O*(3^(n/2))`). |
+| `equal_subset_sum.py` | ESS via signed meet-in-the-middle (`O*(3^(n/2))`); PESS via binary-search MITM (`O*(2^(n/2))`); modular-bucket sampler. |
 | `dissection.py` | Wagner four-list modular k-sum core and verifier. |
 | `hgj.py` | Howgrave-Graham-Joux representation + modular-filter search for hard knapsacks. |
 | `additive.py` | Additive-combinatorics probes: `\|S(A)\|`, collision count `F`, additive energy, modular residue profiles, cardinality counts. |

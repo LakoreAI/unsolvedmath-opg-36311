@@ -10,14 +10,15 @@
 \newcommand{\Ot}{\tilde{\mathcal{O}}}
 \title{Exact Subset Sum and Subset Balancing:\\[2pt]
 A Structured Survey from Meet-in-the-Middle to the Representation Frontier}
-\author{\IEEEauthorblockN{Reproducible Research Note}}
+\author{\IEEEauthorblockN{Le Duc Minh}
+\IEEEauthorblockA{\href{mailto:minh.leduc.0210@gmail.com}{minh.leduc.0210@gmail.com}}}
 \begin{document}
 \maketitle
 \begin{abstract}
 For $n$ integers and a target, exact subset sum has remained at the
 meet-in-the-middle bound $\Oh^*(2^{n/2})$ for half a century in the worst case,
 while the average-case representation technique now reaches
-$\Ot(2^{0.291n})$ for hard knapsacks. This survey maps the field. We fix the
+$\Ot(2^{0.283n})$ (heuristically) for random hard knapsacks. This survey maps the field. We fix the
 problem variants (subset sum, subset balancing over a coefficient set $C$,
 Equal-Subset-Sum, Pigeonhole ESS, $k$-SUM, cardinality-constrained, dense,
 modular), tabulate the classical and modern algorithms with their time, space,
@@ -54,7 +55,7 @@ $|a_i|\le\mathrm{poly}(n)$ then $W\le\mathrm{poly}(n)$ and the dense dynamic
 program is polynomial --- hardness needs large values. (ii) Completely large,
 superincreasing values (e.g.\ powers of two) are also easy, because the target's
 binary expansion is the witness. (iii) Hardness therefore concentrates near
-density $d=n/\log_2\max_i|a_i|\approx1$, exactly where the cryptanalytic
+density $\delta=n/\log_2\max_i|a_i|\approx1$, exactly where the cryptanalytic
 representation technique lives. Powers of two also show that deduplicating
 subset sums cannot force a better exponent: they produce $2^n$ distinct sums
 while remaining easy.
@@ -64,7 +65,7 @@ Different variants behave very differently; Table~\ref{tab:variants} fixes
 notation. A \emph{subset balancing} instance over a coefficient set
 $C\subset\mathbb Z$ asks for a nonzero $c\in C^n$ with $\sum_i c_ia_i=0$; it
 generalises subset sum and Partition. Densities are
-$d=n/\log_2\max_i|a_i|$; the hard-knapsack regime is $d\approx1$.
+$\delta=n/\log_2\max_i|a_i|$; the hard-knapsack regime is $\delta\approx1$.
 
 \begin{table}[t]
 \centering
@@ -78,7 +79,7 @@ Variant & Coefficient set / promise \\
 Subset Sum & $C=\{0,1\}$, target $b$ \\
 Partition & $C=\{-1,1\}$, target $0$ \\
 Equal Subset Sum (ESS) & $C=\{-1,0,1\}$, target $0$ \\
-Pigeonhole ESS (PESS) & ESS with $\sum_i|a_i|<2^n-1$ (solution guaranteed) \\
+Pigeonhole ESS (PESS) & ESS on positive $a_i$ with $\sum_ia_i<2^n-1$ (solution guaranteed) \\
 Subset Balancing & constant $C$ (e.g.\ $[\pm d]$, $[-d:d]$) \\
 $k$-SUM & one element from each of $k$ lists, sum to target \\
 Cardinality-constrained & $C=\{0,1\}$ with $\sum_i x_i=k$ \\
@@ -90,10 +91,12 @@ Modular & equation modulo $M$ (e.g.\ $2^{n}$) \\
 
 \subsection{Scope and sources}
 This survey compiles primary sources (arXiv, IACR ePrint, conference
-proceedings) found in a structured literature pass, together with small
-dependency-free scripts that reproduce the representation exponents. We separate
+proceedings) found in a structured literature pass, together with our own
+numerical evaluation of the representation exponents. We separate
 \emph{cited} results from \emph{reproduced} ones (Section~\ref{sec:repr}). No new
-algorithm or lower bound is claimed.
+algorithm or lower bound is claimed. Results named in the text without a
+bibliography entry come from the literature pass and have not yet been
+re-checked against the primary source.
 
 \section{Classical exact algorithms}\label{sec:classical}
 
@@ -113,11 +116,13 @@ $u\in S(L)$, $v\in S(R)$ with $u+v=b$) makes it exact. This is the baseline.
 
 \paragraph{Schroeppel--Shamir.}
 Schroeppel and Shamir~\cite{ss} keep $\Oh^*(2^{n/2})$ time but reduce space to
-$\Oh^*(2^{n/4})$. They split into four blocks of $n/4$, and for a guessed middle
-value $\sigma_M$ enumerate the pair lists $\{\sigma_{12}\}$,
-$\{\sigma_{34}\}$ matching modulo $2^{n/4}$, generating the needed pair sums
-lazily in sorted order with two priority queues instead of materialising the
-$2^{n/2}$ list. The general trade-off is roughly $T=\Oh(2^n/S^2)$ for space $S$.
+$\Oh^*(2^{n/4})$. They split into four blocks of $n/4$, enumerate and sort the
+four block-sum lists, and generate the pair sums of blocks $1{+}2$ in
+increasing order and of blocks $3{+}4$ in decreasing order with two priority
+queues, sweeping them toward each other instead of materialising the
+$2^{n/2}$-entry lists. (Matching pair lists on a guessed residue modulo
+$2^{n/4}$ is the later Howgrave-Graham--Joux variant~\cite{hgj}.) The general
+trade-off is roughly $T=\Oh(2^n/S^2)$ for space $S\le2^{n/4}$.
 
 \paragraph{Polynomial-space algorithms.}
 Lokshtanov and Nederlof~\cite{ln} solve subset sum and knapsack in
@@ -160,7 +165,7 @@ be built in time proportional to their size, the cost would be
 D(\alpha)=\frac{2}{\alpha^{\alpha/2}(2-\alpha)^{(2-\alpha)/2}}\,2^{-\alpha},
 \qquad \alpha=\ell/n,
 \end{equation}
-with $D(1/2)=2^{0.3113n}$ in the balanced case (HGJ~\cite{hgj}, Sec.~4.1). The
+with $D(1/2)^n=2^{0.3113n}$ in the balanced case (HGJ~\cite{hgj}, Sec.~4.1). The
 gap between $D(\alpha)$ and the achievable time is the crux.
 
 \subsection{Four-way decomposition and unbalanced Schroeppel--Shamir}
@@ -191,7 +196,7 @@ $\alpha_1\approx0.458959$.
 \toprule
 $\beta$ & time exponent & memory exponent \\
 \midrule
-$\to1/4$ & 0.338 & 0.294 \\
+$\to1/4$ & 0.337 & 0.294 \\
 $0.2936$ & 0.381 & 0.250 ($=n/4$) \\
 $0.2972$ & 0.385 & 0.247 \\
 $\to1/3$ & 0.421 & 0.211 \\
@@ -211,9 +216,11 @@ N_\omega(1)&=\tfrac1{16}+\tfrac\alpha4+\tfrac\beta2+\gamma, &
 N_\omega(-1)&=\tfrac\alpha4+\tfrac\beta2+\gamma.
 \end{align}
 With moduli fixed by the single-decomposition condition, the list sizes are
-$L_\chi=\mathrm{mult}(N_\chi)/\prod M$ and
+$L_\chi=\mathrm{mult}(N_\chi)/\prod M$ and, with $2^{h_\omega n/2}$ the cost of
+the bottom-level base lists ($h_\omega$ the entropy of the level-$\omega$
+coefficient distribution),
 \begin{equation}\label{eq:bcj}
-T=\max\!\Big(L_\omega,L_\omega^{1/2},\tfrac{L_\omega^2}{M_\kappa},
+T=\max\!\Big(2^{h_\omega n/2},L_\omega,\tfrac{L_\omega^2}{M_\kappa},
 L_\kappa,\tfrac{L_\kappa^2}{M_\nu},L_\nu,
 L_\nu^2\tfrac{M_\nu M_\kappa M_\omega}{2^n}\Big).
 \end{equation}
@@ -224,7 +231,7 @@ representations to reach $2^{0.283n}$. These are \emph{average-case} bounds for
 random hard knapsacks, resting on heuristic modular-distribution corollaries.
 
 \subsection{Reproduced exponents}
-We implemented the HGJ and BCJ models and minimised them numerically
+We evaluated the HGJ and BCJ models and minimised them numerically
 (Table~\ref{tab:repr}); the companion note gives the derivation. The results
 match the primary sources.
 
@@ -274,9 +281,10 @@ $\{0,1\}+\{-3,-2,1,2\}=[\pm3]$, where $\pm2$ has two representations.
 \paragraph{Results and open cases.}
 Table~\ref{tab:rw} lists the outcomes. The results leave exactly three
 coefficient sets open: $\{0,1\}$ (Subset Sum), $\{\pm1\}$ (Partition), and
-$\{\pm2\}$. We independently verified (Section~\ref{sec:frontier}) that these
-are precisely the sets admitting \emph{no nontrivial sumset factorisation}, so
-coefficient shifting has nothing to exploit.
+$\{\pm2\}$. We independently checked (Section~\ref{sec:frontier}) that, among
+factorisations with $C_1,C_2\subseteq[-3,3]$, these are precisely the sets
+admitting \emph{no nontrivial sumset factorisation}, so coefficient shifting has
+nothing to exploit.
 
 \begin{table}[t]
 \centering
@@ -287,8 +295,8 @@ coefficient shifting has nothing to exploit.
 \toprule
 $C$ & Worst-case exponent \\
 \midrule
-$[-d:d]$, $d>1$ & $|C|^{0.5-\epsilon}$ \\
-$[\pm d]$, $d>2$ & $|C|^{0.5-\epsilon}$ \\
+$[-d:d]$, $d>1$ & $|C|^{(0.5-\epsilon)n}$ \\
+$[\pm d]$, $d>2$ & $|C|^{(0.5-\epsilon)n}$ \\
 $[-1:1]$ (ESS) & $1.7067^n$ \\
 $[\pm1]$ (Partition) & open \\
 $\{\pm2\}$ & open \\
@@ -300,21 +308,21 @@ $\{0,1\}$ (Subset Sum) & open \\
 \section{Where the target is already attained: related variants}\label{sec:variants}
 
 \paragraph{Pigeonhole Equal Subset Sum.}
-PESS (total sum $<2^n-1$, so a collision is guaranteed) is solved in
-$\Oh^*(2^{n/3})$ by a randomized algorithm (Zhang, 2024; Jin--Williams--Zhang,
-ESA 2025~\cite{jwz}), improving Jin--Wu's $\Oh^*(2^{0.4n})$~\cite{jw}. The key
-structural quantity is $F=\sum_t\max(0,\mathrm{cnt}(t)-1)$, the number of
-colliding subset-sum pairs. Small $F$ forces the weights to be close to the
-geometric progression $1,2,4,\dots$, collapsing PESS to a small ESS instance on
-a few low-order elements; large $F$ means many solutions, handleable by
-subsampling and mod-$p$ dynamic programming. A polynomial-space variant runs in
-$\Oh^*(2^{2n/3})$ time. A FOCS 2026 line gives a deterministic dense algorithm
-$\mathrm{poly}(n)M^{o(1)}$ ($M=2^{o(n)}$), an average-case
-$\mathrm{poly}(n)M^{1/4}$, and a lattice-based conditional lower bound.
+PESS (positive weights with total $<2^n-1$, so a collision is guaranteed) is
+solved in $\Oh^*(2^{n/3})$ by a randomized algorithm (Jin--Williams--Zhang,
+ESA 2025~\cite{jwz}), improving Jin--Wu's $\Oh^*(2^{0.4n})$~\cite{jw}. Jin--Wu
+use the excess multiplicity $d=\sum_t\max(0,f_t-1)$, where $f_t$ is the number
+of subsets with sum $t$; it equals the number of non-subset-sums in
+$[0,2^n)$. If $d$ is small, the sorted weights satisfy
+$w_i-2^{i-1}\in[-i\Delta,\Delta]$ for some $\Delta\ge d$, so subset sums can be
+counted exactly with meet-in-the-middle over a short prefix and the binary
+search for a collision runs in $\Oh^*(\Delta^{1/2})$. If $d$ is large there are
+many collisions, found by subsampling a random residue class modulo a random
+prime. Jin--Wu also give an $\Oh^*(2^{0.75n})$ polynomial-space algorithm.
 
 \paragraph{Equal Subset Sum.}
 Worst-case ESS is at $\Oh^*(1.6994^n)$ (Yamano--Shibuya, 2026)~\cite{ys},
-improving $1.7067^n$~\cite{rw} and $1.7088^n$ (MNPW, ESA 2019); the baseline is
+improving $1.7067^n$~\cite{rw} and $1.7088^n$~\cite{mnpw}; the baseline is
 $3^{n/2}=1.7321^n$.
 
 \paragraph{Either-Or Subset Sum.}
@@ -324,19 +332,21 @@ thesis~\cite{rand}), the strongest concrete evidence toward breaking the
 meet-in-the-middle barrier for $\{0,1\}$ itself.
 
 \paragraph{Quantum algorithms.}
-Bernstein, Jeffery, Lange and Meurer~\cite{bjlm} solve worst-case subset sum in
-$\Oh^*(2^{n/3})$; Chukhin, Kulikov, Levitskii and Mihajlin~\cite{cklm} give
-$\Oh^*(2^{2n/7})\approx2^{0.2857n}$ via a worst-case quantum $k$-SUM algorithm
-with exponent $\Psi_k=2k/7+\Oh(1)$. Hence $1/3$ is not
+Combining Grover search with collision finding solves worst-case subset sum
+in $\Oh^*(2^{n/3})$ quantum time; Bernstein, Jeffery, Lange and
+Meurer~\cite{bjlm} give a heuristic average-case $\Oh^*(2^{0.241n})$ quantum
+representation algorithm. Chukhin, Kulikov, Levitskii and Mihajlin~\cite{cklm}
+give a worst-case $\Oh^*(2^{2n/7})\approx2^{0.2857n}$ via a worst-case quantum
+$k$-SUM algorithm. Hence $1/3$ is not
 information-theoretically special; the classical obstruction is algorithmic.
 
 \paragraph{Cardinality-constrained.}
 Fixing the Hamming weight of the solution turns the problem into $k$-SUM, where
 meet-in-the-middle is $\Oh(n^{\lceil k/2\rceil})$ and the $k$-SUM conjecture
-asserts this is essentially optimal. In the low-weight cryptanalytic regime,
-Esser and May (EUROCRYPT 2020) give a heuristic $2^{0.645n}$ algorithm
-(improving BCJ's $2^{0.72n}$ random-subset-sum bound); it needs many solutions
-and is not worst-case.
+asserts this is essentially optimal. For \emph{polynomial memory}, Esser and
+May~\cite{em} give a heuristic $2^{0.65n}$ algorithm for random subset sum
+(improving the earlier $2^{0.72n}$ polynomial-memory bound); it is
+average-case, not worst-case.
 
 \section{Pseudopolynomial, dense, and proximity algorithms}\label{sec:pseudo}
 
@@ -354,8 +364,8 @@ Algorithm & Time & Notes & Ref. \\
 Bellman & $\Oh(nt)$ & classic DP & 1957 \\
 Koiliaris--Xu & $\Ot(t\sqrt n)$ & deterministic & \cite{kx} \\
 Bringmann & $\Ot(n+t)$ & randomized & \cite{bri} \\
-Jin--Wu & $\Ot(n+t)$ & simpler randomized & SOSA'19 \\
-Bringmann--Nakos & $\Ot(|S(X,t)|^{4/3})$ & output-sensitive & STOC'20 \\
+Jin--Wu & $\Ot(n+t)$ & simpler randomized & \cite{jwsosa} \\
+Bringmann--Nakos & $\Ot(|S(X,t)|^{4/3})$ & output-sensitive & \cite{bn} \\
 Chen--Lian--Mao--Zhang & $\Ot(n+\sqrt{a_{\max}t})$ & & \cite{clmz} \\
 Bringmann--Fischer--Nakos & $\Ot(|S(X,t)|\sqrt n)$ & beats Bellman in all regimes & \cite{bfn} \\
 Chan & $\Ot(t)$ & deterministic & SODA'26 \\
@@ -369,7 +379,7 @@ Any of these meets the $2^{n/3}$ target whenever $t\le2^{n/3}$; the hard regime 
 large values / low density.
 
 \paragraph{Proximity and integer programming.}
-Eisenbrand and Weismantel's Steinitz-lemma proximity gives
+Eisenbrand and Weismantel's Steinitz-lemma proximity~\cite{ew} gives
 $(m\Delta)^{\Oh(m)}\mathrm{poly}$ algorithms for integer programs; Randolph and
 Węgrzycki (ESA 2024) prove an exact equivalence between bounded-doubling subset
 sum and hyperplane-constrained binary ILP, recasting subset-sum hardness as ILP
@@ -380,16 +390,16 @@ pseudopolynomial bound.
 
 \paragraph{Generalised birthday.}
 Wagner's $k$-tree algorithm~\cite{wag} solves the modular $k$-sum in
-$\Oh(k\cdot2^{n/(1+\log k)})$; for $k=4$ this is $2^{n/3}$. Lyubashevsky (2005)
-and Shallue (2008) apply it to Random Modular Subset Sum with modulus
+$\Oh(k\cdot2^{n/(1+\log k)})$; for $k=4$ this is $2^{n/3}$. Lyubashevsky~\cite{lyu}
+and Shallue~\cite{sha} apply it to Random Modular Subset Sum with modulus
 $M=2^{n^\epsilon}$, giving $2^{\Oh(n^\epsilon/\log n)}$ bounds. These are
 average-case results for dense/many-solution instances; the representation
 technique is the low-density counterpart.
 
 \paragraph{Lattice reduction.}
 Lagarias and Odlyzko~\cite{lo} solve almost all random knapsacks of density
-$d<0.6463$ in polynomial time given an SVP oracle; Coster et al.\ extend this to
-$d<0.9408$. BKZ-based attacks dominate the density-$\approx1$ regime. Joux and
+$\delta<0.6463$ in polynomial time given an SVP oracle; Coster et al.~\cite{cjloss}
+extend this to $\delta<0.9408$. BKZ-based attacks dominate the density-$\approx1$ regime. Joux and
 Węgrzycki (STACS 2026) improve the modular approach, roughly doubling the
 admissible density. Lattice methods are average-case/heuristic and orthogonal to
 the worst-case target.
@@ -402,7 +412,8 @@ behave well. A recurring theme is a \emph{dichotomy}: either the instance has
 additive structure (small sumset, small doubling, few representations) and is
 easy, or it has many representations and the representation/subsampling
 machinery applies. The sub-$1/2$ worst-case results~\cite{rw} are built on such
-dichotomies; the coefficient sets without a $0$ resist them. We probed two
+dichotomies; the three coefficient sets without a nontrivial sumset
+factorisation ($\{0,1\}$, $\{\pm1\}$, $\{\pm2\}$) resist them. We probed two
 folklore hypotheses with small experiments: dissociativity ($F=0$) does not make
 an instance hard (representations remain modularly spread), and pseudo-solution
 load is concentrated in the \emph{easy} collision-heavy families, not in the
@@ -420,7 +431,7 @@ hard-looking dissociated ones.
 Bound & Assumption \\
 \midrule
 No $2^{o(n)}$ exact algorithm & ETH \\
-No $\Ot(T^{1-\epsilon}2^{o(n)})$ & SETH (Abboud et al.) \\
+No $\Ot(T^{1-\epsilon}2^{o(n)})$ & SETH~\cite{abhs} \\
 No $\Oh(n^{\lceil k/2\rceil-\epsilon})$ for $k$-SUM & $k$-SUM conjecture \\
 No truly subquadratic 3SUM & 3SUM conjecture \\
 No truly subquadratic (min,+) convolution & MinConv hypothesis \\
@@ -464,7 +475,7 @@ Either-Or Subset Sum & $\Oh^*(2^{0.461n})$ & --- & WC & randomized & \cite{rand}
 Quantum (BJLM) & $\Oh^*(2^{n/3})$ & --- & WC & quantum & \cite{bjlm} \\
 Quantum (Chukhin et al.) & $\Oh^*(2^{2n/7})$ & --- & WC & quantum & \cite{cklm} \\
 Wagner $k$-tree ($k=4$) & $2^{n/3}$ & $2^{n/3}$ & avg & modular $k$-sum & \cite{wag} \\
-Lattice (Lagarias--Odlyzko) & poly & poly & avg & $d<0.6463$, SVP oracle & \cite{lo} \\
+Lattice (Lagarias--Odlyzko) & poly & poly & avg & $\delta<0.6463$, SVP oracle & \cite{lo} \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -494,7 +505,7 @@ Year & Milestone \\
 2020 & Bonnetain et al.\ $0.283$ \\
 2021 & Nederlof--Węgrzycki (OV) \\
 2023 & Chen et al.\ $2^{n/2}/\mathrm{poly}$ \\
-2024 & Belova et al.; Jin--Wu; Zhang PESS \\
+2024 & Belova et al.; Jin--Wu PESS $2^{0.4n}$ \\
 2025 & Jin--Williams--Zhang PESS; Randolph--Węgrzycki; BFN; CMZ \\
 2026 & Yamano--Shibuya; Chukhin et al.; Chan; Joux--Węgrzycki \\
 \bottomrule
@@ -503,8 +514,9 @@ Year & Milestone \\
 
 \section{The frontier and open problems}\label{sec:frontier}
 
-We independently searched sumset factorisations $C=C_1+C_2$ and found that the
-three open coefficient sets are exactly those with no nontrivial factorisation
+We searched sumset factorisations $C=C_1+C_2$ with $C_1,C_2\subseteq[-3,3]$ and
+found that, within this range, the three open coefficient sets are exactly
+those with no nontrivial factorisation
 (every coefficient keeps one representation), whereas $\{-1,0,1\}$ and
 $\{\pm3\}$ acquire multiples (Table~\ref{tab:shift}).
 
@@ -540,15 +552,6 @@ bound.
 ($\Oh^*(2^{0.246n})$ space; poly-space exponents).
 \end{enumerate}
 
-\section{Reproducibility}
-The exponents in Table~\ref{tab:repr} and the coefficient-shifting search are
-produced by dependency-free Python scripts
-(\texttt{representation\_exponents.py}, \texttt{coefficient\_shifting.py}) whose
-Markdown outputs and provenance live under \texttt{docs/analysis/}. A companion
-baselines note covers correctness, implementations, and measurements of
-meet-in-the-middle, Schroeppel--Shamir, and the signed DP, with a Lean
-correctness layer.
-
 \begin{thebibliography}{99}
 \bibitem{hs} E. Horowitz and S. Sahni, ``Computing partitions with applications
 to the knapsack problem,'' \emph{J. ACM} 21(2):277--292, 1974.
@@ -563,7 +566,8 @@ arXiv:2010.08576.
 \bibitem{bckm} E. Belova, I. Chukhin, A. Kulikov, I. Mihajlin, ``Improved space
 bounds for subset sum,'' ESA 2024; arXiv:2402.13170.
 \bibitem{bgnv} N. Bansal, S. Garg, J. Nederlof, N. Vyas, ``Faster space-efficient
-algorithms for subset sum and knapsack,'' FOCS 2017.
+algorithms for subset sum, $k$-sum, and related problems,'' STOC 2017;
+\emph{SIAM J. Comput.} 47(5):1755--1777, 2018.
 \bibitem{ln} D. Lokshtanov and J. Nederlof, ``Saving space by algebraization,''
 STOC 2010.
 \bibitem{hgj} N. Howgrave-Graham and A. Joux, ``New generic algorithms for hard
@@ -577,8 +581,27 @@ classical and quantum algorithms for subset-sum,'' ASIACRYPT 2020; ePrint
 subset balancing problems,'' arXiv:2511.10823, 2025.
 \bibitem{ys} Yamano and Shibuya, ``Faster exact algorithms for Equal-Subset-Sum,''
 arXiv:2607.09289, 2026.
-\bibitem{jw} C. Jin and X. Wu, ``A faster algorithm for Pigeonhole Equal Sums,''
-ICALP 2024; arXiv:2403.19117.
+\bibitem{jw} C. Jin and H. Wu, ``A faster algorithm for Pigeonhole Equal Sums,''
+arXiv:2403.19117, 2024.
+\bibitem{jwsosa} C. Jin and H. Wu, ``A simple near-linear pseudopolynomial time
+randomized algorithm for subset sum,'' SOSA 2019; arXiv:1807.11597.
+\bibitem{mnpw} M. Mucha, J. Nederlof, J. Pawlewicz, K. W\k{e}grzycki,
+``Equal-subset-sum faster than the meet-in-the-middle,'' ESA 2019.
+\bibitem{em} A. Esser and A. May, ``Low weight discrete logarithm and subset
+sum in $2^{0.65n}$ with polynomial memory,'' EUROCRYPT 2020.
+\bibitem{bn} K. Bringmann and V. Nakos, ``Top-$k$-convolution and the quest for
+near-linear output-sensitive subset sum,'' STOC 2020.
+\bibitem{ew} F. Eisenbrand and R. Weismantel, ``Proximity results and faster
+algorithms for integer programming using the Steinitz lemma,'' SODA 2018.
+\bibitem{lyu} V. Lyubashevsky, ``The parity problem in the presence of noise,
+decoding random linear codes, and the subset sum problem,'' RANDOM 2005.
+\bibitem{sha} A. Shallue, ``An improved multi-set algorithm for the dense subset
+sum problem,'' ANTS 2008.
+\bibitem{cjloss} M. J. Coster, A. Joux, B. A. LaMacchia, A. M. Odlyzko,
+C.-P. Schnorr, J. Stern, ``Improved low-density subset sum algorithms,''
+\emph{Comput. Complexity} 2(2):111--128, 1992.
+\bibitem{abhs} A. Abboud, K. Bringmann, D. Hermelin, D. Shabtay, ``SETH-based
+lower bounds for subset sum and bicriteria path,'' SODA 2019.
 \bibitem{jwz} C. Jin, R. Williams, S. Zhang, ``New algorithms for Pigeonhole
 Equal Subset Sum,'' ESA 2025, LIPIcs 351:86.
 \bibitem{rand} T. Randolph, ``Exact and parameterized algorithms for subset sum

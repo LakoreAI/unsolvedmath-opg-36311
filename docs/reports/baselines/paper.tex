@@ -1,7 +1,6 @@
 \documentclass[conference]{IEEEtran}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage[T1]{fontenc}
-\usepackage{listings}
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{algorithm}
@@ -11,97 +10,175 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
 \newcommand{\Oh}{\mathcal{O}}
-\title{Exact Subset Sum: Reproducible Baselines, Measurements,\\
-and a Bounded-Magnitude Result}
-\author{\IEEEauthorblockN{Reproducible Research Note}}
+\title{Exact Subset Sum: Reproducible Baselines and Measurements}
+\author{\IEEEauthorblockN{Le Duc Minh}
+\IEEEauthorblockA{\href{mailto:minh.leduc.0210@gmail.com}{minh.leduc.0210@gmail.com}}}
 \begin{document}
 \maketitle
 \begin{abstract}
-We study the exact decision problem: given integers $a_1,\dots,a_n,b$,
-is there $x\in\{0,1\}^n$ with $\sum_i a_i x_i=b$? Whether the classical
-$\Oh^*(2^{n/2})$ worst-case barrier can be improved to $\Oh^*(2^{n/3})$
-is a long-standing open question; we do not resolve it. We instead collect
-deterministic witness-producing solvers---sorted meet-in-the-middle, a signed
-dynamic program, and Schroeppel--Shamir---give mathematical correctness and
-runtime arguments, formalize the correctness layer in Lean~4, and measure all
-three on infeasible instances. The measurements reproduce the predicted
-$\Oh^*(2^{n/2})$ time and confirm the $\Oh^*(2^{n/4})$ peak-memory advantage of
-Schroeppel--Shamir over meet-in-the-middle. A signed dynamic program solves
-every instance with magnitude sum $W=\sum_i|a_i|\le 2^{\lfloor n/3\rfloor}$ in
-$\Oh^*(2^{n/3})$ time; this is the textbook pseudopolynomial bound and not a
-general algorithm. The open bound, the restricted theorem, the proofs, and the
-finite measurements are kept strictly distinct.
+Subset sum asks whether some of the given integers add up to a target value.
+The best known algorithm that works on every input takes about $2^{n/2}$ steps
+for $n$ integers, and nobody knows whether $2^{n/3}$ is possible. This paper
+does not answer that question. It sets up a clean, checked starting point for
+anyone who wants to work on it. We explain the problem and the notation, then
+describe and prove correct three exact solvers: meet-in-the-middle, a
+dynamic program over all reachable sums, and the Schroeppel--Shamir algorithm.
+On inputs with no
+solution, the measured running time grows like $2^{n/2}$ for both
+meet-in-the-middle and Schroeppel--Shamir, and Schroeppel--Shamir uses memory
+that grows only like $2^{n/4}$. We also note the easy case where the numbers
+are small: if their absolute values add up to at most $2^{n/3}$, the dynamic
+program already runs in about $2^{n/3}$ steps. That case is textbook material
+and says nothing about the general question.
 \end{abstract}
 \begin{IEEEkeywords}
-subset sum, exact exponential algorithms, meet-in-the-middle, Schroeppel--Shamir,
-formal verification, reproducibility
+subset sum, knapsack, exact algorithms, meet-in-the-middle, Schroeppel--Shamir
 \end{IEEEkeywords}
 
-\section{Problem and Scope}
-Given $a_1,\dots,a_n,b\in\mathbb{Z}$, determine whether
+\section{Introduction}
+Suppose you have $n$ integers and a target. Can you pick some of them so that
+the picked numbers add up exactly to the target? This is the \emph{subset sum}
+problem. For the numbers $3,5,8,13$ and target $16$ the answer is yes, in two
+ways: $3+13$ and $3+5+8$. For target $2$ the answer is no.
+
+Written as an equation, given integers $a_1,\dots,a_n$ and $b$, we ask whether
 \begin{equation}\label{eq:problem}
 \exists x\in\{0,1\}^n:\quad\sum_{i=1}^{n}a_i x_i=b.
 \end{equation}
-The empty subset is permitted. Equal-valued entries are distinct occurrences,
-each available at most once. Negative entries and targets are permitted. This
-is the equality-decision form of 0--1 knapsack.
+Each $x_i$ says whether $a_i$ is picked ($x_i=1$) or not ($x_i=0$). This is the
+same as the yes/no version of the 0--1 knapsack problem.
 
-A classical result decides \eqref{eq:problem} on every input in
-$\Oh^*(2^{n/2})$ worst-case time, and Schroeppel--Shamir attain the same time
-with $\Oh^*(2^{n/4})$ space~\cite{hs,ss}. Whether the exponent can be reduced
-to $1/3$ is open. Average-case and hard-knapsack improvements
-\cite{hgj,bcj} do not supply a worst-case guarantee, and the recent
-polynomial-factor improvement of Chen, Jin, Randolph, and
-Servedio~\cite{chen} leaves the exponential base at $1/2$. Most recently,
-Randolph and Węgrzycki~\cite{rw} break the meet-in-the-middle barrier in the
-worst case for several subset-balancing coefficient sets, but not for the
-$\{0,1\}$ form \eqref{eq:problem}. We therefore treat the $1/3$ exponent as
-open and make no claim about it.
+\subsection{Why it matters}
+Subset sum is one of the standard NP-complete problems, so nobody expects a
+polynomial-time algorithm. It also shows up in practice. Early public-key
+schemes such as the Merkle--Hellman knapsack cryptosystem~\cite{mh} based
+their security on it, and ideas from subset sum algorithms are still used in
+attacks on code-based and lattice-based schemes. Many budgeting and packing
+questions reduce to it as well.
 
-We use $\Oh^*(\cdot)$ to suppress factors polynomial in $n$ and in the input
-bit length. A bound polynomial only in $n$ cannot hide the cost of reading
-arbitrarily long integers. Our algorithms use exact integer arithmetic; Python
-integers do not overflow. The runtime bounds below include polynomial bit
-costs rather than assuming arbitrarily large integers have unit cost.
+Because a polynomial algorithm is not expected, the interesting question is
+how fast the exponential part can be. Trying every subset costs $2^n$ steps.
+The meet-in-the-middle method of Horowitz and Sahni~\cite{hs} brings this down
+to about $2^{n/2}$, and that is still the best known bound that holds for
+every input, 50 years later. The difference between exponents is large in
+practice. For $n=60$, $2^{n/2}$ is about $10^9$ while $2^{n/3}$ is about
+$10^6$. For $n=100$ the gap is about $10^{15}$ versus $10^{10}$.
 
-\section{Enumeration and Meet-in-the-Middle}
-For a list $A$, let $S(A)$ be the list of all subset sums, retaining
-multiplicities:
+\subsection{What is known}
+Schroeppel and Shamir~\cite{ss} kept the $2^{n/2}$ time and cut the memory to
+$2^{n/4}$. Chen, Jin, Randolph and Servedio~\cite{chen} shaved a polynomial
+factor off the time, to $2^{n/2}/n^{0.5023}$, but the exponent is still $1/2$.
+On \emph{random} inputs, the representation technique of
+Howgrave-Graham and Joux~\cite{hgj} and Becker, Coron and Joux~\cite{bcj} is
+much faster, about $2^{0.291n}$, but those bounds rely on assumptions about how
+random inputs behave and do not hold for every input. Randolph and
+W\k{e}grzycki~\cite{rw} recently beat $2^{n/2}$ for every input on several
+related problems, but not for subset sum itself. So whether $2^{n/3}$ (or
+anything below $2^{n/2}$) is possible for every input is still open. We make no
+claim about it.
+
+\subsection{What this paper does}
+This paper is the first of three companion notes. It covers the problem, the
+notation, and the classical exact algorithms, with proofs and
+measurements. A second note surveys the literature, and a third studies where
+the representation technique stops working. Our contributions are:
+\begin{itemize}
+\item a self-contained introduction to the problem and its notation
+(Section~\ref{sec:prelim});
+\item correctness and running-time proofs for meet-in-the-middle, a signed
+dynamic program, and Schroeppel--Shamir
+(Sections~\ref{sec:mitm}--\ref{sec:ss});
+\item measurements of running time and memory on inputs with no solution
+(Section~\ref{sec:measure}).
+\end{itemize}
+Section~\ref{sec:goal} states what a real $2^{n/3}$ result would have to show.
+
+\section{Preliminaries}\label{sec:prelim}
+This section collects the definitions used in the rest of the paper. Readers
+who already know the area can skip it.
+
+\subsection{Inputs}
+The input is a list $a_1,\dots,a_n$ of integers and a target $b$. We allow
+negative numbers and a negative target. If the same value appears twice, the
+two copies count as different items, and each item can be used at most once.
+The empty selection is allowed and has sum $0$, so the answer for $b=0$ is
+always yes.
+
+A solver can answer in two ways. The \emph{decision} answer is just yes or no.
+The \emph{search} answer also returns a \emph{witness}: the positions of the
+picked items. A witness is easy to check by adding the numbers, so every solver
+in this paper returns one when the answer is yes.
+
+\subsection{Subsets and their sums}
+We write $[n]=\{1,\dots,n\}$ for the positions. For a set of positions
+$S\subseteq[n]$ let $w(S)=\sum_{i\in S}a_i$ be its sum. There are $2^n$
+subsets, so there are $2^n$ subset sums, although some of them may be equal.
+
+For a list $A$ we write $S(A)$ for the list of all its subset sums, keeping
+repeats. It is built one item at a time:
 \begin{align}
-S([])&=[0],\\
-S(a::A)&=S(A)\mathbin{+\!+}\{a+s:s\in S(A)\}.
+S([\,])&=[0],\\
+S(a::A)&=S(A)\mathbin{+\!+}[\,a+s : s\in S(A)\,].
 \end{align}
-Here $+\!+$ denotes list concatenation. In Lean, the independent inductive
-proposition \texttt{HasSum} has constructors for selecting no elements,
-skipping the head, and taking the head.
+Here $a::A$ is the list with first item $a$ and rest $A$, and $+\!+$ joins two
+lists. Each step doubles the length, so $S(A)$ has $2^{|A|}$ entries.
 
-\begin{lemma}[Enumeration correctness]
+\subsection{Measuring cost}
+We count running time as a function of $n$, the number of items. The size of
+each number matters too. Adding two $1000$-bit numbers costs more than adding
+two small ones. We write $\Oh^*(f(n))$ for a bound of the form
+$f(n)\cdot p$, where $p$ is a polynomial in $n$ and in the number of bits of
+the input. For example, $\Oh^*(2^{n/2})$ allows $n^2\cdot2^{n/2}$ steps, and
+also allows the cost of handling large numbers. We use this notation because
+the open question is about the exponent; polynomial factors do not change it.
+
+\subsection{Worst case, average case, and small numbers}
+A \emph{worst-case} bound must hold for every input of size $n$. An
+\emph{average-case} bound only holds for inputs drawn from some random
+distribution, usually with a small chance of failure. The $2^{n/3}$ question is
+about the worst case.
+
+The size of the numbers also matters. Let $W=\sum_i|a_i|$. Every subset sum
+lies between $-W$ and $W$, so a table with $2W+1$ cells is enough to record
+which sums are reachable. This gives an algorithm with about $nW$ steps
+(Section~\ref{sec:dp}). Such a bound is called \emph{pseudopolynomial}: it is
+fast when the numbers are small and slow when they are large. The hard inputs
+are therefore the ones with large numbers, roughly $n$ bits each. Inputs whose
+numbers are much larger are easy for a different reason: powers of two such as
+$1,2,4,8,\dots$ can be solved by reading the binary digits of the target.
+
+\subsection{A worked example of meet-in-the-middle}
+The idea behind the $2^{n/2}$ bound fits in one example. Take
+$a=(3,5,8,13)$ and $b=16$. Split the items into a left half $(3,5)$ and a right
+half $(8,13)$. List all subset sums of each half:
+\[
+\text{left: } 0,3,5,8 \qquad \text{right: } 0,8,13,21.
+\]
+A solution picks some items from each half, so it exists exactly when some left
+sum $u$ and right sum $v$ satisfy $u+v=16$. Sort the right list. For each left
+sum $u$, look up $16-u$ with binary search: $u=3$ finds $13$, and $u=8$ finds
+$8$. These are the two solutions $3+13$ and $3+5+8$. Each half has only
+$2^{n/2}$ sums, so the whole search costs about $2^{n/2}$ steps instead of
+$2^n$. Section~\ref{sec:mitm} turns this into a proof.
+
+\section{Enumeration and Meet-in-the-Middle}\label{sec:mitm}
+We first show that the list $S(A)$ captures exactly the reachable sums, and
+that a solution splits cleanly across any division of the items. All proofs
+are in Appendix~\ref{app:proofs}.
+
+\begin{lemma}[Enumeration correctness]\label{lem:enum}
 $b\in S(A)$ if and only if $A$ has a 0--1 selection summing to $b$.
-Moreover, $|S(A)|=2^{|A|}$.
+Also, $|S(A)|=2^{|A|}$.
 \end{lemma}
-\begin{proof}
-For the empty list the only sum is zero. For a nonempty list, every selection
-either skips its head, yielding a sum in $S(A)$, or takes it, yielding $a+s$
-for $s\in S(A)$. Conversely either construction produces a valid selection;
-induction proves both implications. The lengths obey $L_0=1$ and
-$L_{m+1}=2L_m$, hence $L_m=2^m$. Repeated sums do not affect this count
-because it counts list entries rather than distinct integers.
-\end{proof}
 
 \begin{lemma}[Split correctness]\label{lem:split}
 For any lists $L,R$, a selection of $L+\!+R$ sums to $b$ if and only if there
 are $u\in S(L)$ and $v\in S(R)$ with $u+v=b$.
 \end{lemma}
-\begin{proof}
-Restrict a selection to the two disjoint ranges of occurrences; their sums are
-$u$ and $v$. Conversely, concatenate two valid selections. No occurrence is
-reused because the ranges are disjoint. The argument assumes neither positivity
-nor distinct entry values.
-\end{proof}
 
-Algorithm~\ref{alg:mitm} sorts one half-sum list and binary-searches it for
-each sum of the other half. Attaching an occurrence bit mask to every sum
-yields a witness.
+Algorithm~\ref{alg:mitm} is the worked example of Section~\ref{sec:prelim} in
+general form. Each sum carries a bit mask that records which items produced it,
+so a match gives a witness directly.
 
 \begin{algorithm}[t]
 \caption{Sorted meet-in-the-middle}
@@ -122,35 +199,25 @@ yields a witness.
 \end{algorithmic}
 \end{algorithm}
 
-\begin{theorem}[General baseline]
-There is a deterministic exact witness-producing algorithm for
-\eqref{eq:problem} in time and space $\Oh^*(2^{n/2})$.
+\begin{theorem}[General baseline]\label{thm:mitm}
+There is a deterministic algorithm that solves \eqref{eq:problem} on every
+input, returns a witness when one exists, and uses $\Oh^*(2^{n/2})$ time and
+memory.
 \end{theorem}
-\begin{proof}
-Split after $k=\lfloor n/2\rfloor$ entries. Enumerate the two half-sum lists
-with an occurrence bit mask per sum, sort the right list by sum, and for every
-left sum $u$ binary-search for $b-u$. By Lemma~\ref{lem:split} a match exists
-exactly when the original problem has a solution; concatenating the masks gives
-a witness. With $P=2^k$ and $Q=2^{n-k}$ entries, enumeration costs
-$\Oh(P+Q)$ arithmetic and mask operations, sorting $\Oh(Q\log Q)$ comparisons,
-and searching $\Oh(P\log(Q+1))$ comparisons. Since both halves have size at
-most $\lceil n/2\rceil$, the total is $\Oh(n2^{\lceil n/2\rceil})$ operations
-and $\Oh(2^{\lceil n/2\rceil})$ records. Each sum and mask has polynomial bit
-length in the input size, giving the stated $\Oh^*$ bounds. No probabilistic
-hashing is used.
-\end{proof}
 
-\section{Signed Dynamic Programming}
-Let $W=\sum_i|a_i|$. All partial subset sums lie in $[-W,W]$. Maintain a table
-indexed by this interval, with either no witness or an occurrence mask per
-cell. Initially only the zero cell is reachable. For entry $a_i$ build a new
-table from the old one by
+\section{Signed Dynamic Programming}\label{sec:dp}
+When the numbers are small, a table of reachable sums is faster than listing
+subsets. Let $W=\sum_i|a_i|$. Every partial sum lies in $[-W,W]$, so we keep one
+cell per value in that range. A cell is either empty or holds a bit mask of a
+subset that reaches that value. At the start only the cell for $0$ is filled.
+Item $a_i$ updates the table by
 \begin{equation}\label{eq:dp}
 D_i(s)=D_{i-1}(s)\ \lor\ D_{i-1}(s-a_i),
 \end{equation}
-interpreting indices outside $[-W,W]$ as unreachable. Separate old and new
-buffers ensure an entry is never selected twice. Algorithm~\ref{alg:dp} gives
-the procedure.
+where cells outside $[-W,W]$ count as empty. In words, a value is reachable
+after item $i$ if it was reachable before, or if it is $a_i$ more than a value
+that was reachable before. The new table is written to a separate buffer, so an
+item is never used twice. Algorithm~\ref{alg:dp} gives the details.
 
 \begin{algorithm}[t]
 \caption{Dense signed-sum dynamic programming}
@@ -176,51 +243,37 @@ the procedure.
 \end{algorithmic}
 \end{algorithm}
 
-\begin{theorem}[Signed dynamic programming]
-Algorithm~\ref{alg:dp} correctly decides \eqref{eq:problem} and returns a
-valid occurrence witness in $\Oh(n(2W+1))$ cell visits.
+\begin{theorem}[Signed dynamic programming]\label{thm:dp}
+Algorithm~\ref{alg:dp} solves \eqref{eq:problem} correctly and returns a valid
+witness after $\Oh(n(2W+1))$ cell visits.
 \end{theorem}
-\begin{proof}
-After processing $i$ entries, the invariant is that cell $s$ is populated
-exactly when some subset of the first $i$ occurrences sums to $s$, and any
-stored mask describes such a subset. Initialization establishes the invariant
-at $i=0$. Skipping $a_i$ preserves old witnesses; taking $a_i$ extends an old
-witness by a fresh occurrence bit and shifts its sum by $a_i$. These are
-precisely the cases of \eqref{eq:dp}, so induction gives soundness and
-completeness. The triangle inequality keeps every true partial sum inside the
-table interval, and a target outside it is impossible. There are $n$ scans of
-$2W+1$ cells plus buffer copies of the same order.
-\end{proof}
 
-\section{A Restricted One-Third Exponent}
-\begin{theorem}[Bounded-magnitude family]\label{thm:restricted}
-On instances satisfying $W\le 2^{\lfloor n/3\rfloor}$, problem
-\eqref{eq:problem} can be solved in $\Oh^*(2^{n/3})$ time.
+\section{The Easy One-Third Case}
+The dynamic program gives a $2^{n/3}$ bound when the numbers are small. We
+state it to make clear what it does and does not cover.
+\begin{theorem}[Small numbers]\label{thm:restricted}
+If $W\le 2^{\lfloor n/3\rfloor}$, then \eqref{eq:problem} can be solved in
+$\Oh^*(2^{n/3})$ time.
 \end{theorem}
-\begin{proof}
-Substitute the hypothesis in the cell-visit bound:
-$n(2W+1)\le n(2\cdot 2^{\lfloor n/3\rfloor}+1)$. Witness masks have at most $n$
-bits; arithmetic, indexing, and copying add polynomial bit costs. Suppressing
-these factors gives the result.
-\end{proof}
 
-This is the standard pseudopolynomial argument, not a new general exponential
-algorithm. For entries $a_i=2^{i-1}$ we have $W=2^n-1$, so the hypothesis need
-not hold; such powers also yield $2^n$ distinct subset sums, showing that
-deduplicating sums alone does not force a better exponent. Splitting into three
-blocks does not repair this either: enumerating each block is cheap, but a
-naive merge of two block lists can contain $2^{2n/3}$ pairs. These observations
-describe failures of particular approaches, not a lower bound against all
-algorithms.
+This is the standard pseudopolynomial argument and not a new algorithm. It
+does not reach the hard inputs. For $a_i=2^{i-1}$, for example, $W=2^n-1$, far
+above the assumption. Those powers of two also give $2^n$ different subset
+sums, so removing duplicate sums cannot help in general. Splitting the items
+into three blocks of $n/3$ does not help either: each block is cheap to list,
+but combining two block lists naively already produces $2^{2n/3}$ pairs. These
+remarks rule out particular approaches. They are not lower bounds.
 
-\section{Schroeppel--Shamir}
-The same $\Oh^*(2^{n/2})$ time is attainable with substantially less space by
-splitting into four blocks and streaming, rather than storing, the pair sums.
-Enumerate and sort the four block-sum lists ($2^{n/4}$ entries each). Stream
-the pairs of blocks $0{+}1$ in nondecreasing order and the pairs of blocks
-$2{+}3$ in nonincreasing order using a heap that merges $2^{n/4}$ sorted lists,
-then sweep the two streams toward each other with two pointers
-(Algorithm~\ref{alg:ss}). Each stream advances at most $2^{n/2}$ times.
+\section{Schroeppel--Shamir}\label{sec:ss}
+Meet-in-the-middle stores $2^{n/2}$ sums. Schroeppel and Shamir get the same
+time with far less memory. They split the items into four blocks and generate
+the sums of block pairs one at a time instead of storing them. Each of the four
+block lists has about $2^{n/4}$ entries and is sorted. A heap produces the sums
+of blocks $0$ and $1$ in increasing order, and a second heap produces the sums
+of blocks $2$ and $3$ in decreasing order. Two pointers then walk the two
+streams toward each other, as in the classic search for two numbers with a
+given sum in sorted arrays (Algorithm~\ref{alg:ss}). Each stream moves at most
+$2^{n/2}$ times.
 
 \begin{algorithm}[t]
 \caption{Schroeppel--Shamir with streamed pair sums}
@@ -228,9 +281,9 @@ then sweep the two streams toward each other with two pointers
 \begin{algorithmic}[1]
 \Require entries $a_1,\dots,a_n$; target $b$
 \Ensure occurrence indices summing to $b$, or $\bot$
-\State partition the entries into four blocks $G_0,\dots,G_3$ of size $\lfloor n/4\rfloor$
+\State partition the entries into four contiguous blocks $G_0,\dots,G_3$ of sizes $\lfloor n/4\rfloor$ or $\lceil n/4\rceil$
 \For{$t\gets 0$ to $3$}
-   \State $S_t \gets \textsc{SortBySum}(\textsc{EnumerateShifts}(G_t))$
+   \State $S_t \gets \textsc{SortBySum}(\textsc{Enumerate}(G_t))$ \Comment{masks use global positions}
 \EndFor
 \State $U \gets \textsc{MergeAscending}(S_0,S_1)$ \Comment{streams $u_0+u_1$ increasing}
 \State $V \gets \textsc{MergeDescending}(S_2,S_3)$ \Comment{streams $v_0+v_1$ decreasing}
@@ -248,35 +301,19 @@ then sweep the two streams toward each other with two pointers
 \end{algorithmic}
 \end{algorithm}
 
-\begin{theorem}\label{thm:ss}
+\begin{theorem}[Schroeppel--Shamir]\label{thm:ss}
 Algorithm~\ref{alg:ss} correctly decides \eqref{eq:problem} and returns a valid
 witness in $\Oh^*(2^{n/2})$ time and $\Oh^*(2^{n/4})$ space.
 \end{theorem}
-\begin{proof}
-By Lemma~\ref{lem:split} applied twice, a solution exists exactly when some
-$u=u_0+u_1$ with $u_0\in S(G_0),u_1\in S(G_1)$ and some $v=v_0+v_1$ with
-$v_0\in S(G_2),v_1\in S(G_3)$ satisfy $u+v=b$. The heap merge yields $U$ in
-nondecreasing order because, for fixed $u_0$, the values $u_0+S(G_1)$ are
-sorted; the symmetric argument gives $V$ nonincreasing. The two-pointer sweep is
-standard: when $u+v<b$, no $v'\le v$ can pair with the current $u$, so advance
-$u$; when $u+v>b$, advance $v$. Hence the sweep finds a match iff one exists.
-The four sorted lists and the heap hold $O(2^{n/4})$ entries. Both streams
-advance at most $2^{n/2}$ times and each heap step costs
-$\Oh(\log 2^{n/4})=\Oh(n)$, giving $\Oh(n2^{n/2})=\Oh^*(2^{n/2})$ time and
-$\Oh(2^{n/4})$ records. Occurrence masks are carried with each sum, so a
-returned match yields a witness.
-\end{proof}
 
-\section{Measurements}
-We implement all four methods in one dependency-free Python module and measure
-them on deterministic infeasible instances. Each entry is an even random
-integer and the target is odd, so every solver must run to completion instead
-of stopping at an early match; this isolates worst-case behaviour. Two
-families are used: \emph{bounded} values in $[-100,100]$ (so the pseudopolynomial
-table fits) and \emph{wide} values in $[-2^{40},2^{40}]$ (so the table does
-not). Times are the best of three runs; memory is the peak tracked by
-\texttt{tracemalloc}. The harness records provenance (commit, interpreter,
-platform, seed) alongside the CSV data.
+\section{Measurements}\label{sec:measure}
+We run the three methods on inputs that have no solution, because a solver may
+stop early when it finds a match and that would hide its real cost. To build
+such inputs, every number is even and the target is odd, so no subset can hit
+it. We use two families: \emph{bounded} numbers in $[-100,100]$, where the
+dynamic program's table fits in memory, and \emph{wide} numbers in
+$[-2^{40},2^{40}]$, where it does not. Each time is the best of three runs, and
+memory is the peak allocated during the run.
 
 Tables~\ref{tab:runtime} and~\ref{tab:memory} and
 Figures~\ref{fig:runtime}--\ref{fig:memory} report the results.
@@ -288,8 +325,8 @@ Figures~\ref{fig:runtime}--\ref{fig:memory} report the results.
 \includegraphics[width=\columnwidth]{figures/fig_runtime}
 \caption{Measured runtime versus $n$ on infeasible instances, log scale. Wide
 values (right) admit no pseudopolynomial table, and meet-in-the-middle and
-Schroeppel--Shamir both grow exponentially; bounded values (left) are solved in
-near-constant time by the signed DP.}
+Schroeppel--Shamir both grow exponentially; bounded values (left) are solved by
+the signed DP in time that grows only slowly with $n$.}
 \label{fig:runtime}
 \end{figure}
 
@@ -307,85 +344,189 @@ $2^{n/4}$ line bounds the space, not the time.}
 \includegraphics[width=0.86\columnwidth]{figures/fig_memory}
 \caption{Peak memory versus $n$ (log scale). Meet-in-the-middle grows by about
 a factor of four per four added entries ($2^{n/2}$); Schroeppel--Shamir grows
-by about a factor of two ($2^{n/4}$), realizing the space saving its analysis
-predicts.}
+by about a factor of two ($2^{n/4}$), as its analysis predicts.}
 \label{fig:memory}
 \end{figure}
 
-The measurements support three observations. First, meet-in-the-middle and
-Schroeppel--Shamir have the same exponential time order
-($\Oh^*(2^{n/2})$); their measured times differ by a small constant factor from
-the heap operations. Second, the peak-memory curves separate cleanly, matching
-$2^{n/2}$ for meet-in-the-middle and $2^{n/4}$ for Schroeppel--Shamir. Third,
-the signed DP is effectively linear in $n$ for bounded values and becomes the
-fastest method once $n$ is large enough, but it is unusable on the wide family
-because $W$ exceeds memory. Finite measurements illustrate the bounds; they do
-not prove an asymptotic improvement or establish any lower bound.
+Meet-in-the-middle and Schroeppel--Shamir take about the same time, and both
+grow like $2^{n/2}$. Schroeppel--Shamir is a little slower because of its heap
+operations. Their memory use is very different: meet-in-the-middle grows like
+$2^{n/2}$, while Schroeppel--Shamir grows like $2^{n/4}$ and uses about 200
+times less memory at $n=32$ (Table~\ref{tab:memory}). On bounded numbers the
+dynamic program's time grows roughly linearly in $n$, and from $n=28$ on it is
+the fastest method. On wide numbers it cannot run at all, because the table
+would need on the order of $n\cdot2^{40}$ cells. Its peak memory is not
+monotone in $n$ because the table width $2W+1$ depends on the random input.
+These are finite measurements. They match the proven bounds but do not prove
+anything about larger $n$.
 
-\section{Formalization and Executable Artifacts}
-The file \texttt{lean/SubsetSum.lean} imports only \texttt{Std} under Lean
-4.19.0. It proves:
+\section{What a $2^{n/3}$ Result Would Need}\label{sec:goal}
+A real improvement needs an algorithm that provably finishes in
+$\Oh^*(2^{n/3})$ steps on \emph{every} input, with the cost of arithmetic on
+large numbers counted. If it uses randomness, the proof must also bound its
+chance of failure. Good benchmark numbers cannot replace that proof, and
+neither can an average-case analysis, because both leave out the hardest inputs.
+The closest recent progress is the worst-case result of Randolph and
+W\k{e}grzycki~\cite{rw} for related problems, which uses the representation
+technique; whether it can be adapted to plain subset sum is open. The algorithms
+in this paper are the baseline that any such result has to beat.
+
+\appendices
+\section{Proofs}\label{app:proofs}
+This appendix proves the results stated in the main text. Throughout, a
+\emph{selection} of a list is a choice of some of its positions, each used at
+most once, and its sum is the sum of the chosen entries.
+
+\subsection{Proof of Lemma~\ref{lem:enum}}
+We use induction on the length of $A$.
+
+\emph{Base case.} If $A$ is empty, its only selection is the empty one, with
+sum $0$, and $S([\,])=[0]$. So $b\in S([\,])$ exactly when $b=0$, and
+$|S([\,])|=1=2^0$.
+
+\emph{Step.} Let $A=a::A'$ and assume the claim for $A'$. Every selection of
+$A$ either leaves out the first entry or uses it.
 \begin{itemize}
-\item \texttt{mem\_sums\_iff}: enumeration is equivalent to the inductive
-selection specification;
-\item \texttt{sums\_length}: the enumeration has $2^n$ entries;
-\item \texttt{hasSum\_append}: the split equivalence;
-\item \texttt{meetInMiddle\_correct}: executable list-based matching decides the
-inductive specification;
-\item \texttt{hasSum\_magnitude} and \texttt{target\_outside\_impossible}: every
-feasible sum is inside the signed DP radius, and targets outside it are
-impossible;
-\item \texttt{restricted\_work\_bound}: the arithmetic inequality used in
-Theorem~\ref{thm:restricted}.
+\item If it leaves it out, it is a selection of $A'$. By the induction
+hypothesis its sum $b$ is in $S(A')$, which is the first part of $S(A)$.
+\item If it uses it, the rest is a selection of $A'$ with some sum $s$, and
+$b=a+s$. Since $s\in S(A')$, the value $a+s$ is in the second part of $S(A)$.
 \end{itemize}
-The Lean matcher deliberately uses linear list membership; it is an executable
-correctness reference, not the efficient sorted matcher. The formalization does
-not verify the Python interpreter, the witness-mask implementation, the sorting
-refinement, the DP table, the Schroeppel--Shamir control flow, or operational
-running time. The runtime and DP correctness arguments are mathematical; the
-restricted Lean theorem is an arithmetic work envelope. The general
-$\Oh^*(2^{n/3})$ question is neither assumed as an axiom nor stated as a
-completed theorem. All proofs compile without \texttt{sorry}, and axiom reports
-are included in the source.
+Conversely, a value in the first part of $S(A)$ is a sum of some selection of
+$A'$, which is also a selection of $A$. A value $a+s$ in the second part comes
+from a selection of $A'$ with sum $s$; adding the first entry gives a selection
+of $A$ with sum $a+s$. The first entry was not used before, so no position is
+used twice. This proves the equivalence.
 
-The Python module \texttt{src/subset\_sum.py} has no third-party dependencies.
-The solvers return indices into the original sequence or \texttt{None} for
-infeasibility; the empty tuple is a valid witness. Automatic selection compares
-simple work estimates and makes no optimality claim. Schroeppel--Shamir is
-selected explicitly because its larger constant offset is not worth paying
-unless space matters.
+For the length, $|S(A)|=|S(A')|+|S(A')|=2\cdot2^{|A'|}=2^{|A|}$. The list keeps
+repeated values, so equal sums do not change the count. \hfill$\square$
 
-\section{Reproduction and Validation}
-From the repository root:
-\begin{lstlisting}[basicstyle=\ttfamily\scriptsize,breaklines=true]
-python3 -m unittest tests.test_subset_sum -v
-python3 -m src.subset_sum --values 3 -2 7 0 --target 5 --method ss
-python3 scripts/analysis/benchmark.py
-uv run python scripts/analysis/plot_benchmarks.py   # figures + tables
-cd lean && lake build
-\end{lstlisting}
-The unittest suite checks all lists of length zero through four over
-$\{-2,0,3\}$ against all targets from $-9$ through $13$ (2{,}783 exhaustive
-instances), 150 seeded random instances with up to ten entries, explicit
-single-use and repeated-value cases, arbitrary-precision arithmetic, and input
-validation. Every solver is compared against independent Boolean-vector
-enumeration and each returned witness is checked for unique, in-range indices
-and the correct sum. Passing finite tests supports implementation confidence;
-it is not evidence for a general asymptotic bound. The benchmark writes CSV
-tables and a provenance record under
-\texttt{docs/analysis/2026-10-03/subset-sum/}; the figures and
-Tables~\ref{tab:runtime}--\ref{tab:memory} are regenerated from that data.
+\subsection{Proof of Lemma~\ref{lem:split}}
+The positions of $L+\!+R$ are the positions of $L$ followed by the positions
+of $R$, and the two groups do not overlap.
 
-\section{Remaining Research Goal}
-To improve the worst-case bound, one must construct an algorithm with an
-$\Oh^*(2^{n/3})$ upper bound for \emph{every} allowed input, justify its
-arithmetic model, and account for any randomized success guarantee. Neither
-favorable benchmarks nor average-case representation analyses supply that
-quantifier. The recent worst-case progress for subset-balancing coefficient
-sets~\cite{rw} suggests the representation technique is the most promising
-direction; transferring it to the $\{0,1\}$ form remains open. This note
-provides checked correctness foundations, a clean space-efficient baseline, and
-reproducible measurements; the unrestricted exponent is left open.
+Suppose a selection of $L+\!+R$ has sum $b$. Let $u$ be the sum of its chosen
+positions inside $L$ and $v$ the sum of its chosen positions inside $R$. Then
+$u+v=b$. The positions inside $L$ form a selection of $L$, so
+$u\in S(L)$ by Lemma~\ref{lem:enum}; in the same way $v\in S(R)$.
+
+Now suppose $u\in S(L)$ and $v\in S(R)$ with $u+v=b$. By
+Lemma~\ref{lem:enum} there is a selection of $L$ with sum $u$ and a selection
+of $R$ with sum $v$. Taking both together gives a selection of $L+\!+R$ with sum
+$u+v=b$. No position is used twice because the two groups are disjoint. The
+argument does not use the signs or the distinctness of the entries.
+\hfill$\square$
+
+\subsection{Proof of Theorem~\ref{thm:mitm}}
+We show that Algorithm~\ref{alg:mitm} has the stated properties.
+
+\emph{Correctness.} Let $k=\lfloor n/2\rfloor$, $L=(a_1,\dots,a_k)$ and
+$R=(a_{k+1},\dots,a_n)$. By Lemma~\ref{lem:split}, a solution exists if and
+only if some $u\in S(L)$ and $v\in S(R)$ satisfy $v=b-u$. The algorithm tries
+every $u\in S(L)$ and uses binary search on the sorted list $S(R)$ to decide
+whether $b-u$ is present. Binary search on a sorted list finds a value exactly
+when it is present, so the algorithm answers yes exactly when a solution
+exists.
+
+\emph{Witness.} Each entry of the two lists stores, next to its sum, a bit mask
+of the positions that produced it. When $u$ and $v=b-u$ match, the left mask
+describes a selection of $L$ with sum $u$ and the right mask, shifted by $k$,
+describes a selection of $R$ with sum $v$. Their union is a selection of the
+whole input with sum $b$.
+
+\emph{Cost.} Let $P=2^k$ and $Q=2^{n-k}$ be the list lengths
+(Lemma~\ref{lem:enum}). Building the lists takes $\Oh(P+Q)$ additions and mask
+updates. Sorting the right list takes $\Oh(Q\log Q)$ comparisons, and the $P$
+binary searches take $\Oh(P\log(Q+1))$ comparisons. Since $k$ and $n-k$ are at
+most $\lceil n/2\rceil$, both $P$ and $Q$ are at most $2^{\lceil n/2\rceil}$ and
+$\log Q\le n$, so the total is $\Oh(n\,2^{\lceil n/2\rceil})$ operations on
+$\Oh(2^{\lceil n/2\rceil})$ stored records. Each sum has absolute value at most
+$\sum_i|a_i|$, so its bit length is at most the input length plus $\log_2 n$,
+and each mask has $n$ bits. Every operation therefore costs a
+polynomial factor, which gives $\Oh^*(2^{n/2})$ time and memory. The algorithm
+makes no random choices. \hfill$\square$
+
+\subsection{Proof of Theorem~\ref{thm:dp}}
+Write $D_i$ for the table after the first $i$ items. We prove the following
+invariant by induction on $i$:
+
+\begin{quote}
+$(\star)$ For every $s\in[-W,W]$, the cell for $s$ in $D_i$ is filled if and
+only if some selection of $a_1,\dots,a_i$ has sum $s$, and in that case the
+stored mask is such a selection.
+\end{quote}
+
+\emph{Base case.} With no items, the only selection is the empty one, with sum
+$0$. The algorithm fills only the cell for $0$, with the empty mask.
+
+\emph{Step.} Assume $(\star)$ for $D_{i-1}$. A selection of $a_1,\dots,a_i$
+either skips $a_i$ or uses it. If it skips $a_i$, it is a selection of the
+first $i-1$ items, so its sum $s$ is filled in $D_{i-1}$ and the copy keeps it
+in $D_i$. If it uses $a_i$, the rest has sum $s-a_i$, which is filled in
+$D_{i-1}$; the update writes the cell for $s$, with the old mask plus bit $i$.
+In both cases the cell for $s$ is filled in $D_i$. Conversely, every cell filled
+in $D_i$ was either copied from $D_{i-1}$ (a selection that skips $a_i$) or
+written by the update from a filled cell $s-a_i$ (a selection that uses $a_i$,
+added once because the update reads only the old table). In both cases the
+stored mask is a selection with the right sum. This proves $(\star)$ for $D_i$.
+
+Every partial sum $s$ of a selection satisfies $|s|\le\sum_i|a_i|=W$, so no
+reachable value falls outside the table. By $(\star)$ for $D_n$, the answer is
+yes exactly when the cell for $b$ is filled, and its mask is a witness. If
+$|b|>W$ no selection can reach $b$, and the algorithm correctly answers no.
+
+\emph{Cost.} Each of the $n$ rounds copies the table and scans its $2W+1$
+cells once, so the total is $\Oh(n(2W+1))$ cell visits. \hfill$\square$
+
+\subsection{Proof of Theorem~\ref{thm:restricted}}
+Run Algorithm~\ref{alg:dp}. It is correct by Theorem~\ref{thm:dp} and makes
+$\Oh(n(2W+1))$ cell visits. If $W\le2^{\lfloor n/3\rfloor}$, then
+\[
+n(2W+1)\le n\bigl(2\cdot2^{\lfloor n/3\rfloor}+1\bigr)\le 3n\cdot2^{n/3}.
+\]
+Each cell visit handles a mask of $n$ bits and a sum of $\Oh(n)$ bits, so it
+costs a polynomial number of bit operations. The total is therefore
+$\Oh^*(2^{n/3})$. \hfill$\square$
+
+\subsection{Proof of Theorem~\ref{thm:ss}}
+\emph{Reduction to two streams.} Apply Lemma~\ref{lem:split} three times: to
+split the input into $G_0+\!+G_1$ and $G_2+\!+G_3$, and then to split each of
+these. A solution exists if and only if there are $u_0\in S(G_0)$,
+$u_1\in S(G_1)$, $v_0\in S(G_2)$ and $v_1\in S(G_3)$ with
+$(u_0+u_1)+(v_0+v_1)=b$. Let $U$ be the list of all values $u=u_0+u_1$ and $V$
+the list of all values $v=v_0+v_1$.
+
+\emph{The streams are sorted.} The heap for $U$ holds one candidate for each
+$u_0\in S(G_0)$: the next unused value $u_0+u_1$, taken in increasing order of
+$u_1$ in the sorted list $S(G_1)$. Each such row is increasing, so the smallest
+heap entry is always the smallest value not yet output. Hence $U$ is produced in
+increasing order, and it contains every pair exactly once. The same argument
+with the order reversed shows that $V$ is produced in decreasing order.
+
+\emph{The two-pointer walk is complete.} Suppose $u^\ast\in U$ and
+$v^\ast\in V$ satisfy $u^\ast+v^\ast=b$, and suppose the walk stops without a
+match. Then at some step it moves one pointer past its target value; consider
+the first such step.
+\begin{itemize}
+\item If the $U$ pointer leaves $u^\ast$, the walk saw $u^\ast+v<b$ for the
+current $v$. Then $v<v^\ast$, so the $V$ pointer had already moved past
+$v^\ast$, which contradicts the choice of the first step.
+\item If the $V$ pointer leaves $v^\ast$, the walk saw $u+v^\ast>b$ for the
+current $u$. Then $u>u^\ast$, so the $U$ pointer had already moved past
+$u^\ast$, again a contradiction.
+\end{itemize}
+So the walk stops with some pair whose sum is $b$. If no solution exists, no
+pair sums to $b$, and the walk ends when a stream runs out. The masks stored
+with $u$ and $v$ give a witness by the same argument as in
+Theorem~\ref{thm:mitm}.
+
+\emph{Cost.} The four sorted lists have $\Oh(2^{n/4})$ entries each, and each
+heap holds one entry per row, so memory is $\Oh(2^{n/4})$ records. Each stream
+has at most $2^{\lceil n/2\rceil}$ values, so the walk takes at most
+$2\cdot2^{\lceil n/2\rceil}$ steps. Each step is one heap operation costing
+$\Oh(\log 2^{n/4})=\Oh(n)$ comparisons. With polynomial bit costs per
+operation, the time is $\Oh^*(2^{n/2})$ and the memory is $\Oh^*(2^{n/4})$.
+\hfill$\square$
 
 \begin{thebibliography}{9}
 \bibitem{hs} E. Horowitz and S. Sahni, ``Computing partitions with applications
@@ -394,7 +535,7 @@ pp.~277--292, 1974.
 \bibitem{ss} R. Schroeppel and A. Shamir, ``A $T=O(2^{n/2})$, $S=O(2^{n/4})$
 algorithm for certain NP-complete problems,'' \emph{SIAM Journal on Computing},
 vol.~10, no.~3, pp.~456--464, 1981.
-\bibitem{hgj} N. Howgrave-Graham and A. Joux, ``A new generic algorithm for hard
+\bibitem{hgj} N. Howgrave-Graham and A. Joux, ``New generic algorithms for hard
 knapsacks,'' in \emph{EUROCRYPT}, 2010.
 \bibitem{bcj} A. Becker, J.-S. Coron, and A. Joux, ``Improved generic algorithms
 for hard knapsacks,'' in \emph{EUROCRYPT}, 2011; IACR ePrint 2011/474.
@@ -405,5 +546,8 @@ Shamir's algorithm for subset sum via orthogonal vectors,'' in \emph{STOC},
 2021; arXiv:2010.08576.
 \bibitem{rw} T. Randolph and K. W\k{e}grzycki, ``Beating meet-in-the-middle for
 subset balancing problems,'' arXiv:2511.10823, 2025.
+\bibitem{mh} R. Merkle and M. Hellman, ``Hiding information and signatures in
+trapdoor knapsacks,'' \emph{IEEE Transactions on Information Theory}, vol.~24,
+no.~5, pp.~525--530, 1978.
 \end{thebibliography}
 \end{document}

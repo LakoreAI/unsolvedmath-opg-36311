@@ -48,13 +48,14 @@ is not hardness.
 
 - [x] B1. `src/subset_sum.py`: meet-in-the-middle, Schroeppel–Shamir (`ss`),
       signed DP (`dp`), `solve(...)`.
-- [x] B2. `src/equal_subset_sum.py`: ESS/PESS baseline (`O*(3^(n/2))`).
+- [x] B2. `src/equal_subset_sum.py`: ESS signed MITM (`O*(3^(n/2))`) and
+      PESS binary-search MITM (`O*(2^(n/2))`).
 - [x] B3. `src/dissection.py`: Wagner four-list modular core + verifier.
 - [x] B4. `src/hgj.py`: Howgrave-Graham–Joux representation search.
 - [x] B5. `src/additive.py`: `|S(A)|`, collision count `F`, additive energy,
       modular residue profiles, cardinality counts.
 - [x] B6. Tests (`tests/`): `test_subset_sum`, `test_equal_subset_sum`,
-      `test_dissection`, `test_hgj`, `test_additive` — 26 stdlib tests, all pass.
+      `test_dissection`, `test_hgj`, `test_additive` — 30 stdlib tests, all pass.
 - [x] B7. Modules are dependency-free (stdlib only).
 
 ## 3. Measurement harnesses — done
@@ -88,8 +89,10 @@ is not hardness.
 
 ## 5. Verification — done
 
-- [x] E1. `python3 -m unittest discover -s tests -p "test_*.py"` — 26 pass.
-- [x] E2. Ruff lint/format clean across `src/`, `tests/`, `scripts/analysis/`.
+- [x] E1. `python3 -m unittest discover -s tests -p "test_*.py"` — 30 pass.
+- [x] E2. Ruff lint clean across `src/`, `tests/`, `scripts/analysis/`;
+      changed-file format checks pass. Repo-wide format check flags the
+      untouched `scripts/analysis/plot_representation.py`.
 - [x] E3. Lean 4.19.0 `lake clean && lake build` passes; axioms
       `[propext, Quot.sound]` only.
 - [x] E4. `docs/reports/validation.md` records the checks actually run.
@@ -125,7 +128,9 @@ is not hardness.
       `0.291n` curve empirically; currently only the exponent model is reproduced.
 - [ ] R16. **Port `O*(2^(n/3))` PESS.** Implement the
       `F = Σ_t max(0, cnt(t)-1)` structural algorithm and its subsampling/mod-p
-      case (Zhang / Jin–Williams–Zhang); currently only a MITM baseline exists.
+      case (Zhang / Jin–Williams–Zhang). The deterministic PESS baseline and
+      modular-bucket counting/sampling primitive exist; the structural
+      reductions and full randomized algorithm remain unimplemented.
 - [ ] R17. **Formalize.** Extend `lean/SubsetSum.lean` with the split / residue
       enumeration lemmas used by the representation arguments.
 - [ ] R18. **Survey upkeep.** Re-check the open-case map against the newest

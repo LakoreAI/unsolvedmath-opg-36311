@@ -98,22 +98,27 @@ Compile each paper twice from its own directory:
 - Paper: `pdflatex` pass 1 and pass 2 both exited 0; output is 4 pages.
   No undefined references or citations remain; only minor overfull/underfull
   box warnings.
-- Ruff 0.15.15: lint and format checks pass for all of `src/`, `tests/`, and
-  `scripts/analysis/`.
+- Ruff 0.15.15: lint passes for all of `src/`, `tests/`, and
+  `scripts/analysis/`; changed-file formatting checks pass. A repo-wide format
+  check flags the untouched `scripts/analysis/plot_representation.py`.
 - Lean 4.19.0: `lake clean && lake build` succeeds from scratch; `#eval` outputs
   `true` and `false` as expected; every theorem's axiom report is exactly
   `[propext, Quot.sound]`.
 - Repository consolidation: the ML-template code was removed; `src/` now holds
-  only the subset-sum research modules. The remaining test suite (26 stdlib
+  only the subset-sum research modules. The remaining test suite (30 stdlib
   tests) runs with no third-party packages.
 
 ## Phase 0 research artifacts (2026-10-03)
 
 Built for the deep-research plan in `docs/research/subset-sum-n3/PLAN.md`:
 
-- `src/equal_subset_sum.py` — exact Equal-Subset-Sum / PESS baseline via signed
-  meet-in-the-middle, `O*(3^(n/2))`. Tests compare it against a `{-1,0,1}^n`
-  brute-force oracle, including the PESS promise `sum|w_i| < 2^n - 1`.
+- `src/equal_subset_sum.py` — exact ESS signed meet-in-the-middle baseline at
+  `O*(3^(n/2))`, plus a deterministic PESS binary-search/MITM solver at
+  `O*(2^(n/2))`, and a modular-bucket DP sampler for the randomized high-
+  collision approach. Tests compare ESS against a `{-1,0,1}^n` brute-force
+  oracle and exhaustively check the sampler on small buckets. The structural
+  reductions and full randomized `O*(2^(n/3))` PESS algorithm are not
+  implemented.
 - `src/dissection.py` — Wagner four-list modular k-sum core plus a verifier.
   Tests check soundness and that solutions are found when many exist.
 - `src/hgj.py` — Howgrave-Graham-Joux representation + modular-filter search
