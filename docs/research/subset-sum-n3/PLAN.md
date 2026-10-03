@@ -132,6 +132,16 @@ publishable breakthrough; matching `1/3` is the target.
   is roughly `0.9 <= beta <= 1.25`: collisions exist but are too sparse and too
   spread out. Next: a collision-finding method whose cost depends on global,
   not per-half, structure. See `collision_mitm.md`.
+- **R20 result.** Jin-Wu residue-class sampling (random prime `p`, one class
+  `w(S) = r mod p`) is exactly such a method. Predicted cost
+  `(2^n/sqrt(C2))^(2/3)`, two thirds of the birthday exponent; measured cost
+  matches within ~0.02 for `beta <= 1.1` (n = 16, 20, 24). At density 1, n = 24:
+  `2^(0.42n)` vs birthday `2^(0.55n)` and meet-in-the-middle `2^(0.5n)`; still
+  below `2^(n/2)` at `beta = 1.25` for n = 24. So in the hard band, *equal-sum
+  pairs* are cheap to find. This finds collisions, not subset-sum solutions.
+  Open step: turn a supply of cheap collisions `c` (with `c.a = 0`) into
+  progress on subset sum, e.g. by using them to generate many solutions from
+  one, or to reduce the instance. See `bucket_collisions.md`.
 
 ## Phase 2 — the structured 3SUM route
 
