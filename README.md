@@ -1,168 +1,75 @@
-# AI Research Project Template
+# OPG-36311: Exact Subset Sum Research
 
-A small, opinionated scaffold for ML research code. It pairs a **config-driven
-training loop** with reusable **callbacks**, a standalone **evaluation** path,
-and a **test suite** — so an experiment is reproducible from a YAML file plus a
-checkpoint.
+A dependency-free research repository on exact subset sum: correct implementa-
+tions, Lean-checked correctness proofs, reproducible measurements, and a
+roadmap toward the open `O*(2^(n/3))` worst-case bound.
 
-The reference model is deliberately trivial: a multilayer perceptron (MLP) with
-a linear classification head over fixed-size feature vectors. Swap the model,
-dataset, and metrics for your own task; the surrounding structure (config
-splits, pipelines, callbacks, scripts, tests) is what the template provides.
-
-## Contents
-
-- [Quickstart](#quickstart)
-- [Data format](#data-format)
-- [Training](#training)
-- [Evaluation and inference](#evaluation-and-inference)
-- [Repository layout](#repository-layout)
-- [Documentation](#documentation)
-- [Configuration](#configuration)
-- [Extending the template](#extending-the-template)
-- [License](#license)
+**The general worst-case `O*(2^(n/3))` question is not solved here.** The
+repository proves the meet-in-the-middle correctness reduction, gives an
+`O*(2^(n/3))` result for the restricted family
+`sum(abs(a_i)) <= 2^floor(n/3)`, ports the representation technique, and
+documents which hypotheses about the barrier hold and which fail. See the
+The repository includes a [baselines paper](docs/reports/baselines/paper.tex),
+a [representation paper](docs/reports/representation/representation.tex), and a
+[survey](docs/reports/survey/survey.tex); see the
+[validation report](docs/reports/validation.md) for scope.
 
 ## Quickstart
 
-Requires Python ≥ 3.12 and [`uv`](https://docs.astral.sh/uv/).
+Requires Python 3.12+. The core modules and tests need no third-party packages.
 
 ```bash
-git clone <your-repo-url> ai-research-project-template
-cd ai-research-project-template
+python3 -m src.subset_sum --values 3 -2 7 0 --target 5
+python3 -m src.subset_sum --values 2 4 8 --target 7 --method ss
+python3 -m unittest discover -s tests -p "test_*.py" -v
 
-uv sync                # core: torch, numpy, scikit-learn
-uv sync --extra rich   # optional: pretty training summary (panels / tables)
-uv sync --extra wandb  # optional: Weights & Biases logging
-uv run pytest          # test suite
-
-# end-to-end on synthetic features, no dataset required
-uv run python scripts/training/smoke_test.py
+# Lean 4.19.0 via elan; no mathlib dependency
+cd lean && lake build
 ```
 
-Platform-aware torch builds resolve from `pyproject.toml`: Linux + NVIDIA uses
-the CUDA wheels, macOS resolves CPU/MPS wheels.
+Plotting uses matplotlib (`uv run python scripts/analysis/plot_benchmarks.py`);
+the report generator uses PyYAML.
 
-## Data format
+## Modules (`src/`)
 
-The template trains on fixed-size feature matrices stored as `.npz` files with
-two arrays:
+| Module | Contents |
+| --- | --- |
+| `subset_sum.py` | Exact subset sum: sorted meet-in-the-middle, Schroeppel-Shamir (`ss`), signed dense DP (`dp`), dispatched by `solve(values, target, method)`. |
+| `equal_subset_sum.py` | Equal-Subset-Sum / Pigeonhole-ESS baseline via signed meet-in-the-middle (`O*(3^(n/2))`). |
+| `dissection.py` | Wagner four-list modular k-sum core and verifier. |
+| `hgj.py` | Howgrave-Graham-Joux representation + modular-filter search for hard knapsacks. |
+| `additive.py` | Additive-combinatorics probes: `\|S(A)\|`, collision count `F`, additive energy, modular residue profiles, cardinality counts. |
 
-| Array | Shape | Dtype | Meaning |
-|---|---|---|---|
-| `X` | `(N, input_dim)` | `float32` | one feature vector per example |
-| `y` | `(N,)` | `int64` | class label in `[0, num_classes)` |
+All solvers are exact and return occurrence-index witnesses (or `None`). `ss`
+is `O*(2^(n/2))` time with `O*(2^(n/4))` space; the DP is pseudopolynomial in
+`W = sum(abs(a_i))`.
 
-Expected layout:
+## Measurements and research
 
-```
-data/
-└── raw/
-    ├── train.npz    # required
-    ├── val.npz      # optional (held-out split for val_loss / early stopping)
-    └── test.npz     # optional (reported metrics)
-```
-
-Generate a synthetic dataset to try the pipeline:
-
-```bash
-uv run python scripts/data/make_synthetic.py \
-    --out data/raw --n_samples 4000 --n_features 32 --n_classes 5
-```
-
-## Training
-
-```bash
-uv run python scripts/training/train.py --config configs/train.yaml
-
-# individual overrides win over the YAML
-uv run python scripts/training/train.py \
-    --config configs/train.yaml --epochs 50 --lr 5e-4 --batch_size 64
-```
-
-The run writes `checkpoints/<run_name>/best.pt`, periodic `epoch_*.pt`, and a
-`train_log.json`. Checkpoints carry the model config and label mapping so the
-evaluator can rebuild the model without the original YAML.
-
-## Evaluation and inference
-
-```bash
-# evaluate a checkpoint on a split
-uv run python scripts/training/evaluate.py \
-    --ckpt checkpoints/<run>/best.pt --data data/raw/test.npz
-
-# score a single feature file
-uv run python -m src.pipelines.infer \
-    --ckpt checkpoints/<run>/best.pt --features data/raw/test.npz --index 0
-```
+- Measurements, figures, and provenance: `docs/analysis/2026-10-03/subset-sum/`.
+- Papers (source, PDF, figures, tables): `docs/reports/<topic>/`.
+- Deep-research program toward the open bound: `docs/research/subset-sum-n3/`
+  (`report.md` — 20 sourced approach items; `PLAN.md`; `PHASE1.md`).
+- Plan and progress: `docs/TODO.md` (mirrored at the repo root).
 
 ## Repository layout
 
 ```
-src/
-├── config.py            # MLPConfig — model architecture only
-├── data.py              # FeatureDataset, npz loading, synthetic generator
-├── modules/
-│   ├── model.py         # MLPBackbone + MLPClassifier (logits, feature)
-│   └── loss.py          # ClassificationLoss + probability/label helpers
-├── pipelines/
-│   ├── config.py        # TrainingConfig — training-loop hyperparameters
-│   ├── train.py         # training loop + callback wiring
-│   ├── eval.py          # accuracy / macro-F1 / per-class report
-│   └── infer.py         # single-checkpoint inference
-├── callbacks/           # checkpoint, early_stopping, lr_scheduler, wandb
-└── utils/               # io, model, device helpers
-configs/                 # training YAML configs
-scripts/
-├── data/                # synthetic dataset generator
-└── training/            # train, evaluate, smoke_test
-tests/                   # pytest suite
-docs/                    # all documents (see docs/README.md)
-notebooks/               # exploratory notebooks
+src/                      # dependency-free research modules
+scripts/analysis/         # benchmarks, probes, figure/table generators
+tests/                    # standard-library unittest suites
+lean/                     # Lean 4.19.0 correctness layer
+docs/                     # all documents (see docs/README.md)
+  analysis/<date>/<topic>/#   measured outputs (CSV, markdown)
+  reports/<topic>/        #   papers (source, PDF, figures, tables)
+  reports/validation.md   #   repo-wide validation record
+  research/<topic>/       #   deep-research workspace (outline, results, plans)
 ```
 
 ## Documentation
 
-All documents live under `docs/` — nothing document-related belongs elsewhere.
-See [docs/README.md](docs/README.md) for the full convention. Analysis outputs
-and reports follow a date-then-topic layout:
-
-```
-docs/analysis/<yyyy-mm-dd>/<topic>/...{md|txt|csv|png|...}
-docs/reports/<yyyy-mm-dd>/<topic>/...{md|txt|csv|png|...}
-```
-
-## Configuration
-
-Configuration is split in two, mirroring the reference project:
-
-- **`src/config.py` → `MLPConfig`** holds the *architecture* (input/output
-  dims, hidden layers, dropout, ...). It is saved into every checkpoint.
-- **`src/pipelines/config.py` → `TrainingConfig`** holds the *training loop*
-  (data paths, optimizer, callbacks). It is loaded from `configs/train.yaml`
-  and overridable from the CLI.
-
-Callbacks are wired from the same YAML:
-
-```yaml
-lr_scheduler: {type: cosine, t_max: 100, eta_min: 1.0e-5}
-early_stopping: {enabled: true, monitor: accuracy, mode: max, patience: 10}
-save_best: true
-best_metric: accuracy
-best_mode: max
-wandb: {enabled: false, project: ai-research-template}
-```
-
-## Extending the template
-
-1. Replace `MLPClassifier` in `src/modules/model.py` (keep the
-   `forward(x) -> (logits, feature)` contract).
-2. Replace `FeatureDataset` in `src/data.py` for your input format.
-3. Replace the metrics in `src/pipelines/eval.py`.
-4. Wire any new callback into `src/callbacks/` and register it in
-   `build_callbacks` (`src/pipelines/train.py`).
-
-Everything else — checkpoint schema, CLI, W&B/early-stopping/best-checkpoint
-callbacks, tests — keeps working.
+All documents live under `docs/`. See [docs/README.md](docs/README.md) for the
+convention.
 
 ## License
 

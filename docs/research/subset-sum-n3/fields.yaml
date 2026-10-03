@@ -1,0 +1,114 @@
+# Field definitions for the deep-research pass.
+# Output JSON must be flat (fields at the top level); see validate_json.py.
+fields:
+  basic:
+    - name: name
+      description: Canonical name of the approach/result/item.
+      detail_level: brief
+    - name: category
+      description: One of algorithmic-family, technique, problem-variant, barrier, cryptanalytic, quantum, practical.
+      detail_level: brief
+    - name: description
+      description: One-paragraph plain-language summary of the approach and what it claims.
+      detail_level: moderate
+
+  complexity:
+    - name: worst_case_time
+      description: Best proven worst-case running time, as an explicit expression (e.g. O*(2^(n/2)), O(2^(0.291n))).
+      detail_level: detailed
+    - name: space_complexity
+      description: Space usage, or "not specified".
+      detail_level: detailed
+    - name: model
+      description: Computational model (unit-cost RAM, word RAM, circuit RAM, quantum circuit, etc.).
+      detail_level: moderate
+    - name: randomized_or_deterministic
+      description: Deterministic, Monte Carlo, or Las Vegas, with success probability if randomized.
+      detail_level: brief
+    - name: time_space_tradeoff_curve
+      description: Time as a function of the space budget, if a tradeoff family (else "single point").
+      detail_level: moderate
+    - name: numerical_exponent_and_record_year
+      description: Concrete base/exponent achieved and the year of that record.
+      detail_level: moderate
+
+  scope:
+    - name: problem_variant
+      description: Vanilla subset sum, Equal-Subset-Sum, Pigeonhole ESS, Partition, Subset Balancing, k-SUM, dense, etc.
+      detail_level: moderate
+    - name: applies_to
+      description: Which exact problem(s) the result covers, including restrictions.
+      detail_level: moderate
+    - name: coefficient_set
+      description: For balancing-type results, the coefficient set C and |C|.
+      detail_level: moderate
+    - name: density_regime
+      description: Density d = n/log2(max|a_i|) or the regime (low density, d~1, dense) the result targets.
+      detail_level: moderate
+    - name: solution_regime
+      description: General decision vs promised/numerous-solution (pigeonhole) regime.
+      detail_level: moderate
+    - name: cardinality_constraint
+      description: Whether a fixed-cardinality/Hamming-layer constraint is part of the problem.
+      detail_level: brief
+
+  method:
+    - name: key_technique
+      description: The central algorithmic technique.
+      detail_level: detailed
+    - name: core_idea
+      description: Intuition for why the technique beats or matches the 2^(n/2) baseline.
+      detail_level: detailed
+    - name: reduction_pipeline
+      description: Mediating problem and reduction direction (SS -> k-SUM, SS -> Orthogonal Vectors, modular filter, sumset, ...).
+      detail_level: moderate
+    - name: constructive_vs_existential
+      description: Whether the method yields an algorithm/witness or only an existence proof.
+      detail_level: moderate
+    - name: search_vs_decision_witness
+      description: Decides feasibility only, or returns an explicit witness, and whether constructivity is proved.
+      detail_level: brief
+
+  frontier:
+    - name: obstacle_to_2n3
+      description: The specific reason this approach does not yet reach O*(2^(n/3)), stated precisely.
+      detail_level: detailed
+    - name: potential_to_break_mitm
+      description: Honest assessment (high/medium/low) of how likely this line is to break the worst-case MITM barrier.
+      detail_level: moderate
+    - name: barrier_evidence
+      description: Known barriers, no-go arguments, or conditional lower bounds constraining this approach.
+      detail_level: detailed
+    - name: open_questions
+      description: Concrete open questions that, if answered, would advance the line.
+      detail_level: detailed
+
+  assumptions:
+    - name: conditional_hypothesis
+      description: Assumption a lower bound or hardness claim rests on (SETH, k-SUM conjecture, MITM conjecture, lattice hardness, ETH).
+      detail_level: moderate
+    - name: worst_case_vs_average_case_guarantee
+      description: Explicitly whether guarantees hold worst-case, average-case, or only for random/high-density instances.
+      detail_level: moderate
+    - name: cryptographic_regime
+      description: Relevance to knapsack/decoding cryptanalysis, with density and number of samples if applicable.
+      detail_level: moderate
+    - name: pseudopolynomial_interaction
+      description: Whether the technique combines with DP/proximity to improve dense or small-item regimes.
+      detail_level: moderate
+
+  evidence:
+    - name: key_references
+      description: Primary references with authors, venue/year, and stable URL/arXiv id.
+      detail_level: detailed
+    - name: empirical_evidence
+      description: Benchmarks or experiments reported, if any.
+      detail_level: moderate
+    - name: implementation_artifact
+      description: Available code/implementations and their URL, or "none found".
+      detail_level: moderate
+    - name: verification_method
+      description: How a reader could verify the claim (reproduce proof, run code, check reduction).
+      detail_level: moderate
+
+uncertain: []

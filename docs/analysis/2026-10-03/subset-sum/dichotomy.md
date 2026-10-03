@@ -1,0 +1,38 @@
+# Phase 1 dichotomy probe
+
+Collision count `F` is the PESS quantity; a large `F` means many
+representations (subsampling/dissection applies), small `F` with small
+geometric distance means near-geometric structure.
+
+| family | n | log2|S| | log2 F | energy(A)/n^3 | log2 geo-dist |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| geometric | 10 | 10.0 | 0.0 | 0.19 | 0.0 |
+| near_geometric | 10 | 9.81 | 6.98 | 0.194 | 3.7 |
+| powers_plus_one | 10 | 9.59 | 7.99 | 0.19 | 1.0 |
+| arithmetic | 10 | 5.81 | 9.92 | 0.67 | 8.97 |
+| dense_random | 10 | 5.83 | 9.92 | 0.934 | 8.98 |
+| density1_random | 10 | 9.94 | 5.32 | 0.19 | 9.81 |
+| dissociated_random | 10 | 10.0 | 0.0 | 0.19 | 19.74 |
+| geometric | 12 | 12.0 | 0.0 | 0.16 | 0.0 |
+| near_geometric | 12 | 10.72 | 11.23 | 0.167 | 4.52 |
+| powers_plus_one | 12 | 11.58 | 10.01 | 0.16 | 1.0 |
+| arithmetic | 12 | 6.3 | 11.97 | 0.669 | 10.99 |
+| dense_random | 12 | 6.04 | 11.98 | 0.778 | 10.99 |
+| density1_random | 12 | 11.74 | 9.38 | 0.16 | 11.7 |
+| dissociated_random | 12 | 12.0 | 0.0 | 0.16 | 23.85 |
+| geometric | 14 | 14.0 | 0.0 | 0.138 | 0.0 |
+| near_geometric | 14 | 13.36 | 12.52 | 0.179 | 5.49 |
+| powers_plus_one | 14 | 13.58 | 12.01 | 0.138 | 1.0 |
+| arithmetic | 14 | 6.73 | 13.99 | 0.668 | 13.0 |
+| dense_random | 14 | 6.67 | 13.99 | 0.919 | 13.0 |
+| density1_random | 14 | 13.85 | 10.67 | 0.138 | 13.63 |
+| dissociated_random | 14 | 14.0 | 0.0 | 0.138 | 27.9 |
+| geometric | 16 | 16.0 | 0.0 | 0.121 | 0.0 |
+| near_geometric | 16 | 15.23 | 14.72 | 0.155 | 6.43 |
+| powers_plus_one | 16 | 15.58 | 14.01 | 0.121 | 1.0 |
+| arithmetic | 16 | 7.1 | 16.0 | 0.668 | 15.0 |
+| dense_random | 16 | 7.1 | 16.0 | 0.893 | 15.0 |
+| density1_random | 16 | 15.84 | 12.72 | 0.121 | 15.37 |
+| dissociated_random | 16 | 16.0 | 0.0 | 0.121 | 31.97 |
+
+Danger-zone families (log2 F <= 1 and geo-dist >= 1): dissociated_random(n=10), dissociated_random(n=12), dissociated_random(n=14), dissociated_random(n=16)

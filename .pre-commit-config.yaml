@@ -28,18 +28,12 @@ repos:
         args: [--fix]
       - id: ruff-format
 
-  # Keep uv.lock in sync with pyproject.toml.
-  - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.12.10
-    hooks:
-      - id: uv-lock
-
-  # Full test suite — fast enough to run on every commit.
+  # Full test suite — dependency-free, fast enough to run on every commit.
   - repo: local
     hooks:
-      - id: pytest
-        name: pytest (ai-research-project-template test suite)
-        entry: uv run pytest tests/ -q
+      - id: unittest
+        name: unittest (subset-sum research suite)
+        entry: python3 -m unittest discover -s tests -p "test_*.py" -q
         language: system
         pass_filenames: false
         always_run: true

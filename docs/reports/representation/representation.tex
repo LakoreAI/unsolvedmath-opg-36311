@@ -1,0 +1,236 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[T1]{fontenc}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\hypersetup{hidelinks}
+\newcommand{\Oh}{\mathcal{O}}
+\title{The Representation Technique for Exact Subset Sum:\\
+Reproducing the $2^{n/2}$-to-$2^{0.291n}$ Frontier}
+\author{\IEEEauthorblockN{Reproducible Research Note}}
+\begin{document}
+\maketitle
+\begin{abstract}
+The exact subset sum problem has a classical worst-case $\Oh^*(2^{n/2})$
+meet-in-the-middle algorithm. The representation/dissection technique of
+Howgrave-Graham--Joux and Becker--Coron--Joux lowers the exponent to
+$\tilde{\Oh}(2^{0.291n})$ for \emph{random} hard knapsacks, but not in the
+worst case. We reproduce the complexity models of both papers from their
+primary sources and numerically recover their published optima: the HGJ
+two-part ideal $2^{0.3113n}$, the HGJ simple algorithm $2^{0.337n}$
+(May--Meurer corrected), and the BCJ three-level optimum $2^{0.291n}$. We then
+probe \emph{where} the technique stalls: generic and dissociated instances have
+well-spread modular representations and no pseudo-solutions, while the open
+coefficient sets $\{0,1\}$, $\{\pm1\}$, $\{\pm2\}$ are exactly those that admit
+no nontrivial sumset factorisation, so the worst-case tool of coefficient
+shifting cannot be applied. No worst-case improvement is claimed.
+\end{abstract}
+\begin{IEEEkeywords}
+subset sum, representation technique, meet-in-the-middle, dissection, hard
+knapsacks, reproducibility
+\end{IEEEkeywords}
+
+\section{Introduction}
+Given integers $a_1,\dots,a_n,b$, the exact subset sum problem asks whether some
+$x\in\{0,1\}^n$ satisfies $\sum_i a_ix_i=b$. Horowitz--Sahni solve it in
+$\Oh^*(2^{n/2})$ time and space~\cite{hs}; Schroeppel--Shamir keep the
+$\Oh^*(2^{n/2})$ time with $\Oh^*(2^{n/4})$ space~\cite{ss}. Whether the
+exponent can be reduced below $1/2$ in the worst case is open. For \emph{random}
+hard knapsacks of density $d=n/\log_2\max_i a_i\approx1$, the representation
+technique of Howgrave-Graham--Joux~\cite{hgj} and Becker--Coron--Joux~\cite{bcj}
+reaches $\tilde{\Oh}(2^{0.337n})$ and $\tilde{\Oh}(2^{0.291n})$ respectively;
+Chen et al.~\cite{chen} give the first worst-case improvement, but only a
+polynomial factor $2^{n/2}/n^{-0.5023}$. Most recently,
+Randolph--Węgrzycki~\cite{rw} break the meet-in-the-middle barrier in the
+\emph{worst case} for most constant coefficient sets, leaving
+$\{0,1\}$, $\{\pm1\}$ (Partition), and $\{\pm2\}$ open.
+
+This note does three things. It reproduces the HGJ and BCJ complexity models
+and their published optima from the primary sources (Sections~\ref{sec:hgj}
+and~\ref{sec:bcj}); it probes which structural hypotheses about the barrier
+hold (Section~\ref{sec:probes}); and it characterises the open cases
+(Section~\ref{sec:frontier}). It makes no worst-case claim.
+
+\section{The representation principle}\label{sec:principle}
+Meet-in-the-middle splits the $n$ entries into two halves $L,R$ and looks for
+$u\in S(L),v\in S(R)$ with $u+v=b$ (Lemma of split correctness), at cost
+$\Oh^*(2^{n/2})$. The representation technique instead represents a solution
+$x\in\{0,1\}^n$ in many ways as a sum of partial vectors, so that a random
+modular filter keeps about one representation while shrinking the search.
+
+For a solution of Hamming weight $\ell\approx n/2$, write
+$b=\sigma_1+\sigma_2$ with $\sigma_i$ a sum of $\lceil\ell/2\rceil$ or
+$\lfloor\ell/2\rfloor$ entries. The number of such decompositions is
+$N=\binom{\ell}{\lfloor\ell/2\rfloor}\approx2^{\ell}$. Choose a modulus
+$M\approx N$ and a random $R$; heuristically some decomposition has
+$\sigma_1\equiv R$ and $\sigma_2\equiv b-R\pmod M$. Constructing the two
+subsets of solutions and matching them costs
+\begin{equation}\label{eq:two-part}
+D(\alpha)=\frac{2}{\alpha^{\alpha/2}(2-\alpha)^{(2-\alpha)/2}}\cdot 2^{-\alpha},
+\end{equation}
+where $\alpha=\ell/n$; in the balanced case $D(1/2)=\tilde{\Oh}(2^{0.3113n})$.
+The remaining difficulty is to construct the modular solution lists in time
+proportional to their size; this is the crux.
+
+\subsection{Generalised coefficient sets}
+Becker--Coron--Joux extend the coefficient set from $\{0,1\}$ to
+$\{-1,0,1\}$: a $1$ is split as $(0,1)$ or $(1,0)$, and a $0$ as $(0,0)$,
+$(1,-1)$, or $(-1,1)$. With a parameter $\alpha$ giving $(1/4+\alpha)n$ ones and
+$\alpha n$ minus-ones per side, the number of representations is
+$N_D=\binom{n/2}{n/4}\cdot\binom{n/2}{\alpha n,\alpha n,(1/2-2\alpha)n}$.
+
+\section{Reproducing the HGJ exponents}\label{sec:hgj}
+The HGJ simple algorithm~\cite{hgj} decomposes $b$ into four parts
+$b=\sigma_1+\sigma_2+\sigma_3+\sigma_4$, each a weight-$(n/8)$ sum, and solves
+each sub-knapsack with the \emph{unbalanced} Schroeppel--Shamir algorithm. With
+modulus $M\approx2^{\beta n}$, $1/4<\beta<1/3$, the paper's analysis gives
+\begin{equation}
+T(\beta)=\max(2^{0.3113n},\,2^{(0.0872+\beta)n}),\qquad
+M(\beta)=2^{(0.5436-\beta)n}.
+\end{equation}
+The optimum is at $\beta\to1/4$: time $2^{0.338n}$ with $2^{0.294n}$ memory.
+Other trade-offs are $\beta\to1/3$ ($2^{0.421n}$ time, $2^{0.211n}$ memory) and
+$\beta\approx0.2936$ (Schroeppel--Shamir memory $2^{n/4}$, time $2^{0.381n}$).
+The recursive variant (HGJ, Sec.~4.3)~\cite{hgj} applies the decomposition to the
+complementary knapsack near $\alpha=1/2$; its thresholds are
+$\alpha_0\approx0.312835$ and $\alpha_1\approx0.458959$.
+Table~\ref{tab:repro} shows these values reproduced numerically.
+
+\section{Reproducing the BCJ exponents}\label{sec:bcj}
+BCJ~\cite{bcj} use three levels of $\{-1,0,1\}$ decomposition with parameters
+$\alpha,\beta,\gamma$. The coefficient counts are
+\begin{align}
+N_\nu(1)&=\tfrac14+\alpha, & N_\nu(-1)&=\alpha,\\
+N_\kappa(1)&=\tfrac18+\tfrac\alpha2+\beta, & N_\kappa(-1)&=\tfrac\alpha2+\beta,\\
+N_\omega(1)&=\tfrac1{16}+\tfrac\alpha4+\tfrac\beta2+\gamma, &
+N_\omega(-1)&=\tfrac\alpha4+\tfrac\beta2+\gamma.
+\end{align}
+With the moduli fixed by the ``single decomposition'' conditions, the list sizes
+are $L_\chi=\mathrm{mult}(N_\chi)/\prod M$, and the running time is
+\begin{equation}\label{eq:bcj}
+T=\max\!\big(L_\omega,L_\omega^{1/2},\tfrac{L_\omega^2}{M_\kappa},
+L_\kappa,\tfrac{L_\kappa^2}{M_\nu},L_\nu,
+L_\nu^2\tfrac{M_\nu M_\kappa M_\omega}{2^n}\big).
+\end{equation}
+Minimising \eqref{eq:bcj} numerically reproduces BCJ's optimum at
+$\alpha=0.0267,\ \beta=0.0168,\ \gamma=0.0029$, giving $T=2^{0.291n}$; at
+$\alpha=\beta=\gamma=0$ it recovers the May--Meurer-corrected HGJ value
+$2^{0.337n}$.
+
+\begin{table}[t]
+\centering
+\caption{Reproduced representation exponents (base-2, per $n$), from the
+primary-source models \cite{hgj,bcj}.}
+\label{tab:repro}
+\begin{tabular}{lr}
+\toprule
+Quantity & Exponent \\
+\midrule
+HGJ two-part ideal $D(1/2)$ & 0.3113 \\
+HGJ simple algorithm (best $\beta$) & 0.337 \\
+BCJ $\alpha=\beta=\gamma=0$ (HGJ) & 0.337 \\
+BCJ minimised & 0.291 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.9\columnwidth]{figures/fig_representation_exponents}
+\caption{The HGJ two-part exponent $D(\alpha)$ from \eqref{eq:two-part} against
+the meet-in-the-middle $2^{n/2}$, the ideal $0.3113$, the HGJ simple $0.337$,
+and the BCJ $0.291$ references.}
+\label{fig:d}
+\end{figure}
+
+\section{Structural probes}\label{sec:probes}
+We implemented a weak (balanced) variant of the HGJ search and probed the
+structural hypotheses that have been proposed for the barrier.
+
+\paragraph{Modular coverage.} For a planted solution, the residues
+$a\cdot y\bmod M$ of its $C(n/2,n/4)$ representations, with $M$ near the
+representation count, are \emph{spread} at the random-birthday level
+(coverage $\approx0.6$) for dissociated, density-1, and near-geometric
+families; only deliberately concentrated families (arithmetic, equal weights)
+are low, and they are easy. Dissociativity is therefore \emph{not} the barrier.
+
+\paragraph{Pseudo-solutions.} Resolving target representations by cardinality,
+dissociated, geometric, and near-geometric instances have a unique
+weight-$n/2$ solution and \emph{zero} smaller-cardinality representations
+(i.e.\ no pseudo-solution load); pseudo-solutions appear only in the
+collision-heavy easy families. Pseudo-solution blow-up is therefore also
+\emph{not} the barrier.
+
+\section{The open cases}\label{sec:frontier}
+Randolph--Węgrzycki's worst-case tool is \emph{coefficient shifting}: a sumset
+factorisation $C=C_1+C_2$ in which coefficients acquire multiple
+representations, e.g.\ $\{0,1\}+\{-3,-2,1,2\}=[\pm3]$, where $\pm2$ has two
+representations. Searching factorisations $C_1,C_2\subseteq[-3,3]$
+(Table~\ref{tab:shift}), the open cases $\{0,1\}$, $\{\pm1\}$
+(Partition), and $\{\pm2\}$ are \emph{exactly} those with no nontrivial
+factorisation: every coefficient keeps a single representation. Sets with a $0$
+coefficient ($\{-1,0,1\}$) or a nontrivial factorisation ($\{\pm3\}$) obtain
+the surplus that shifting needs.
+
+\begin{table}[t]
+\centering
+\caption{Coefficient-shifting search. ``Nontrivial'' counts factorisations with
+a coefficient represented more than once.}
+\label{tab:shift}
+\begin{tabular}{lrr}
+\toprule
+$C$ & nontrivial factorisations & max representations \\
+\midrule
+$\{0,1\}$ (Subset Sum) & 0 & 1 \\
+$\{\pm1\}$ (Partition) & 0 & 1 \\
+$\{\pm2\}$ & 0 & 1 \\
+$\{-1,0,1\}$ (Equal Subset Sum) & 6 & 2 \\
+$\{\pm3\}$ & 4 & 2 \\
+$\{-2,\dots,2\}$ & 39 & 3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This independently reproduces the frontier: the obstacle for $\{0,1\}$ is the
+absence of a nontrivial sumset factorisation (equivalently, of a $0$
+coefficient), so the worst-case representation technique has no surplus to
+exploit. A worst-case $2^{n/3}$ algorithm for $\{0,1\}$ must therefore use a
+\emph{different} mechanism.
+
+\section{Reproducibility}
+All exponents are produced by small dependency-free Python scripts:
+\texttt{representation\_exponents.py} (Table~\ref{tab:repro},
+Figure~\ref{fig:d}), \texttt{coefficient\_shifting.py} (Table~\ref{tab:shift}),
+and the probe
+scripts \texttt{modular\_structure.py} and \texttt{pseudo\_solutions.py}. Each
+writes a Markdown report to \texttt{docs/analysis/}. The Lean correctness layer
+and the baseline implementations are unchanged from the companion note. The
+figures are regenerated with \texttt{uv run python
+scripts/analysis/plot\_representation.py}.
+
+\section{Conclusion}
+The representation technique already reaches $2^{0.291n}$ for random hard
+knapsacks. Its limits are not a sub-solver or a class of hard-looking
+instances (those are representation-friendly), but the average-case nature of
+its modular guarantees and the lack of coefficient shifting for $\{0,1\}$,
+$\{\pm1\}$, $\{\pm2\}$. A worst-case $2^{n/3}$ bound for exact subset sum
+requires a new mechanism for these sets, or a conditional lower bound.
+
+\begin{thebibliography}{9}
+\bibitem{hs} E. Horowitz and S. Sahni, ``Computing partitions with applications
+to the knapsack problem,'' \emph{J. ACM}, vol.~21, no.~2, pp.~277--292, 1974.
+\bibitem{ss} R. Schroeppel and A. Shamir, ``A $T=O(2^{n/2})$, $S=O(2^{n/4})$
+algorithm for certain NP-complete problems,'' \emph{SIAM J. Comput.}, vol.~10,
+no.~3, pp.~456--464, 1981.
+\bibitem{hgj} N. Howgrave-Graham and A. Joux, ``New generic algorithms for hard
+knapsacks,'' in \emph{EUROCRYPT}, 2010; IACR ePrint 2010/189.
+\bibitem{bcj} A. Becker, J.-S. Coron, and A. Joux, ``Improved generic algorithms
+for hard knapsacks,'' in \emph{EUROCRYPT}, 2011; IACR ePrint 2011/474.
+\bibitem{chen} X. Chen, Y. Jin, T. Randolph, and R. A. Servedio, ``Subset sum
+in time $2^{n/2}/\mathrm{poly}(n)$,'' in \emph{RANDOM}, 2023; arXiv:2301.07134.
+\bibitem{rw} T. Randolph and K. W\k{e}grzycki, ``Beating meet-in-the-middle for
+subset balancing problems,'' arXiv:2511.10823, 2025.
+\end{thebibliography}
+\end{document}

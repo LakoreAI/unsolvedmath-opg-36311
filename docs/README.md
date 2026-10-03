@@ -8,12 +8,17 @@ Everything document-related lives in `docs/`. Nothing that is a document
 ```
 docs/
 ├── RESEARCH.md           project question, scope, method
-├── NOTES.md              decisions log (append newest at top)
-├── EXPERIMENTS.md        runbook for gated experiments
-├── analysis/             analysis artifacts
+├── TODO.md               plan and progress (mirrored at the repo root)
+├── analysis/             measured output
 │   └── <yyyy-mm-dd>/<topic>/...{md|txt|csv|png|...}
-└── reports/              write-ups / reports
-    └── <yyyy-mm-dd>/<topic>/...{md|txt|csv|png|...}
+├── reports/              write-ups / reports and their PDFs
+│   ├── validation.md     repo-wide validation record
+│   └── <topic>/          one directory per paper
+│       ├── <topic>.tex, <topic>.pdf
+│       ├── figures/      generated figures
+│       └── tables/       generated LaTeX tables
+└── research/             deep-research workspaces
+    └── <topic>/          outline.yaml, fields.yaml, results/, report.md, PLAN.md
 ```
 
 ## Convention for analysis and reports
@@ -27,14 +32,17 @@ docs/reports/<yyyy-mm-dd>/<topic>/...
 
 Examples:
 
-- `docs/analysis/2026-10-03/lr-sweep/curves.png`
-- `docs/analysis/2026-10-03/lr-sweep/summary.md`
-- `docs/reports/2026-10-03/lr-sweep/report.md`
+- `docs/analysis/2026-10-03/subset-sum/bench.md`
+- `docs/analysis/2026-10-03/subset-sum/dichotomy.csv`
+- `docs/reports/baselines/paper.pdf`
+- `docs/reports/representation/representation.pdf`
 
 Rules:
 
-- The first path segment under `analysis/` / `reports/` is a `YYYY-MM-DD` date.
-- Group files by topic in a directory beneath the date.
+- The first path segment under `analysis/` is a `YYYY-MM-DD` date; group files
+  by topic beneath it.
+- Each paper lives under `docs/reports/<topic>/`, with its generated `figures/`
+  and `tables/` beside it.
 - Any format is allowed inside a topic folder (`.md`, `.txt`, `.csv`, images, ...).
-- Keep raw results in these folders and link to them from `RESEARCH.md` /
-  `EXPERIMENTS.md` rather than copying numbers by hand.
+- Keep raw results in these folders and link to them from `RESEARCH.md` rather
+  than copying numbers by hand.

@@ -1,0 +1,6 @@
+name = "subset_sum_research"
+version = "0.1.0"
+defaultTargets = ["SubsetSum"]
+
+[[lean_lib]]
+name = "SubsetSum"
