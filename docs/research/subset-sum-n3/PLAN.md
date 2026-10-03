@@ -142,16 +142,40 @@ publishable breakthrough; matching `1/3` is the target.
   Open step: turn a supply of cheap collisions `c` (with `c.a = 0`) into
   progress on subset sum, e.g. by using them to generate many solutions from
   one, or to reduce the instance. See `bucket_collisions.md`.
+- **R21 result (negative, closes the collision route).** Collisions found by
+  the R20 sampler have support about `n/2` (0.50-0.56 of entries nonzero), so
+  each is compatible with a fixed solution with probability about `2^(1-n/2)`.
+  Over n = 16, 20, 24 and `beta` in 0.9-1.1, inputs averaged at most 1
+  compatible collision out of up to 128 found, and kept 1-3 solutions. Cheap
+  collisions do not multiply solutions. A useful collision would need support
+  `o(n)`, and sampling does not find those. See `collision_amplification.md`.
 
 ## Phase 2 — the structured 3SUM route
 
 1. Formalize the three-block reduction: subset sum becomes 3SUM over three
    subset-sum sets of size `N = 2^(n/3)` (item 6).
-2. Prove or refute a subquadratic algorithm for 3SUM on these structured sets:
-   use sumset-size bounds, bounded-integer convolution, or Kneser's theorem.
-   Generic 3SUM is conjectured quadratic, so any success must exploit structure.
+2. Find a 3SUM algorithm on these structured sets that runs in
+   `N^(3/2 - eps)` time (this beats `2^(n/2)`), and ideally `N^(1 + o(1))`
+   (this reaches `2^(n/3)`). A merely subquadratic `N^(2 - eps)` algorithm is
+   *not* enough: it costs `2^((2/3)(1 - eps/2) n)`, worse than meet-in-the-middle
+   unless `eps > 1/2`. Generic 3SUM is conjectured to need `N^2`, so the
+   structure of subset-sum sets must do almost all of the work.
 3. Combine with Phase 1: a dichotomy gives either AP structure (convolve) or
    many representations (dissect).
+
+### Phase 2 status
+
+- **P2.1 result (negative for the pairwise route).** Listing the smallest
+  pairwise sumset `|Si + Sj|` and matching the third block beats `2^(n/2)` only
+  if `|Si + Sj| <= 2^((1/2 - eps) n)`. Measured exponents (n = 18, 21, 24, best
+  of 8 random splits): about `0.66` for `beta >= 0.7`, `0.56-0.58` at
+  `beta = 0.5`, and below `0.5` only at `beta = 0.4`, where the dynamic program
+  already runs in `2^(0.4n)`. This matches the bound
+  `|Si + Sj| <= min(2^(2n/3), (2n/3) 2^(beta n))`. So in the hard band the
+  pairwise sumsets have no usable structure, as R19 found for halves. A Phase 2
+  algorithm must use cancellation that involves all three blocks at once (for
+  example a modular filter applied across the three lists), not the size of any
+  pairwise sumset. See `three_block.md`.
 
 ## Phase 3 — one worst-case algorithm across regimes
 
