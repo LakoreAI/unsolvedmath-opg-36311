@@ -18,7 +18,7 @@
 \begin{abstract}
 Subset sum asks whether some of the given integers add up to a target value.
 The best known algorithm that works on every input takes about $2^{n/2}$ steps
-for $n$ integers, and nobody knows whether $2^{n/3}$ is possible. This paper
+for $n$ integers, and nobody knows whether $2^{n/3}$ is possible. This note
 does not answer that question. It sets up a clean, checked starting point for
 anyone who wants to work on it. We explain the problem and the notation, then
 describe and prove correct three exact solvers: meet-in-the-middle, a
@@ -77,11 +77,9 @@ related problems, but not for subset sum itself. So whether $2^{n/3}$ (or
 anything below $2^{n/2}$) is possible for every input is still open. We make no
 claim about it.
 
-\subsection{What this paper does}
-This paper is the first of three companion notes. It covers the problem, the
-notation, and the classical exact algorithms, with proofs and
-measurements. A second note surveys the literature, and a third studies where
-the representation technique stops working. Our contributions are:
+\subsection{What this note does}
+This note covers the problem, the notation, and the classical exact
+algorithms, with proofs and measurements. Its contents are:
 \begin{itemize}
 \item a self-contained introduction to the problem and its notation
 (Section~\ref{sec:prelim});
@@ -107,7 +105,7 @@ always yes.
 A solver can answer in two ways. The \emph{decision} answer is just yes or no.
 The \emph{search} answer also returns a \emph{witness}: the positions of the
 picked items. A witness is easy to check by adding the numbers, so every solver
-in this paper returns one when the answer is yes.
+in this note returns one when the answer is yes.
 
 \subsection{Subsets and their sums}
 We write $[n]=\{1,\dots,n\}$ for the positions. For a set of positions
@@ -184,13 +182,13 @@ so a match gives a witness directly.
 \caption{Sorted meet-in-the-middle}
 \label{alg:mitm}
 \begin{algorithmic}[1]
-\Require entries $a_1,\dots,a_n$; target $b$
-\Ensure occurrence indices summing to $b$, or $\bot$
+\Require numbers $a_1,\dots,a_n$; target $b$
+\Ensure positions of a subset summing to $b$, or $\bot$ if none exists
 \State $k \gets \lfloor n/2 \rfloor$
 \State $L \gets \textsc{Enumerate}(a_1,\dots,a_k)$
 \State $R \gets \textsc{SortBySum}(\textsc{Enumerate}(a_{k+1},\dots,a_n))$
 \For{$(u,m_L)\in L$}
-  \State $p \gets \textsc{LowerBound}(R,\,b-u)$
+  \State $p \gets$ first position in $R$ with sum $\ge b-u$ \Comment{binary search}
   \If{$p\le |R|$ and $R[p].\mathrm{sum}=b-u$}
      \State \Return the indices in $m_L \mid (R[p].\mathrm{mask}\ll k)$
   \EndIf
@@ -223,8 +221,8 @@ item is never used twice. Algorithm~\ref{alg:dp} gives the details.
 \caption{Dense signed-sum dynamic programming}
 \label{alg:dp}
 \begin{algorithmic}[1]
-\Require entries $a_1,\dots,a_n$; target $b$
-\Ensure occurrence indices summing to $b$, or $\bot$
+\Require numbers $a_1,\dots,a_n$; target $b$
+\Ensure positions of a subset summing to $b$, or $\bot$ if none exists
 \State $W \gets \sum_{i}|a_i|$
 \If{$|b|>W$} \State \Return $\bot$ \EndIf
 \State $D \gets [\bot] \times (2W+1)$; \quad $D[W]\gets 0$
@@ -279,8 +277,8 @@ $2^{n/2}$ times.
 \caption{Schroeppel--Shamir with streamed pair sums}
 \label{alg:ss}
 \begin{algorithmic}[1]
-\Require entries $a_1,\dots,a_n$; target $b$
-\Ensure occurrence indices summing to $b$, or $\bot$
+\Require numbers $a_1,\dots,a_n$; target $b$
+\Ensure positions of a subset summing to $b$, or $\bot$ if none exists
 \State partition the entries into four contiguous blocks $G_0,\dots,G_3$ of sizes $\lfloor n/4\rfloor$ or $\lceil n/4\rceil$
 \For{$t\gets 0$ to $3$}
    \State $S_t \gets \textsc{SortBySum}(\textsc{Enumerate}(G_t))$ \Comment{masks use global positions}
@@ -313,7 +311,12 @@ such inputs, every number is even and the target is odd, so no subset can hit
 it. We use two families: \emph{bounded} numbers in $[-100,100]$, where the
 dynamic program's table fits in memory, and \emph{wide} numbers in
 $[-2^{40},2^{40}]$, where it does not. Each time is the best of three runs, and
-memory is the peak allocated during the run.
+memory is the peak allocated during the run. All runs are single-threaded, on
+CPython~3.12 under Linux with an Intel Core i9-8950HK CPU at 2.9\,GHz.
+Figure~\ref{fig:states} also reports a machine-independent \emph{work count}:
+the number of half-list sums built for meet-in-the-middle, the number of heap
+steps for Schroeppel--Shamir, and the number of table cells visited for the
+dynamic program.
 
 Tables~\ref{tab:runtime} and~\ref{tab:memory} and
 Figures~\ref{fig:runtime}--\ref{fig:memory} report the results.
@@ -323,7 +326,8 @@ Figures~\ref{fig:runtime}--\ref{fig:memory} report the results.
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{figures/fig_runtime}
-\caption{Measured runtime versus $n$ on infeasible instances, log scale. Wide
+\caption{Measured runtime versus $n$ on inputs with no solution, log scale.
+Wide
 values (right) admit no pseudopolynomial table, and meet-in-the-middle and
 Schroeppel--Shamir both grow exponentially; bounded values (left) are solved by
 the signed DP in time that grows only slowly with $n$.}
@@ -333,7 +337,8 @@ the signed DP in time that grows only slowly with $n$.}
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.86\columnwidth]{figures/fig_states}
-\caption{Reported work units versus $n$ (log scale) with the reference slopes
+\caption{Work count (defined in Section~\ref{sec:measure}) versus $n$ (log
+scale) with the reference slopes
 $2^{n/2}$ and $2^{n/4}$. The measured counts track $2^{n/2}$ as predicted; the
 $2^{n/4}$ line bounds the space, not the time.}
 \label{fig:states}
@@ -352,7 +357,9 @@ Meet-in-the-middle and Schroeppel--Shamir take about the same time, and both
 grow like $2^{n/2}$. Schroeppel--Shamir is a little slower because of its heap
 operations. Their memory use is very different: meet-in-the-middle grows like
 $2^{n/2}$, while Schroeppel--Shamir grows like $2^{n/4}$ and uses about 200
-times less memory at $n=32$ (Table~\ref{tab:memory}). On bounded numbers the
+times less memory at $n=32$ (Table~\ref{tab:memory}). Nederlof and
+W\k{e}grzycki~\cite{nw} show that the memory can be pushed slightly below
+$2^{n/4}$ with randomization, at the same $2^{n/2}$ time. On bounded numbers the
 dynamic program's time grows roughly linearly in $n$, and from $n=28$ on it is
 the fastest method. On wide numbers it cannot run at all, because the table
 would need on the order of $n\cdot2^{40}$ cells. Its peak memory is not
@@ -369,7 +376,7 @@ neither can an average-case analysis, because both leave out the hardest inputs.
 The closest recent progress is the worst-case result of Randolph and
 W\k{e}grzycki~\cite{rw} for related problems, which uses the representation
 technique; whether it can be adapted to plain subset sum is open. The algorithms
-in this paper are the baseline that any such result has to beat.
+in this note are the baseline that any such result has to beat.
 
 \appendices
 \section{Proofs}\label{app:proofs}
