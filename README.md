@@ -10,7 +10,8 @@ repository proves the meet-in-the-middle correctness reduction, gives an
 `sum(abs(a_i)) <= 2^floor(n/3)`, ports the representation technique, and
 documents which hypotheses about the barrier hold and which fail. The
 repository includes a [baselines paper](docs/reports/baselines/paper.tex), a
-[representation paper](docs/reports/representation/representation.tex), and a
+[representation paper](docs/reports/representation/representation.tex), a
+[mixing note](docs/reports/mixing/mixing.tex), and a
 [survey](docs/reports/survey/survey.tex); see the
 [validation report](docs/reports/validation.md) for scope.
 

@@ -56,6 +56,9 @@ as a new discovery.
 - `docs/reports/baselines/paper.tex` (+ `paper.pdf`) — the baselines note.
 - `docs/reports/representation/representation.tex` (+ `.pdf`) — the
   representation-technique note.
+- `docs/reports/mixing/mixing.tex` (+ `.pdf`) — the mixing note: concentration
+  and contraction lemmas, the average-collision-energy bound, and the
+  full-pipeline experiments.
 - `docs/reports/survey/survey.tex` (+ `.pdf`) — the structured survey.
 - `docs/analysis/2026-10-03/subset-sum/` — `bench.csv`, `memory.csv`,
   `correctness.csv`, `bench.md`, `provenance.md`, `research-notes.md`.

@@ -1,0 +1,338 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\hypersetup{hidelinks}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newcommand{\Oh}{\mathcal{O}}
+\title{Elementary Mixing Bounds and Experiments for the\\
+Representation Technique in Subset Sum}
+\author{\IEEEauthorblockN{Le Duc Minh}
+\IEEEauthorblockA{\href{mailto:minh.leduc.0210@gmail.com}{minh.leduc.0210@gmail.com}}}
+\begin{document}
+\maketitle
+\begin{abstract}
+Subset sum is solved on every input in about $2^{n/2}$ steps, and nobody knows
+whether $2^{n/3}$ (or anything below $2^{n/2}$) is possible. The representation
+technique does much better on random inputs, about $2^{0.291n}$, and the missing
+ingredient for general inputs is usually called \emph{mixing}: the many
+representations of a solution must fall into many residue classes modulo a
+random prime. This note does not give a faster worst-case algorithm. It gives
+two elementary facts about mixing and one experiment. First, if the weight-$w$
+sums take few residues modulo a prime $p$, then the input values themselves are
+concentrated modulo $p$. Second, averaged over a window of primes, the collision
+energy of the representations is at most $E_\infty+Y^2\kappa/\pi$, which is
+$\Oh(Y\log Y)$ when few exact collisions occur, so a random prime mixes to within
+a polylogarithmic factor on \emph{every} input. We then run the complete
+pipeline---modular filter, balanced sub-solver, disjointness match---on
+adversarial families. Low mixing appears only on arithmetic structure, which is
+easy; the hard large-value and generalized-progression families mix at
+$0.85$--$0.95$ and are solved at the sub-solver cost
+$2\binom{n/2}{n/8}=2^{0.4057n}$. We conclude that for the coefficient set
+$\{0,1\}$ the obstruction is more likely the balanced sub-solver than mixing, and
+we state the resulting open problem. The two lemmas are machine-checked in Lean.
+\end{abstract}
+\begin{IEEEkeywords}
+subset sum, representation technique, mixing, meet-in-the-middle, worst-case
+analysis
+\end{IEEEkeywords}
+
+\section{Introduction}
+Suppose you have $n$ integers and a target. Can you pick some of them so that the
+picked numbers add up exactly to the target? This is the \emph{subset sum}
+problem. For the numbers $3,5,8,13$ and target $16$ the answer is yes, in two
+ways: $3+13$ and $3+5+8$.
+
+Written as an equation, given integers $a_1,\dots,a_n$ and $b$, we ask whether
+$\exists x\in\{0,1\}^n:\sum_i a_ix_i=b$.
+
+\subsection{Why it matters}
+Subset sum is one of the standard NP-complete problems. Trying every subset costs
+$2^n$ steps; meet-in-the-middle of Horowitz and Sahni~\cite{hs} brings this to
+about $2^{n/2}$, and that is still the best bound that holds on every input,
+fifty years later. Schroeppel and Shamir~\cite{ss} kept the $2^{n/2}$ time with
+$2^{n/4}$ memory, and Chen, Jin, Randolph and Servedio~\cite{chen} removed a
+polynomial factor, but the exponent stayed $1/2$. Whether $2^{(1/2-\varepsilon)n}$
+is possible is open.
+
+\subsection{What is known}
+On \emph{random} inputs the representation technique of Howgrave-Graham and
+Joux~\cite{hgj}, refined by Becker, Coron and Joux~\cite{bcj}, runs in about
+$2^{0.291n}$ steps. Its speed comes from splitting the \emph{answer} rather than
+the positions: a solution has enormously many two-piece \emph{representations},
+and after filtering them with a random prime only a small subfamily remains to be
+searched. The analysis assumes the representations are spread across the residue
+classes---they \emph{mix}. Randolph and W\k{e}grzycki~\cite{rw} made the
+technique work on every input for many coefficient sets, using a ``mixing
+dichotomy''; the plain subset sum case $\{0,1\}$ resisted. Austrin, Kaski,
+Koivisto and Nederlof~\cite{akkn} showed that instances with a very small or very
+large maximum bin size are also easy, leaving a hard middle band.
+
+\subsection{What this note does}
+\begin{itemize}
+\item It sets up the mixing condition and defines the coverage and the collision
+energy (Section~\ref{sec:mix}), with a worked example.
+\item It proves two elementary lemmas: few hit residues force the input values to
+be concentrated modulo the prime, and one residue class can be stripped and the
+instance recursed (Section~\ref{sec:lemmas}). Both are machine-checked in Lean.
+\item It proves that the average collision energy over a window of primes is
+$\Oh(Y\log Y)$ when few exact collisions occur, so a random prime mixes to within
+a polylogarithmic factor on every input (Section~\ref{sec:energy}).
+\item It runs the full pipeline on adversarial families and finds that low mixing
+coincides with easy arithmetic structure, while hard families mix and run at the
+sub-solver cost (Section~\ref{sec:exp}).
+\end{itemize}
+Section~\ref{sec:barrier} states what the experiments suggest the real
+obstruction is. We do not claim a faster worst-case algorithm.
+
+\subsection{A worked example of mixing}
+Let the support be $A=\{3,5,8,13\}$ and let $w=2$, so the representations are the
+$2$-subsets. Their sums are $8,11,16,13,18,21$. Modulo $p=7$ these are
+$1,4,2,6,4,0$, so $s_p=5$ classes are hit and the coverage is $5/7\approx0.71$.
+Modulo $p=5$ they are $3,1,1,3,3,1$, so only $s_p=2$ classes are hit and the
+coverage is $0.4$. A random prime rarely looks like $p=5$; the point of this note
+is to say how rarely, and what poor coverage implies.
+
+\section{Preliminaries and the mixing condition}\label{sec:mix}
+Let $A=\{a_1,\dots,a_m\}\subseteq\mathbb Z\setminus\{0\}$ and let $w$ with
+$1\le w\le m-1$. In the balanced regime $m=n/2$ is the support of a solution and
+$w=n/4$. Write $[m]=\{1,\dots,m\}$, and
+\[
+\mathcal Y=\{y\subseteq[m]:|y|=w\},\qquad
+\Sigma(y)=\sum_{i\in y}a_i,\qquad Y=\binom mw ,
+\]
+so $\mathcal Y$ is the set of \emph{representations}. For a prime $p$ let
+\[
+c_r=\#\{y\in\mathcal Y:\Sigma(y)\equiv r\!\!\pmod p\},\qquad
+E_p=\sum_r c_r^2 ,
+\]
+the \emph{collision energy}, and let $s_p=\#\{r:c_r>0\}$ be the number of residue
+classes hit. The filter keeps the sums modulo $p$; a representation survives in a
+random class with probability $s_p/p$, so the technique needs $s_p$ close to $p$.
+We call $s_p/p$ the \emph{coverage}. Since $\sum_r c_r=Y$ and there are $s_p$
+nonzero terms, Cauchy--Schwarz gives
+\begin{equation}\label{eq:cs}
+E_p\ge Y^2/s_p .
+\end{equation}
+The \emph{exact} collision energy is $E_\infty=\sum_v d_v^2$, where
+$d_v=\#\{y:\Sigma(y)=v\}$.
+
+\section{Mixing forces concentration}\label{sec:lemmas}
+The first lemma says that poor mixing is a statement about the values, not merely
+about their weight-$w$ sums. All proofs are in Appendix~\ref{app:proofs}.
+
+\begin{lemma}[Concentration]\label{lem:conc}
+$|(A\bmod p)-(A\bmod p)|\le s_p^2$, and hence $|\{a_i\bmod p\}|\le s_p^2+1$.
+\end{lemma}
+
+Poor mixing therefore forces additive structure. Structure is not the same as a
+small sumset: $A=\{p\,2^0,\dots,p\,2^{m-1}\}$ has $s_p=1$ yet $|S(A)|=2^m$; it is
+structured, and easy. The single-residue case is exact.
+
+\begin{lemma}[Contraction]\label{lem:contract}
+If $p\mid a_i-\rho$ for all $i$, then every representation sum satisfies
+$\Sigma(y)\equiv w\rho\pmod p$. Writing $a_i=\rho+p\,b_i$, every subset sum is
+$|y|\rho+p\,\Sigma_b(y)$, so $p$ can be stripped from the values and the instance
+recursed.
+\end{lemma}
+
+For larger $s_p$, the analogue is that $A\bmod p$ lies in a short generalized
+arithmetic progression (Kneser's theorem); we do not pursue that step here.
+
+\section{Average collision energy over primes}\label{sec:energy}
+The next result holds for \emph{every} input, on average over primes.
+
+\begin{lemma}[Average energy]\label{lem:avg}
+Let $B=\max_i|a_i|$, let $\kappa=\lfloor\log(2wB)/\log P\rfloor$, and let
+$\pi=\#\{p\text{ prime}:P\le p\le2P\}$. Then
+\[
+\frac1\pi\sum_{p\in[P,2P]}E_p \;\le\; E_\infty+\frac{Y^2\kappa}{\pi}.
+\]
+\end{lemma}
+
+Take $P\approx Y$, so $\pi\approx Y/\ln Y$, and $B\le2^{\beta n}$ with
+$m,w=\Theta(n)$; then $\kappa\le2\beta+o(1)$. If few exact collisions occur,
+i.e.\ $E_\infty\le Y\,\mathrm{polylog}(Y)$, Lemma~\ref{lem:avg} gives an average
+of $\Oh(Y\log Y)$. Markov's inequality controls the tail: for all but an
+$\Oh(1/\log Y)$ fraction of primes, $E_p=\Oh(Y\log^3Y)$, so by \eqref{eq:cs}
+\begin{equation}\label{eq:cov}
+s_p\;\ge\;\frac{Y^2}{E_p}\;=\;\frac{Y}{\mathrm{polylog}(Y)} .
+\end{equation}
+A representation is therefore found after $\mathrm{polylog}(Y)$ retries, and at
+least half of the primes mix to coverage $Y/\mathrm{polylog}$.
+
+Table~\ref{tab:energy} checks the bound directly. The average energy is about
+$2Y$, the birthday value, well below the bound and below $Y\log Y$; and even the
+\emph{pointwise minimum} coverage over all primes stays at $0.27$--$0.37$, not
+only the average.
+
+\begin{table}[t]
+\centering
+\caption{Average energy and coverage over every prime $p\in[Y,2Y]$, for a
+planted balanced support with sparse values and no exact collisions.}
+\label{tab:energy}
+\begin{tabular}{rrrrrr}
+\toprule
+$n$ & $Y$ & primes & avg.\ $E_p$ & bound $Y^2\kappa/\pi$ & min.\ coverage\\
+\midrule
+$16$ & $70$  & $15$ & $113$ & $653$  & $0.371$\\
+$20$ & $252$ & $43$ & $422$ & $2954$ & $0.325$\\
+$22$ & $462$ & $68$ & $778$ & $6278$ & $0.270$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{The full pipeline on adversarial families}\label{sec:exp}
+Lemma~\ref{lem:avg} concerns all weight-$w$ sums; the algorithm needs a
+representation of the actual solution. We therefore ran the complete pipeline:
+enumerate weight-$n/8$ subsets of each half and match by residue (the balanced
+sub-solver, $2\binom{n/2}{n/8}=2^{0.4057n}$ work per residue), filter by a random
+prime, and look for a disjoint pair of weight-$n/4$ pieces with exact sum $b$.
+Table~\ref{tab:adv} reports, for planted balanced solutions, the fraction solved
+within $16$ residues, the coverage, and the enumeration work.
+
+\begin{table}[t]
+\centering
+\caption{Full pipeline on adversarial families at $n=40$. Coverage is the
+fraction of residues hit by the planted solution's representations; work is the
+mean enumeration, baseline $2^{0.4057n}$.}
+\label{tab:adv}
+\begin{tabular}{lrrr}
+\toprule
+family & success & coverage & work\\
+\midrule
+random $\beta=1$        & $1.00$ & $0.95$ & $2^{0.4057n}$\\
+random $\beta=1.5$      & $1.00$ & $0.95$ & $2^{0.4057n}$\\
+two-scale $q b_i+r_i$   & $1.00$ & $0.94$ & $2^{0.4057n}$\\
+rank-$2$ generalized AP & $1.00$ & $0.91$ & $2^{0.4057n}$\\
+$q$-multiple            & $1.00$ & $0.95$ & $2^{0.4057n}$\\
+geometric (superincr.)  & $0.17$ & $0.94$ & $>2^{0.4057n}$\\
+arithmetic (large step) & $0.33$ & $0.003$ & $>2^{0.4057n}$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The hard families---large random values, two-scale weights $qb_i+r_i$, rank-$2$
+generalized progressions, near-multiples---all mix at $0.91$--$0.95$ and are
+solved at the sub-solver cost, up to a small constant. The only low-coverage
+family is the large-step arithmetic progression (coverage $0.003$), which is
+additively structured and easy. Geometric (superincreasing) instances are
+high-coverage but the balanced enumeration happens to fail on them, and they are
+solved greedily in any case. No hard, poorly-mixing family was found.
+
+\section{Where the barrier lies}\label{sec:barrier}
+Combining the lemmas and the experiments: on every input a random prime mixes to
+within a polylog (Lemma~\ref{lem:avg}), and in the tests the only low-coverage
+families are structured and easy. If mixing were the obstruction, the pipeline
+would already beat $2^{n/2}$ using the balanced sub-solver, since
+$0.4057<1/2$. It does not, so for $\{0,1\}$ the obstruction must lie elsewhere.
+The experiments isolate two candidates.
+
+\emph{(a) The balanced sub-solver.} The filtered class is enumerated by matching
+weight-$n/8$ subsets of two fixed halves, which finds only representations that
+are weight-balanced across the split. An adversary can force the solution's
+representations off balance, and the recursion that replaces the balanced
+sub-solver---the four-way decomposition of~\cite{hgj,bcj}---is where the
+published $0.291n$ bound is won; without it the exponent is stuck at $0.4057$.
+
+\emph{(b) Compatibility and exactness.} Two pieces may combine to an invalid
+coefficient vector (a ``pseudo-solution''), and recovering a compatible pair with
+an exact, not merely modular, sum is a sparse orthogonal-vectors step whose cost
+must be kept list-linear.
+
+The open problem suggested by the experiments is therefore:
+\begin{quote}
+\itshape
+For every $\{0,1\}$ instance, either a solution has a representation that the
+balanced sub-solver enumerates and the compatibility certificate recovers, or the
+instance is solved below $2^{n/2}$ by other means; and the filtered class is
+enumerable and searchable in $2^{(1/2-\varepsilon)n}$ for a constant
+$\varepsilon>0$.
+\end{quote}
+
+\emph{Remark on a recent preprint.} A 2025 preprint~\cite{salas} claims a
+guaranteed $2^{n/2-\varepsilon}$ via a ``controlled aliasing'' that replaces one
+element by another inside a half's partial sums and keeps one canonical subset
+per aliased sum. The mechanism is unsound: in the half $\{1,2\}$, aliasing
+$2\to1$ gives the canonical subset $\{1,2\}$ a stored sum of $2$ although its
+true sum is $3$, so the merge can return a false positive and the subset
+$\{2\}$ is lost. The claimed theorem is deferred to a companion paper and is not
+established.
+
+\section{Conclusion}
+Mixing in the representation technique obeys an elementary, input-independent
+bound: on average over primes the collision energy is $\Oh(Y\log Y)$, and
+pointwise coverage stayed above $0.27$ on every input we tested. In the full
+pipeline the hard, unstructured families mix at $0.9$ and run at the balanced
+sub-solver cost, while low mixing coincides with arithmetic structure and easy
+inputs. For the coefficient set $\{0,1\}$ this points to the sub-solver and the
+compatibility step, not mixing, as the obstruction. A genuinely hard,
+poorly-mixing family, if one exists, was not found; finding one, or proving none
+exists, is the next step.
+
+\appendices
+\section{Proofs}\label{app:proofs}
+\subsection{Proof of Lemma~\ref{lem:conc}}
+Fix $i,j$. Since $1\le w\le m-1$ and $m\ge2$, the set $[m]\setminus\{i,j\}$ has at
+least $m-2\ge w-1$ elements, so there is $S\subseteq[m]\setminus\{i,j\}$ with
+$|S|=w-1$. The sets $S\cup\{i\}$ and $S\cup\{j\}$ both have size $w$, so
+$u=a_i+\Sigma(S)$ and $v=a_j+\Sigma(S)$ are both values of weight-$w$ sums. Their
+difference is $u-v=a_i-a_j$. Letting $i,j$ vary, every value difference modulo
+$p$ is a difference of two hit residues; the hit residues number $s_p$, so the
+difference set has at most $s_p^2$ elements. Fixing one index as a base gives
+$|\{a_i\bmod p\}|\le s_p^2+1$. \hfill$\square$
+
+\subsection{Proof of Lemma~\ref{lem:contract}}
+If $a_i\equiv\rho\pmod p$ for all $i$, then
+$\Sigma(y)=\sum_{i\in y}a_i\equiv|y|\rho=w\rho\pmod p$. Writing
+$a_i=\rho+p\,b_i$ with $b_i=(a_i-\rho)/p\in\mathbb Z$, we get
+$\Sigma(y)=|y|\rho+p\,\Sigma_b(y)$, so the target determines $p\,\Sigma_b(y)$ given
+$|y|$. \hfill$\square$
+
+\subsection{Proof of Lemma~\ref{lem:avg}}
+For each prime $p$, $E_p=\sum_r c_r^2=\#\{(y,y'):\Sigma(y)\equiv\Sigma(y')\pmod p\}$,
+so $\sum_pE_p=\sum_{y,y'}n_{y,y'}$ with
+$n_{y,y'}=\#\{p\in[P,2P]:p\mid\Sigma(y)-\Sigma(y')\}$. If $\Sigma(y)=\Sigma(y')$
+then $n_{y,y'}=\pi$; there are $E_\infty$ such ordered pairs. Otherwise
+$N=\Sigma(y)-\Sigma(y')\ne0$ and $|N|\le2wB$ because each value is at most $B$ in
+absolute value and a weight-$w$ sum has at most $w$ terms; the number of primes in
+$[P,2P]$ dividing $N$ is at most $\lfloor\log|N|/\log P\rfloor\le\kappa$. The
+remaining $Y^2$ ordered pairs each contribute at most $\kappa$. Summing and
+dividing by $\pi$ gives the claim. \hfill$\square$
+
+\section{Reproducibility}
+The measurements are generated by \texttt{scripts/analysis/average\_energy.py}
+(Table~\ref{tab:energy}) and \texttt{scripts/analysis/hgj\_adversarial.py}
+(Table~\ref{tab:adv}); the raw outputs are in
+\texttt{docs/analysis/2026-10-03/subset-sum/}. The Lean proofs of
+Lemmas~\ref{lem:conc} and~\ref{lem:contract} are in
+\texttt{lean/SubsetSum.lean} as \texttt{value\_diff\_mem\_wsum\_diff},
+\texttt{value\_diff\_mod\_mem\_wsum\_mod\_diff}, and
+\texttt{dvd\_listSum\_sub\_length\_mul} (Lean 4.19, \texttt{Std} only, axioms
+$[\texttt{propext},\texttt{Quot.sound}]$).
+
+\begin{thebibliography}{9}
+\bibitem{hs} E. Horowitz and S. Sahni, ``Computing partitions with applications
+to the knapsack problem,'' \emph{Journal of the ACM}, vol.~21, no.~2,
+pp.~277--292, 1974.
+\bibitem{ss} R. Schroeppel and A. Shamir, ``A $T=O(2^{n/2})$, $S=O(2^{n/4})$
+algorithm for certain NP-complete problems,'' \emph{SIAM Journal on Computing},
+vol.~10, no.~3, pp.~456--464, 1981.
+\bibitem{hgj} N. Howgrave-Graham and A. Joux, ``New generic algorithms for hard
+knapsacks,'' in \emph{EUROCRYPT}, 2010; IACR ePrint 2010/189.
+\bibitem{bcj} A. Becker, J.-S. Coron, and A. Joux, ``Improved generic algorithms
+for hard knapsacks,'' in \emph{EUROCRYPT}, 2011; IACR ePrint 2011/474.
+\bibitem{chen} X. Chen, Y. Jin, T. Randolph, and R. A. Servedio, ``Subset sum
+in time $2^{n/2}/\mathrm{poly}(n)$,'' in \emph{RANDOM}, 2023; arXiv:2301.07134.
+\bibitem{rw} T. Randolph and K. W\k{e}grzycki, ``Beating meet-in-the-middle for
+subset balancing problems,'' arXiv:2511.10823, 2025.
+\bibitem{akkn} P. Austrin, P. Kaski, M. Koivisto, and J. Nederlof, ``Dense subset
+sum may be the hardest,'' in \emph{STACS}, 2016; arXiv:1508.06019.
+\bibitem{salas} J. Salas, ``Beyond worst-case subset sum,'' arXiv:2503.20162,
+2025.
+\end{thebibliography}
+\end{document}
