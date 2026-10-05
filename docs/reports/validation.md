@@ -259,6 +259,11 @@ Built for the deep-research plan in `docs/research/subset-sum-n3/PLAN.md`:
   exhaustively against `close_pairs` on small instances and check the geometric
   family is cheaper than dense; `pess_structure.md` reports `visit` exponents
   `~0.3` (decreasing in `n`) for nearly geometric inputs versus `~1.0` dense.
+- `src/compatibility.py` (+ `tests/test_compatibility.py`) — sparse-OV
+  disjointness primitives (`disjoint_pair_certified`, `compatible_pair_with_sum`)
+  for the broadened-representation compatibility step; exact (the certificate
+  only prunes non-disjoint pairs) and wired into `hgj_search` via the
+  `certificate=True` flag.
 - `jwz_disjoint_close_pairs` / `pess_jwz_pigeonhole_equal_subset_sum` in
   `src/equal_subset_sum.py` (R16b) — the Jin–Williams–Zhang `O*(2^(n/3))` PESS
   reduction: the poly(n)-size disjoint close-pair set `D` of Lemma 9

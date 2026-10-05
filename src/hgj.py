@@ -28,6 +28,8 @@ from dataclasses import dataclass
 from itertools import combinations
 from typing import Sequence
 
+from src.compatibility import compatible_pair_with_sum
+
 
 @dataclass(frozen=True)
 class HgjResult:
@@ -92,11 +94,14 @@ def hgj_search(
     modulus_bits: int | None = None,
     residues: int = 8,
     seed: int = 0,
+    certificate: bool = False,
 ) -> HgjResult:
     """Heuristic HGJ search for a Hamming-``weight`` solution.
 
     Tries ``residues`` random residues; each pass enumerates Y and Z and looks
-    for a disjoint exact match. ``weight`` defaults to n//2.
+    for a disjoint exact match. ``weight`` defaults to n//2. With
+    ``certificate=True`` the disjoint (compatibility) step goes through the
+    sparse-OV primitive of ``src.compatibility`` instead of the inline scan.
     """
     values = tuple(values)
     n = len(values)
@@ -124,13 +129,29 @@ def hgj_search(
             values, block_weight, modulus, (target - r) % modulus
         )
         enumerated += per_attempt
-        z_table: dict[int, list[int]] = {}
-        for total, mask in z_list:
-            z_table.setdefault(total, []).append(mask)
-        for total, mask in y_list:
-            for zmask in z_table.get(target - total, ()):
-                if not mask & zmask:
-                    plus = tuple(i for i in range(n) if mask >> i & 1)
-                    minus = tuple(i for i in range(n) if zmask >> i & 1)
-                    return HgjResult(plus + minus, enumerated, tried)
+        pair: tuple[int, int] | None = None
+        if certificate:
+            pair = compatible_pair_with_sum(
+                [(mask, total) for total, mask in y_list],
+                [(mask, total) for total, mask in z_list],
+                target,
+                n,
+                seed=seed,
+            )
+        else:
+            z_table: dict[int, list[int]] = {}
+            for total, mask in z_list:
+                z_table.setdefault(total, []).append(mask)
+            for total, mask in y_list:
+                for zmask in z_table.get(target - total, ()):
+                    if not mask & zmask:
+                        pair = (mask, zmask)
+                        break
+                if pair is not None:
+                    break
+        if pair is not None:
+            plus_mask, minus_mask = pair
+            plus = tuple(i for i in range(n) if plus_mask >> i & 1)
+            minus = tuple(i for i in range(n) if minus_mask >> i & 1)
+            return HgjResult(plus + minus, enumerated, tried)
     return HgjResult(None, enumerated, tried)

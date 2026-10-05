@@ -131,3 +131,25 @@ small-`n` evidence says it may even be pointwise — which sharpens the open
 problem from "prove mixing" to **"find the adversarial poorly-mixing family or
 identify the sub-solver barrier"**. That is a concrete, falsifiable target for
 the next iteration.
+
+## 6. BCJ port status
+
+The barriered plan is to broaden the representations (Becker-Coron-Joux, ePrint
+2011/474) so every solution is seen across all weight profiles, and to recover a
+compatible pair with a certificate (Randolph-Węgrzycki Thm 8.1). Status:
+
+- **Compatibility done (exact).** `src/compatibility.py` implements the
+  disjointness predicate as a sparse-OV search (`disjoint_pair_certified`,
+  `compatible_pair_with_sum`) and `hgj_search(..., certificate=True)` routes the
+  pseudo-solution step through it. It is *exact* (the sampled certificate only
+  prunes non-disjoint pairs), but the current submask enumeration is not
+  asymptotically better than the linear scan; the efficient version needs the
+  block/inclusion-exclusion certificate of RW Thm 8.1.
+- **Multi-level BCJ recursion not ported.** The ePrint/HAL PDFs are behind bot
+  challenges, and the three-level `{-1,0,1}` construction (Algorithm 1 plus the
+  eight lists) is intricate enough that a from-memory port would risk a subtle
+  error. The repository's own cost model (`docs/reports/representation`, App. B)
+  reproduces the exponents but not the algorithm.
+- **Next.** Obtain the BCJ source (library/institutional access), port the
+  three-level construction, and swap in the efficient certificate; then measure
+  the worst-case curve against the `0.4057n` balanced sub-solver.

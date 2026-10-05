@@ -38,6 +38,19 @@ class HgjTests(unittest.TestCase):
         self.assertEqual(enumerated_size(32, 8), 2 * math.comb(16, 4))
         self.assertEqual(enumerated_size(64, 16), 2 * math.comb(32, 8))
 
+    def test_certificate_matches_inline(self):
+        for n in (16, 24, 32):
+            for t in range(6):
+                rng = random.Random(2000 + n + t)
+                values, target, _ = _planted(n, rng)
+                inline = hgj_search(values, target, seed=t)
+                certified = hgj_search(values, target, seed=t, certificate=True)
+                self.assertEqual(inline.feasible, certified.feasible, (n, t))
+                if certified.feasible:
+                    got = set(certified.indices)
+                    self.assertEqual(len(got), n // 2)
+                    self.assertEqual(sum(values[i] for i in got), target)
+
     def test_finds_planted_solution(self):
         for n in (16, 24, 32):
             successes = 0
