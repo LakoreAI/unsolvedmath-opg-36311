@@ -15,7 +15,7 @@ This script measures, for adversarial families, the representation coverage
 structured (small doubling) ones; a low-coverage *dissociated* family would be a
 counterexample.
 
-Writes docs/analysis/2026-10-03/subset-sum/mixing_dichotomy.md.
+Writes docs/analysis/2026-10-05/subset-sum/mixing_dichotomy.md.
 """
 
 import argparse
@@ -28,7 +28,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-03" / "subset-sum"
+DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-05" / "subset-sum"
 SIZES = (16, 20)
 FAMILIES = (
     "constant",

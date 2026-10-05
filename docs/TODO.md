@@ -2,7 +2,8 @@
 
 Canonical plan for this repository, kept in `docs/` per the docs convention.
 Living research log: `docs/research/subset-sum-n3/` (`report.md`, `PLAN.md`,
-`PHASE1.md`). Measurements: `docs/analysis/2026-10-03/subset-sum/`.
+`PHASE1.md`). Measurements: `docs/analysis/2026-10-03/subset-sum/` (R1–R21)
+and `docs/analysis/2026-10-05/subset-sum/` (R13/R16/R17 follow-ups).
 
 ## 0. Status snapshot
 

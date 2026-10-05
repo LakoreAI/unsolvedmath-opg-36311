@@ -1,7 +1,8 @@
 # Research memo: proving (or refuting) the target mixing dichotomy
 
 Status (2026-10-05): literature check + a new candidate lemma + the precise
-obstruction. Read with `ATTACK.md` and `MIXING.md`.
+obstruction. Read with `ATTACK.md` and `MIXING.md`. The measurements referenced
+below are in `docs/analysis/2026-10-05/subset-sum/`.
 
 ## 0. Alert: an unsound preprint
 
@@ -80,13 +81,19 @@ following is the true barrier, and identifying it is now the concrete goal:
 
 1. **Adversarial low coverage.** Some instance family has `s_p = o(Y)` for every
    `p` in the algorithm's window. Randolph–Węgrzycki prove such families exist
-   for other coefficient sets; none was found for `{0,1}` at `n ≤ 20`
-   (`mixing_counterexample.md`; min best-coverage `0.47`). **This is the most
-   likely candidate and the highest-value search target.**
-2. **Sub-solver / profile / exactness.** The balanced sub-solver only enumerates
-   reps whose weight is split `w/2`–`w/2` across a fixed split; an adversary can
-   force reps off-balance, costing a `√n` factor (harmless) or worse. And the
-   disjoint exact-match (pseudo-solution) step may cost more than list-linear.
+   for other coefficient sets; none was found for `{0,1}` (`mixing_counterexample.md`,
+   `hgj_adversarial.md`, up to `n = 40`; low coverage only on arithmetic
+   progressions). **Not supported so far.**
+2. **Profile / completeness (confirmed).** The balanced sub-solver only
+   enumerates weight-`n/4` pieces split `n/8`–`n/8` across the split. A solution
+   with no balanced representation is never seen, so the search returns a wrong
+   ``no''. `hgj_profile.md` confirms this: success is `1.00` exactly when the
+   solution's first-half share is `n/4` and `0.00` otherwise; one random
+   permutation repairs it only with the (small) probability that the support
+   lands balanced. Enumerating *all* weight profiles costs
+   `sum_i C(n/2,i)C(n/2,n/4-i) = C(n,n/4) = 2^{0.811n}`, above meet-in-the-middle.
+   This is the genuine obstacle, and it is a *completeness* rather than a mixing
+   problem.
 3. **Accounting subtlety.** The retry/coverage argument loses a polylog; a
    constant-exponent claim needs coverage constant for a *single* prime, which
    Markov alone does not give (it gives a `1/polylog` fraction of good primes).

@@ -53,6 +53,13 @@ as a new discovery.
   lemma: average collision energy `E_p` over a prime window is `O(Y log Y)`, so a
   random prime mixes; measured pointwise minimum coverage stays `≥ 0.27`. See
   `docs/research/subset-sum-n3/NEXT.md`.
+- `scripts/analysis/hgj_adversarial.py` → `hgj_adversarial.md` — the full filter
+  + balanced sub-solver + disjointness pipeline on adversarial families: hard
+  families mix at `0.91`–`0.95` and run at the sub-solver cost; only arithmetic
+  progressions mix poorly.
+- `scripts/analysis/hgj_profile.py` → `hgj_profile.md` — the profile barrier:
+  the balanced sub-solver succeeds exactly when the solution's first-half share
+  is `n/4` and returns a wrong ``no'' otherwise; completeness costs `2^{0.811n}`.
 - `docs/reports/baselines/paper.tex` (+ `paper.pdf`) — the baselines note.
 - `docs/reports/representation/representation.tex` (+ `.pdf`) — the
   representation-technique note.
@@ -62,6 +69,10 @@ as a new discovery.
 - `docs/reports/survey/survey.tex` (+ `.pdf`) — the structured survey.
 - `docs/analysis/2026-10-03/subset-sum/` — `bench.csv`, `memory.csv`,
   `correctness.csv`, `bench.md`, `provenance.md`, `research-notes.md`.
+- `docs/analysis/2026-10-05/subset-sum/` — the R13/R16/R17 follow-ups:
+  `pess_structure.md`, `jwz_close_pairs.md`, `mixing_dichotomy.md`,
+  `mixing_counterexample.md`, `average_energy.md`, `hgj_adversarial.md`,
+  `hgj_profile.md`, `subset_sum_pipeline.md`.
 - `docs/reports/<topic>/figures/`, `docs/reports/<topic>/tables/` — generated
   figures and tables, one set per paper topic.
 

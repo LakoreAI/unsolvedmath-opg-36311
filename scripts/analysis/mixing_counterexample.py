@@ -8,7 +8,7 @@ random primes `p in [C(n/2,n/4), 2 C(n/2,n/4)]` (the algorithm may retry), next
 to structural flags. A "hard" instance (gcd 1, not superincreasing, many
 distinct subset sums) with small best-coverage would refute the dichotomy.
 
-Writes docs/analysis/2026-10-03/subset-sum/mixing_counterexample.md.
+Writes docs/analysis/2026-10-05/subset-sum/mixing_counterexample.md.
 """
 
 import argparse
@@ -21,7 +21,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-03" / "subset-sum"
+DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-05" / "subset-sum"
 SIZES = (18, 20)
 PRIMES_PER_INSTANCE = 6
 TRIALS = 6

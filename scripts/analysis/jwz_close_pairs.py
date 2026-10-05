@@ -12,7 +12,7 @@ nearly geometric PESS instance w_i = 2^(i-1) with the top element 2^(n-1)-1:
 * the naive suffix enumeration exponent ``(n-k) log2(3) / n``;
 * the bound 200 n^5.
 
-Writes docs/analysis/2026-10-03/subset-sum/jwz_close_pairs.md.
+Writes docs/analysis/2026-10-05/subset-sum/jwz_close_pairs.md.
 """
 
 import argparse
@@ -24,7 +24,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from src.equal_subset_sum import jwz_disjoint_close_pairs
 
-DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-03" / "subset-sum"
+DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-05" / "subset-sum"
 SIZES = (16, 18, 20)
 
 

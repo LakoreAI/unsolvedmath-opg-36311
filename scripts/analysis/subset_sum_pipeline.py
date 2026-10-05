@@ -10,7 +10,7 @@ point is that the pipeline stays correct and the representation branch works on
 the hard large-value families; the worst-case guarantee is the open mixing
 dichotomy (see ATTACK.md).
 
-Writes docs/analysis/2026-10-03/subset-sum/subset_sum_pipeline.md.
+Writes docs/analysis/2026-10-05/subset-sum/subset_sum_pipeline.md.
 """
 
 import argparse
@@ -24,7 +24,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from src.representation import mixing_coverage, representation_subset_sum  # noqa: E402
 
-DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-03" / "subset-sum"
+DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-05" / "subset-sum"
 SIZES = (16, 20, 24)
 FAMILIES = (
     "superincreasing",

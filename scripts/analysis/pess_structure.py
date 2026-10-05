@@ -14,7 +14,7 @@ for a near-geometric family and for a dense random family, reporting base-2
 exponents per n. Prediction: geometric exponents near 0 (poly(n)), dense
 exponents large.
 
-Writes docs/analysis/2026-10-03/subset-sum/pess_structure.md.
+Writes docs/analysis/2026-10-05/subset-sum/pess_structure.md.
 """
 
 import argparse
@@ -28,7 +28,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from src.equal_subset_sum import close_pair_visit_count, close_pairs_structured
 
-DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-03" / "subset-sum"
+DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-05" / "subset-sum"
 SIZES = (16, 19, 22)
 FAMILIES = ("geometric", "dense")
 

@@ -8,7 +8,7 @@ across every prime `p` in `[Y, 2Y]` (`Y = C(n/2, n/4)`), and compares the averag
 candidate proof that a random prime mixes; the pointwise minimum coverage is the
 counterexample-hunting quantity (see NEXT.md).
 
-Writes docs/analysis/2026-10-03/subset-sum/average_energy.md.
+Writes docs/analysis/2026-10-05/subset-sum/average_energy.md.
 """
 
 import argparse
@@ -21,7 +21,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-03" / "subset-sum"
+DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-05" / "subset-sum"
 SIZES = (16, 20, 22)
 
 

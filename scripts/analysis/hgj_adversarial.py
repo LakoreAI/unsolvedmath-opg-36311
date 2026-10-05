@@ -11,7 +11,7 @@ hard (large distinct-sum count, no gcd, not superincreasing) and low-coverage
 would be the adversarial poorly-mixing instance; otherwise the barrier is the
 sub-solver.
 
-Writes docs/analysis/2026-10-03/subset-sum/hgj_adversarial.md.
+Writes docs/analysis/2026-10-05/subset-sum/hgj_adversarial.md.
 """
 
 import argparse
@@ -26,7 +26,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from src.hgj import enumerated_size, hgj_search  # noqa: E402
 
-DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-03" / "subset-sum"
+DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-05" / "subset-sum"
 SIZES = (24, 32, 40)
 FAMILIES = (
     "random-b1.0",
