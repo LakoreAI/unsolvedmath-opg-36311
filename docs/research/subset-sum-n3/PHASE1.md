@@ -295,7 +295,10 @@ coverage), but they do not identify the barrier; R11 does.
    shifting cannot be applied.
 8. **Next (R13).** Look for a worst-case mechanism for `{0,1}` that is not
    coefficient shifting: e.g. a canonical sumset / compatibility certificate
-   specific to `{0,1}`, or a proof that none exists.
+   specific to `{0,1}`, or a proof that none exists. The barrier statement in
+   `TRANSFER.md` shows the PESS structural lemma needs the pigeonhole promise
+   and is false without it, so R13 must supply a promise-forcing reduction, a
+   promise-free structure dichotomy, or an all-three-block algorithm.
 9. **H3**: pseudosolution recovery / compatibility certificates for `C={0,1}`.
 2. **Pseudo-solution accounting (new Phase 1 core).** Instrument the HGJ search
    to count modular candidates `L²/M` versus true representations for

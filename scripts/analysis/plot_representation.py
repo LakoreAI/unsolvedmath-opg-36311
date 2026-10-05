@@ -20,9 +20,12 @@ DEFAULT_OUT = REPO_ROOT / "docs" / "reports" / "representation" / "figures"
 
 
 def hgj_two_part(alpha):
-    return 1 - (alpha / 2) * math.log2(alpha) - ((2 - alpha) / 2) * math.log2(
-        2 - alpha
-    ) - alpha
+    return (
+        1
+        - (alpha / 2) * math.log2(alpha)
+        - ((2 - alpha) / 2) * math.log2(2 - alpha)
+        - alpha
+    )
 
 
 def main() -> None:

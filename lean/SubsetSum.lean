@@ -144,8 +144,157 @@ theorem restricted_work_bound (n w : Nat) (h : w ≤ 2 ^ (n / 3)) :
   apply Nat.mul_le_mul_left
   omega
 
+/-! ## Weight-resolved certificates (the representation split)
+
+The representation technique balances a solution by its Hamming weight: a
+weight-`ℓ` solution is written as `y + z` with `y`, `z` disjoint of weights
+`~ℓ/2`. The following weight-resolved specification and its split lemma supply
+the combinatorial, weight-tracking analogue of `HasSum` / `hasSum_append`. -/
+
+/-- `HasSumWeight xs b k`: the subset sums to `b` selecting exactly `k`
+occurrences. The third index is the Hamming weight used by the representation
+technique. -/
+inductive HasSumWeight : List Int → Int → Nat → Prop where
+  | nil : HasSumWeight [] 0 0
+  | skip {a : Int} {xs : List Int} {b : Int} {k : Nat} :
+      HasSumWeight xs b k → HasSumWeight (a :: xs) b k
+  | take {a : Int} {xs : List Int} {b : Int} {k : Nat} :
+      HasSumWeight xs b k → HasSumWeight (a :: xs) (a + b) (k + 1)
+
+/-- Forgetting the weight recovers the original specification. -/
+theorem hasSumWeight_sound {xs : List Int} {b : Int} {k : Nat}
+    (h : HasSumWeight xs b k) : HasSum xs b := by
+  induction h with
+  | nil => exact HasSum.nil
+  | skip _ ih => exact HasSum.skip ih
+  | take _ ih => exact HasSum.take ih
+
+/-- Every subset sum has a weight-resolved certificate. -/
+theorem hasSumWeight_complete {xs : List Int} {b : Int}
+    (h : HasSum xs b) : ∃ k, HasSumWeight xs b k := by
+  induction h with
+  | nil => exact ⟨0, HasSumWeight.nil⟩
+  | skip _ ih =>
+      rcases ih with ⟨k, hk⟩
+      exact ⟨k, HasSumWeight.skip hk⟩
+  | take _ ih =>
+      rcases ih with ⟨k, hk⟩
+      exact ⟨k + 1, HasSumWeight.take hk⟩
+
+/-- The selected weight never exceeds the number of occurrences. -/
+theorem hasSumWeight_le_length {xs : List Int} {b : Int} {k : Nat}
+    (h : HasSumWeight xs b k) : k ≤ xs.length := by
+  induction h with
+  | nil => simp
+  | skip _ ih =>
+      simp only [List.length_cons]
+      omega
+  | take _ ih =>
+      simp only [List.length_cons]
+      omega
+
+/-- Split lemma for weight-resolved certificates: any contiguous split factors
+the certificate into two disjoint parts whose weights add up. This is the
+combinatorial core of the representation decomposition `x = y + z`. -/
+theorem hasSumWeight_append {left right : List Int} {b : Int} {k : Nat}
+    (h : HasSumWeight (left ++ right) b k) :
+    ∃ u v ku kv, HasSumWeight left u ku ∧ HasSumWeight right v kv ∧
+      u + v = b ∧ ku + kv = k := by
+  induction left generalizing b k with
+  | nil =>
+      simp only [List.nil_append] at h
+      exact ⟨0, b, 0, k, HasSumWeight.nil, h, by omega, by omega⟩
+  | cons a xs ih =>
+      simp only [List.cons_append] at h
+      cases h with
+      | skip h' =>
+          rcases ih h' with ⟨u, v, ku, kv, hu, hv, he, hk⟩
+          exact ⟨u, v, ku, kv, HasSumWeight.skip hu, hv, he, hk⟩
+      | take h' =>
+          rcases ih h' with ⟨u, v, ku, kv, hu, hv, he, hk⟩
+          refine ⟨a + u, v, ku + 1, kv, HasSumWeight.take hu, hv, ?_, ?_⟩
+          · omega
+          · omega
+
+/-! ## Residue enumeration (the modular filter)
+
+The HGJ filter enumerates subsets by the residue of their dot product modulo a
+chosen modulus. The following is the completeness half: no feasible sum is
+discarded by the filter. -/
+
+/-- Residues of all subset sums under a filter of modulus `m`. -/
+def residues (m : Nat) (xs : List Int) : List Int :=
+  (sums xs).map (fun s => s % (m : Int))
+
+/-- The filter's residue set contains the residue of every feasible sum, so a
+random residue keeps a solution with the probability the representation count
+predicts. -/
+theorem mem_residues {xs : List Int} {b : Int} {m : Nat} (h : HasSum xs b) :
+    b % (m : Int) ∈ residues m xs := by
+  simp only [residues, List.mem_map]
+  exact ⟨b, (mem_sums_iff xs b).mpr h, rfl⟩
+
+/-! ## Mixing concentration (R13)
+
+The HGJ filter keeps weight-`w` index sets whose value sum lies in a residue
+class. If the weight-`w` sums take few residues, the values themselves are
+concentrated. The two lemmas below are the elementary kernel of the target
+mixing dichotomy (`docs/research/subset-sum-n3/MIXING.md`): two weight-`w` sets
+differing only in the index `i` versus `j` have sums differing by `a i - a j`,
+so every pairwise value difference is a difference of two weight-`w` sums. -/
+
+/-- Sum of the values selected by a list of occurrence indices. -/
+def listSum {m : Nat} (a : Fin m → Int) (s : List (Fin m)) : Int :=
+  (s.map a).sum
+
+/-- `x` is a weight-`w` sum: the value sum of a nodup index list of length `w`. -/
+def IsWSum {m : Nat} (a : Fin m → Int) (w : Nat) (x : Int) : Prop :=
+  ∃ s : List (Fin m), s.Nodup ∧ s.length = w ∧ listSum a s = x
+
+theorem value_diff_mem_wsum_diff {m w : Nat} (a : Fin m → Int)
+    {i j : Fin m} {s : List (Fin m)}
+    (hs : s.Nodup) (hi : i ∉ s) (hj : j ∉ s) (hlen : s.length + 1 = w) :
+    ∃ x y, IsWSum a w x ∧ IsWSum a w y ∧ x - y = a i - a j := by
+  refine ⟨listSum a (i :: s), listSum a (j :: s), ?_, ?_, ?_⟩
+  · exact ⟨i :: s, List.nodup_cons.mpr ⟨hi, hs⟩, by simpa using hlen, rfl⟩
+  · exact ⟨j :: s, List.nodup_cons.mpr ⟨hj, hs⟩, by simpa using hlen, rfl⟩
+  · simp only [listSum, List.map_cons, List.sum_cons]
+    omega
+
+theorem value_diff_mod_mem_wsum_mod_diff {m w : Nat} (a : Fin m → Int) (p : Int)
+    {i j : Fin m} {s : List (Fin m)}
+    (hs : s.Nodup) (hi : i ∉ s) (hj : j ∉ s) (hlen : s.length + 1 = w) :
+    ∃ x y, IsWSum a w x ∧ IsWSum a w y ∧
+      (x % p - y % p) % p = (a i - a j) % p := by
+  refine ⟨listSum a (i :: s), listSum a (j :: s), ?_, ?_, ?_⟩
+  · exact ⟨i :: s, List.nodup_cons.mpr ⟨hi, hs⟩, by simpa using hlen, rfl⟩
+  · exact ⟨j :: s, List.nodup_cons.mpr ⟨hj, hs⟩, by simpa using hlen, rfl⟩
+  · rw [← Int.sub_emod]
+    have hdiff : listSum a (i :: s) - listSum a (j :: s) = a i - a j := by
+      simp only [listSum, List.map_cons, List.sum_cons]
+      omega
+    rw [hdiff]
+
+/-- `r = 1` contraction kernel: if every value is congruent to `ρ` modulo `p`
+(as divisibility), then every weight-`w` sum is congruent to `w · ρ`, so `p` can
+be stripped from the instance (`docs/research/subset-sum-n3/MIXING.md`). -/
+theorem dvd_listSum_sub_length_mul {m : Nat} (a : Fin m → Int) (p ρ : Int)
+    (h : ∀ i, p ∣ a i - ρ) :
+    ∀ s : List (Fin m), p ∣ listSum a s - (s.length : Int) * ρ
+  | [] => by simp [listSum]
+  | i :: t => by
+      rw [listSum, List.map_cons, List.sum_cons, List.length_cons]
+      have hsum : (a i + (List.map a t).sum) - (↑(t.length + 1) * ρ)
+          = (a i - ρ) + ((List.map a t).sum - ↑t.length * ρ) := by
+        rw [Int.natCast_succ, Int.add_mul, Int.one_mul]
+        omega
+      rw [hsum]
+      exact Int.dvd_add (h i) (by
+        simpa only [listSum] using dvd_listSum_sub_length_mul a p ρ h t)
+
 #eval meetInMiddle [3, -2] [7, 0] 5
 #eval meetInMiddle [2, 4] [8] 7
+#eval residues 4 [1, 2, 3]
 #print axioms mem_sums_iff
 #print axioms sums_length
 #print axioms hasSum_append
@@ -153,5 +302,13 @@ theorem restricted_work_bound (n w : Nat) (h : w ≤ 2 ^ (n / 3)) :
 #print axioms hasSum_magnitude
 #print axioms target_outside_impossible
 #print axioms restricted_work_bound
+#print axioms hasSumWeight_sound
+#print axioms hasSumWeight_complete
+#print axioms hasSumWeight_le_length
+#print axioms hasSumWeight_append
+#print axioms mem_residues
+#print axioms value_diff_mem_wsum_diff
+#print axioms value_diff_mod_mem_wsum_mod_diff
+#print axioms dvd_listSum_sub_length_mul
 
 end SubsetSum

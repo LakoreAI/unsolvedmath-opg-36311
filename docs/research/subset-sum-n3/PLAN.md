@@ -36,7 +36,7 @@ three-block `2^(n/3)`-size 3SUM becomes subquadratic.
 - [x] 0.3. ESS/PESS baselines (`src/equal_subset_sum.py` + tests): signed
   meet-in-the-middle for ESS at `O*(3^(n/2))`, and binary-search/MITM for
   PESS at `O*(2^(n/2))`.
-- [ ] 0.4. Port the `O*(2^(n/3))` PESS algorithm and its structural
+- [x] 0.4. Port the `O*(2^(n/3))` PESS algorithm and its structural
   `F = sum_t max(0, count(t)-1)` and subsampling/mod-p machinery. A
   modular-bucket counting/sampling primitive and a large-slack collision
   round (`bucket_collision`, Las Vegas `randomized_pigeonhole_equal_subset_sum`
@@ -49,8 +49,18 @@ three-block `2^(n/3)`-size 3SUM becomes subquadratic.
   the measured slack `Delta*` with `d >= Delta*` (Lemma 6, tested by brute
   force). Near-geometric instances: cost `~2^9.6` vs MITM `~2^17.6` at
   `n=24`; on random instances poly(n) overhead dominates at `n <= 24`.
-  Pending: the `2^(n/3)` refinement (poly-size close pairs, small-slack case
-  of Jin-Williams-Zhang), which needs the full paper.
+   Close-pair search (R16a): `close_pairs_structured` in `src/equal_subset_sum.py`
+   is a complete branch-and-bound that returns the same pairs as the `2^(n-k)`
+   reference but visits polynomially many nodes on nearly geometric inputs
+   (`pess_structure.md`: `visit e ~ 0.3` and falling in `n`, vs `~1.0` dense).
+   Full `O*(2^(n/3))` reduction (R16b, Jin-Williams-Zhang ESA 2025):
+   `jwz_disjoint_close_pairs` builds the poly(n)-size disjoint close-pair set
+   `D` of Lemma 9 from the geometric proxy (exhaustive-tested vs brute force;
+   `jwz_close_pairs.md`: `|D| <= 200 n^5` while the naive suffix enumeration is
+   `3^(n-k)`), and `pess_jwz_pigeonhole_equal_subset_sum` applies the prefix and
+   Lemma 10 reductions to `W_{X,Y} = (w_1..w_k, w(X)-w(Y))` with witness
+   lifting. The poly(n) constants are large, so this reproduces the asymptotics
+   rather than a practical speedup at small `n`.
 - [x] 0.5. Regime-aware exponent benchmark (`scripts/analysis/regimes.py`).
 - [x] 0.6. Mixing harness (`scripts/analysis/mixing_harness.py`).
 

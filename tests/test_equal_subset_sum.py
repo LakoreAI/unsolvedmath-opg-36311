@@ -8,11 +8,15 @@ from src.equal_subset_sum import (
     StructuredCounter,
     bucket_collision,
     close_pair_equal_subset_sum,
+    close_pair_visit_count,
     close_pairs,
+    close_pairs_structured,
     equal_subset_sum,
     geometric_slack,
     jin_wu_pigeonhole_equal_subset_sum,
+    jwz_disjoint_close_pairs,
     lift_reduced_witness,
+    pess_jwz_pigeonhole_equal_subset_sum,
     pigeonhole_equal_subset_sum,
     randomized_pigeonhole_equal_subset_sum,
     sample_modular_bucket,
@@ -213,6 +217,139 @@ class EqualSubsetSumTests(unittest.TestCase):
                 self.assertEqual(result.feasible, expected, (values, k))
                 if expected:
                     self.assert_witness(values, result)
+
+    def test_close_pairs_structured_matches_reference(self):
+        rng = random.Random(19)
+        cases = [list(v) for v in product((0, 1, 2, 3), repeat=4)]
+        cases += [
+            [rng.randrange(1, 9) for _ in range(rng.randrange(1, 8))] for _ in range(40)
+        ]
+        cases += [[1 << j for j in range(rng.randrange(1, 7))] for _ in range(20)]
+        for values in cases:
+            for k in range(len(values) + 1):
+                self.assertEqual(
+                    close_pairs_structured(values, k),
+                    close_pairs(values, k),
+                    (values, k),
+                )
+
+    def test_close_pairs_structured_rejects_negatives(self):
+        with self.assertRaises(ValueError):
+            close_pairs_structured([1, -2, 3], 1)
+        with self.assertRaises(ValueError):
+            close_pairs_structured([1, 2], 3)
+
+    def test_structured_enumeration_is_cheap_on_geometric(self):
+        geometric = [1 << j for j in range(18)]
+        dense = [1, 1, 1, 2, 3, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987]
+        k = 8
+        self.assertLess(
+            close_pair_visit_count(geometric, k), close_pair_visit_count(dense, k)
+        )
+
+    def valid_pess_instances(self, n):
+        """Structurally valid PESS inputs: Eq.(1) and sum < 2^n - 1."""
+        prefix = [1 << j for j in range(n - 2)]
+        cases = []
+        limit = max(1, (1 << (n - 2)) // 2)
+        for a in range(1, limit):
+            w = prefix + [(1 << (n - 2)) + a, (1 << (n - 1)) - 1 - a]
+            if w[-1] > w[-2] and sum(w) < (1 << n) - 1:
+                cases.append(w)
+        return cases
+
+    def jwz_brute(self, values, k):
+        n = len(values)
+        bound = (k + 1) << (k + 1)
+        out = set()
+        for c in product((-1, 0, 1), repeat=n - k):
+            x = y = 0
+            total = 0
+            for idx, ci in enumerate(c):
+                if ci == 1:
+                    x |= 1 << (k + idx)
+                    total += values[k + idx]
+                elif ci == -1:
+                    y |= 1 << (k + idx)
+                    total -= values[k + idx]
+            if (x or y) and abs(total) <= bound:
+                out.add((min(x, y), max(x, y)))
+        return out
+
+    def test_jwz_disjoint_close_pairs_matches_bruteforce(self):
+        import random as _random
+
+        rng = _random.Random(4)
+        for n in range(5, 11):
+            cases = self.valid_pess_instances(n)
+            cases += [[1 << j for j in range(n - 1)] + [(1 << (n - 1)) - 1]]
+            for values in cases[:6]:
+                sums = subset_sums(values)
+                coll = (1 << n) - len(set(sums))
+                if coll < 1:
+                    continue
+                k = coll.bit_length() - 1
+                self.assertEqual(
+                    jwz_disjoint_close_pairs(values, k),
+                    tuple(sorted(self.jwz_brute(values, k))),
+                    (values, k),
+                )
+            # a few random valid instances from the same family
+            for _ in range(3):
+                a = rng.randrange(1, max(2, (1 << (n - 2)) // 2))
+                values = [1 << j for j in range(n - 2)] + [
+                    (1 << (n - 2)) + a,
+                    (1 << (n - 1)) - 1 - a,
+                ]
+                if values[-1] <= values[-2] or sum(values) >= (1 << n) - 1:
+                    continue
+                coll = (1 << n) - len(set(subset_sums(values)))
+                if coll < 1:
+                    continue
+                k = coll.bit_length() - 1
+                self.assertEqual(
+                    jwz_disjoint_close_pairs(values, k),
+                    tuple(sorted(self.jwz_brute(values, k))),
+                    (values, k),
+                )
+
+    def test_jwz_close_pairs_contain_solution_suffix(self):
+        for n in range(4, 11):
+            base = [[1 << j for j in range(n - 1)] + [(1 << (n - 1)) - 1]]
+            for values in self.valid_pess_instances(n)[:5] + base:
+                coll = (1 << n) - len(set(subset_sums(values)))
+                if coll < 1:
+                    continue
+                k = coll.bit_length() - 1
+                result = equal_subset_sum(values)
+                if not result.feasible:
+                    continue
+                x = sum(1 << i for i in result.plus if i >= k)
+                y = sum(1 << i for i in result.minus if i >= k)
+                if x or y:
+                    self.assertIn(
+                        (min(x, y), max(x, y)), jwz_disjoint_close_pairs(values, k)
+                    )
+
+    def test_jwz_disjoint_close_pairs_rejects(self):
+        with self.assertRaises(ValueError):
+            jwz_disjoint_close_pairs([1, -2, 4], 1)
+        with self.assertRaises(ValueError):
+            jwz_disjoint_close_pairs([1, 2, 4], 4)
+
+    def test_pess_jwz_always_valid(self):
+        for n in range(3, 11):
+            cases = self.valid_pess_instances(n)
+            cases += [[1 << j for j in range(n - 1)] + [(1 << (n - 1)) - 1]]
+            for values in cases[:8]:
+                result = pess_jwz_pigeonhole_equal_subset_sum(values)
+                self.assert_witness(values, result)
+
+    def test_pess_jwz_promise(self):
+        with self.assertRaises(ValueError):
+            pess_jwz_pigeonhole_equal_subset_sum([1 << 10, 1 << 10])
+        with self.assertRaises(ValueError):
+            pess_jwz_pigeonhole_equal_subset_sum([0, 1, 1])
 
     def test_close_pair_arguments(self):
         with self.assertRaises(ValueError):

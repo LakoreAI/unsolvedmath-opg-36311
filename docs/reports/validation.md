@@ -15,9 +15,40 @@ as a new discovery.
   `bounded_dp`, dispatched by `solve(values, target, method)`.
 - `tests/test_subset_sum.py` — brute-force differential suite over all three
   solvers.
-- `lean/SubsetSum.lean` — Lean 4.19.0 correctness layer (`Std` only).
+- `lean/SubsetSum.lean` — Lean 4.19.0 correctness layer (`Std` only), including
+  the R17 weight-resolved split (`hasSumWeight_append`) and residue-filter
+  completeness (`mem_residues`) lemmas.
 - `scripts/analysis/benchmark.py` — measurement harness (stdlib only).
 - `scripts/analysis/plot_benchmarks.py` — figures and LaTeX tables from the CSV.
+- `scripts/analysis/pess_structure.py` → `pess_structure.md` — R16a: the
+  branch-and-bound close-pair search is polynomially small on nearly geometric
+  PESS inputs and exponential only on collision-heavy ones.
+- `scripts/analysis/jwz_close_pairs.py` → `jwz_close_pairs.md` — R16b: the
+  poly(n)-size disjoint close-pair set `D` of JWZ Lemma 9, within the `200 n^5`
+  bound while the naive suffix enumeration is `3^(n-k)`.
+- `scripts/analysis/mixing_dichotomy.py` → `mixing_dichotomy.md` — R13 probe:
+  HGJ representation coverage of a planted balanced solution versus the
+  doubling constant `|A+A|/n`. Only structurally easy families (constant,
+  arithmetic, geometric) mix poorly; hard large-value families mix at `~0.6`.
+  This supports the target-problem mixing dichotomy in
+  `docs/research/subset-sum-n3/ATTACK.md`.
+- `src/representation.py` (+ `tests/test_representation.py`) — candidate `{0,1}`
+  pipeline: gcd reduction, superincreasing greedy, HGJ modular filter, and an
+  exact meet-in-the-middle fallback; `mixing_coverage` helper. A small suite
+  checks it against brute force across the branches.
+- `scripts/analysis/subset_sum_pipeline.py` → `subset_sum_pipeline.md` — the
+  candidate is correct on every planted instance and routes structured families
+  to the greedy branch and hard families to the representation branch (work
+  exponent `~0.36–0.43 < 0.5`).
+- `docs/research/subset-sum-n3/MIXING.md` — proves the elementary concentration
+  lemma (`|A-A mod p| ≤ s²` from few weight-`w` sums) and the `s=1`
+  strip-and-recurse case (both formalized in Lean: `value_diff_mem_wsum_diff`,
+  `value_diff_mod_mem_wsum_mod_diff`, `dvd_listSum_sub_length_mul`), derives the
+  collision-energy criterion `E_p = (1/p)Σ_k |e_w(ζ^k)|²`, and states the
+  higher-order-energy lifting gap.
+- `scripts/analysis/mixing_counterexample.py` → `mixing_counterexample.md` — the
+  counterexample search: no poorly-mixing *hard* instance was found (hard
+  families mix at `≥ 0.47`); only structured `short-ap` mixes poorly.
 - `docs/reports/baselines/paper.tex` (+ `paper.pdf`) — the baselines note.
 - `docs/reports/representation/representation.tex` (+ `.pdf`) — the
   representation-technique note.
@@ -41,6 +72,13 @@ specification chooses or skips each occurrence once.
 | `hasSum_magnitude` | Every feasible sum has absolute value at most the input magnitude sum |
 | `target_outside_impossible` | A target beyond that radius cannot be feasible |
 | `restricted_work_bound` | Algebraic work envelope under `w <= 2^(n/3)` |
+| `hasSumWeight_sound` / `hasSumWeight_complete` | The weight-resolved specification is equivalent to `HasSum` (soundness / existence of a certificate) |
+| `hasSumWeight_le_length` | Selected weight never exceeds the number of occurrences |
+| `hasSumWeight_append` | Any contiguous split factors a weight-`k` certificate into disjoint parts with `ku + kv = k` (the representation decomposition `x = y + z`) |
+| `mem_residues` | Every feasible sum survives a modulus-`m` residue filter (filter completeness) |
+| `value_diff_mem_wsum_diff` | Concentration kernel: two weight-`w` sets differing in `i` vs `j` have sums differing by `a i - a j`, so value differences lie in `V - V` |
+| `value_diff_mod_mem_wsum_mod_diff` | Residue form of the concentration kernel (`Int.sub_emod`) |
+| `dvd_listSum_sub_length_mul` | `r = 1` contraction: if `p ∣ a i - ρ` for all `i` then `p ∣ listSum a s - s.length·ρ` |
 
 The reference matcher uses linear membership; its runtime is not the sorted
 Python matcher's runtime. The Lean file does not prove a refinement of the
@@ -48,8 +86,8 @@ Python code, the dense DP implementation, the Schroeppel–Shamir control flow,
 or operational runtime bounds. The paper supplies mathematical proofs of DP and
 Schroeppel–Shamir correctness and of the runtime bounds. Lean 4.19.0 (via
 `elan`) was run with a clean rebuild (`lake clean && lake build`); it completed
-successfully and all seven theorems depend only on `propext` and `Quot.sound`,
-with no `sorryAx`.
+successfully and every theorem depends only on `propext` and `Quot.sound`, with
+no `sorryAx` (R17 added the weight-resolved split and residue-filter lemmas).
 
 ## Measurements
 
@@ -98,14 +136,14 @@ Compile each paper twice from its own directory:
 - Paper: `pdflatex` pass 1 and pass 2 both exited 0; output is 4 pages.
   No undefined references or citations remain; only minor overfull/underfull
   box warnings.
-- Ruff 0.15.15: lint passes for all of `src/`, `tests/`, and
-  `scripts/analysis/`; changed-file formatting checks pass. A repo-wide format
-  check flags the untouched `scripts/analysis/plot_representation.py`.
-- Lean 4.19.0: `lake clean && lake build` succeeds from scratch; `#eval` outputs
-  `true` and `false` as expected; every theorem's axiom report is exactly
-  `[propext, Quot.sound]`.
+- Ruff 0.15.15: lint passes and `ruff format --check` is clean across all of
+  `src/`, `tests/`, and `scripts/analysis/` (31 files; the previously flagged
+  `scripts/analysis/plot_representation.py` is now formatted).
+- Lean 4.19.0: `lake build` succeeds from scratch; `#eval` outputs `true`,
+  `false`, and the residue list as expected; every theorem depends only on
+  `[propext, Quot.sound]` (the two pure-structure weight lemmas on none).
 - Repository consolidation: the ML-template code was removed; `src/` now holds
-  only the subset-sum research modules. The remaining test suite (30 stdlib
+  only the subset-sum research modules. The remaining test suite (58 stdlib
   tests) runs with no third-party packages.
 
 ## Phase 0 research artifacts (2026-10-03)
@@ -116,9 +154,12 @@ Built for the deep-research plan in `docs/research/subset-sum-n3/PLAN.md`:
   `O*(3^(n/2))`, plus a deterministic PESS binary-search/MITM solver at
   `O*(2^(n/2))`, and a modular-bucket DP sampler for the randomized high-
   collision approach. Tests compare ESS against a `{-1,0,1}^n` brute-force
-  oracle and exhaustively check the sampler on small buckets. The structural
-  reductions and full randomized `O*(2^(n/3))` PESS algorithm are not
-  implemented.
+  oracle and exhaustively check the sampler on small buckets. The structured
+  close-pair search is implemented (R16a: complete branch-and-bound enumeration,
+  `close_pairs_structured`), and the full `O*(2^(n/3))` reduction of
+  Jin–Williams–Zhang is reproduced (R16b: `jwz_disjoint_close_pairs` Lemma 9 set
+  and `pess_jwz_pigeonhole_equal_subset_sum`). The asymptotic bound uses the
+  randomized Lemma 6 subroutine; the poly(n) constants are large at small `n`.
 - `src/dissection.py` — Wagner four-list modular k-sum core plus a verifier.
   Tests check soundness and that solutions are found when many exist.
 - `src/hgj.py` — Howgrave-Graham-Joux representation + modular-filter search
@@ -178,8 +219,34 @@ Built for the deep-research plan in `docs/research/subset-sum-n3/PLAN.md`:
 - `scripts/analysis/coefficient_shifting.py` → `coefficient_shifting.md`
   (R12): searches sumset factorisations `C = C1 + C2`. The open cases `{0,1}`,
   `{±1}`, `{±2}` have none with multiple representations, while `{-1,0,1}` and
-  `{±3}` do — independently reproducing Randolph-Węgrzycki's stated frontier
+  `{±3}` do —   independently reproducing Randolph-Węgrzycki's stated frontier
   and identifying the obstruction as the absence of coefficient shifting.
+- `scripts/analysis/collision_mitm.py` → `collision_mitm.md` (R19): collisions
+  are global; meet-in-the-middle halves show no repeats in the hard band and
+  birthday sampling needs `2^(0.55n)`.
+- `scripts/analysis/bucket_collisions.py` → `bucket_collisions.md` (R20):
+  Jin-Wu residue-class sampling finds equal-sum pairs at `2^(0.42n)` vs
+  `2^(0.5n)` MITM (`n = 24`, density 1) — collisions, not solutions.
+- `scripts/analysis/collision_amplification.py` → `collision_amplification.md`
+  (R21, negative): sampled collisions have support `~n/2`, so they do not
+  multiply solutions; this closes the collision route.
+- `scripts/analysis/three_block.py` → `three_block.md` (P2.1, negative for the
+  pairwise route): smallest pairwise-sumset exponents stay `~0.66` in the hard
+  band, so Phase 2 needs all-three-block cancellation rather than one pairwise
+  sumset.
+- `close_pairs_structured` / `close_pair_visit_count` in
+  `src/equal_subset_sum.py` (R16a) — a complete branch-and-bound close-pair
+  search returning exactly the reference `close_pairs` set. Tests compare it
+  exhaustively against `close_pairs` on small instances and check the geometric
+  family is cheaper than dense; `pess_structure.md` reports `visit` exponents
+  `~0.3` (decreasing in `n`) for nearly geometric inputs versus `~1.0` dense.
+- `jwz_disjoint_close_pairs` / `pess_jwz_pigeonhole_equal_subset_sum` in
+  `src/equal_subset_sum.py` (R16b) — the Jin–Williams–Zhang `O*(2^(n/3))` PESS
+  reduction: the poly(n)-size disjoint close-pair set `D` of Lemma 9
+  (exhaustive-tested against brute force on valid PESS instances, and shown to
+  contain the suffix of an actual solution), the Equation (1) prefix reduction,
+  and the Lemma 10 reduction to `W_{X,Y} = (w_1, ..., w_k, w(X) - w(Y))` with
+  witness lifting.
 - Findings and the corrected Phase 1 direction are in
   `docs/research/subset-sum-n3/PHASE1.md`.
 

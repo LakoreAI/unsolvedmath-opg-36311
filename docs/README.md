@@ -8,7 +8,7 @@ Everything document-related lives in `docs/`. Nothing that is a document
 ```
 docs/
 ├── RESEARCH.md           project question, scope, method
-├── TODO.md               plan and progress (mirrored at the repo root)
+├── TODO.md               plan and progress
 ├── analysis/             measured output
 │   └── <yyyy-mm-dd>/<topic>/...{md|txt|csv|png|...}
 ├── reports/              write-ups / reports and their PDFs
@@ -23,11 +23,12 @@ docs/
 
 ## Convention for analysis and reports
 
-Analysis outputs and reports are placed under a date then a topic:
+Analysis outputs are grouped by date then topic; each report lives under its
+topic (no date, since a paper is updated in place):
 
 ```
 docs/analysis/<yyyy-mm-dd>/<topic>/...
-docs/reports/<yyyy-mm-dd>/<topic>/...
+docs/reports/<topic>/...
 ```
 
 Examples:

@@ -8,9 +8,9 @@ roadmap toward the open `O*(2^(n/3))` worst-case bound.
 repository proves the meet-in-the-middle correctness reduction, gives an
 `O*(2^(n/3))` result for the restricted family
 `sum(abs(a_i)) <= 2^floor(n/3)`, ports the representation technique, and
-documents which hypotheses about the barrier hold and which fail. See the
-The repository includes a [baselines paper](docs/reports/baselines/paper.tex),
-a [representation paper](docs/reports/representation/representation.tex), and a
+documents which hypotheses about the barrier hold and which fail. The
+repository includes a [baselines paper](docs/reports/baselines/paper.tex), a
+[representation paper](docs/reports/representation/representation.tex), and a
 [survey](docs/reports/survey/survey.tex); see the
 [validation report](docs/reports/validation.md) for scope.
 
@@ -38,6 +38,7 @@ the report generator uses PyYAML.
 | `equal_subset_sum.py` | ESS via signed meet-in-the-middle (`O*(3^(n/2))`); PESS via binary-search MITM (`O*(2^(n/2))`); modular-bucket sampler. |
 | `dissection.py` | Wagner four-list modular k-sum core and verifier. |
 | `hgj.py` | Howgrave-Graham-Joux representation + modular-filter search for hard knapsacks. |
+| `representation.py` | Candidate `{0,1}` pipeline: gcd reduction, superincreasing greedy, HGJ filter, MITM fallback; mixing-coverage helper. |
 | `additive.py` | Additive-combinatorics probes: `\|S(A)\|`, collision count `F`, additive energy, modular residue profiles, cardinality counts. |
 
 All solvers are exact and return occurrence-index witnesses (or `None`). `ss`
@@ -49,8 +50,11 @@ is `O*(2^(n/2))` time with `O*(2^(n/4))` space; the DP is pseudopolynomial in
 - Measurements, figures, and provenance: `docs/analysis/2026-10-03/subset-sum/`.
 - Papers (source, PDF, figures, tables): `docs/reports/<topic>/`.
 - Deep-research program toward the open bound: `docs/research/subset-sum-n3/`
-  (`report.md` — 20 sourced approach items; `PLAN.md`; `PHASE1.md`).
-- Plan and progress: `docs/TODO.md` (mirrored at the repo root).
+  (`report.md` — 20 sourced approach items; `PLAN.md`; `PHASE1.md`;
+  `TRANSFER.md` — why the PESS `2^(n/3)` structure does not transfer to `{0,1}`;
+  `ATTACK.md` — reducing the `{0,1}` bound to a target-problem mixing dichotomy;
+  `MIXING.md` — the proved concentration step and the lifting gap).
+- Plan and progress: [`docs/TODO.md`](docs/TODO.md).
 
 ## Repository layout
 

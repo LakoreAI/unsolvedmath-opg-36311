@@ -1,6 +1,6 @@
 # TODO — Exact Subset Sum research
 
-Canonical plan for this repository. Mirror at the repo root (`TODO.md`).
+Canonical plan for this repository, kept in `docs/` per the docs convention.
 Living research log: `docs/research/subset-sum-n3/` (`report.md`, `PLAN.md`,
 `PHASE1.md`). Measurements: `docs/analysis/2026-10-03/subset-sum/`.
 
@@ -24,11 +24,15 @@ isolated the frontier.
 | Becker–Coron–Joux (2011) | `2^(0.291n)` | — | hard/random knapsack |
 | Randolph–Węgrzycki (2025) | `|C|^((0.5-ε)n)` | — | worst case, most constant `C` |
 
-**Frontier (R11–R12).** The obstacle is **not** a sub-solver or an instance
-class: the representation technique already reaches `0.291n` (average case),
-and the open coefficient sets `{0,1}`, `{±1}`, `{±2}` are exactly those with no
-nontrivial sumset factorisation ("coefficient shifting"). The barrier is the
-**average-case → worst-case gap**.
+**Frontier (R11–R12, R19–R21, P2.1).** The obstacle is **not** a sub-solver or
+an instance class: the representation technique already reaches `0.291n`
+(average case), and the open coefficient sets `{0,1}`, `{±1}`, `{±2}` are
+exactly those with no nontrivial sumset factorisation ("coefficient shifting").
+The barrier is the **average-case → worst-case gap**. Two further routes are
+closed: cheap collisions `c` with `c.a = 0` have support `~n/2`, so they do not
+multiply solutions (R19–R21); and pairwise sumsets in the three-block split stay
+`>= 2^(0.66n)` in the hard band, so Phase 2 needs cancellation across all three
+blocks at once, not one pairwise sumset (P2.1).
 
 **Structural facts.** (i) `|a_i| ≤ poly(n)` ⇒ dense DP is polynomial.
 (ii) Superincreasing (powers of two) are easy. (iii) Hardness sits near density
@@ -55,7 +59,7 @@ is not hardness.
 - [x] B5. `src/additive.py`: `|S(A)|`, collision count `F`, additive energy,
       modular residue profiles, cardinality counts.
 - [x] B6. Tests (`tests/`): `test_subset_sum`, `test_equal_subset_sum`,
-      `test_dissection`, `test_hgj`, `test_additive` — 30 stdlib tests, all pass.
+      `test_dissection`, `test_hgj`, `test_additive` — 58 stdlib tests, all pass.
 - [x] B7. Modules are dependency-free (stdlib only).
 
 ## 3. Measurement harnesses — done
@@ -89,15 +93,15 @@ is not hardness.
 
 ## 5. Verification — done
 
-- [x] E1. `python3 -m unittest discover -s tests -p "test_*.py"` — 30 pass.
-- [x] E2. Ruff lint clean across `src/`, `tests/`, `scripts/analysis/`;
-      changed-file format checks pass. Repo-wide format check flags the
-      untouched `scripts/analysis/plot_representation.py`.
-- [x] E3. Lean 4.19.0 `lake clean && lake build` passes; axioms
-      `[propext, Quot.sound]` only.
+- [x] E1. `python3 -m unittest discover -s tests -p "test_*.py"` — 58 pass.
+- [x] E2. Ruff lint clean and repo-wide `ruff format --check` clean across
+      `src/`, `tests/`, `scripts/analysis/` (including the previously flagged
+      `scripts/analysis/plot_representation.py`).
+- [x] E3. Lean 4.19.0 `lake build` passes; axioms `[propext, Quot.sound]` only
+      (the weight/residue lemmas add to the correctness layer; see R17).
 - [x] E4. `docs/reports/validation.md` records the checks actually run.
 
-## 6. Research program (`docs/research/subset-sum-n3/`) — done through R12
+## 6. Research program (`docs/research/subset-sum-n3/`) — done through R21 + P2.1
 
 - [x] R1. `/research` outline + 32-field schema; 20 items.
 - [x] R2. `/research-deep` — 20 validated JSON results (100% coverage).
@@ -112,27 +116,78 @@ is not hardness.
       the barrier as average-case → worst-case, not a sub-solver.
 - [x] R12. `coefficient_shifting.py`: open cases `{0,1}`, `{±1}`, `{±2}` are
       exactly those with no nontrivial sumset factorisation.
+- [x] R19. `collision_mitm.py`: collisions are *global* (they need many items);
+      in the hard band `0.9 <= beta <= 1.25` meet-in-the-middle halves show no
+      repeats (work ratio `~0.99` over 32 splits) and birthday sampling needs
+      `2^(0.55n)`. See `collision_mitm.md`.
+- [x] R20. `bucket_collisions.py`: Jin-Wu residue-class sampling finds
+      equal-sum pairs in the hard band at `2^(0.42n)` vs `2^(0.5n)` MITM
+      (`n = 24`, density 1) and stays below MITM at `beta = 1.25`. It finds
+      collisions, not subset-sum solutions. See `bucket_collisions.md`.
+- [x] R21. `collision_amplification.py` **(negative; closes the collision
+      route)**: sampled collisions have support `~n/2` (0.50–0.56), so each is
+      compatible with a fixed solution with probability `~2^(1-n/2)`; over
+      `n = 16, 20, 24` inputs kept 1–3 solutions. Cheap collisions do not
+      multiply solutions. See `collision_amplification.md`.
+- [x] P2.1. `three_block.py` **(negative for the pairwise route)**: smallest
+      pairwise-sumset exponents stay `~0.66` for `beta >= 0.7`, so listing one
+      pairwise sumset and matching the third block cannot beat `2^(n/2)`. Phase
+      2 must cancel across all three blocks at once. See `three_block.md`.
 
-## 7. Remaining work (the actual research frontier)
+## 7. Research frontier and follow-ups (R13–R18)
 
 - [ ] R13. **Attack `{0,1}` worst case.** Seek a worst-case mechanism that does
       not need coefficient shifting: a canonical sumset / `{0,1}`-specific
       compatibility certificate, a new mixing lemma, or a `{0,1}`-version of
       the Equal-Subset-Sum pseudosolution construction. Success = any worst-case
       exponent `< 0.5`; target = `O*(2^(n/3))`. Fallback = a clean barrier.
+      Barrier statement: `docs/research/subset-sum-n3/TRANSFER.md` shows the
+      PESS engine (Lemma 4) needs the pigeonhole promise and fails without it.
+      Attack plan: `docs/research/subset-sum-n3/ATTACK.md` reduces the bound to
+      (i) a target-problem mixing dichotomy, (ii) a disjointness (sparse OV)
+      compatibility certificate, and (iii) the balanced sub-solver (R8–R11).
+      `MIXING.md` proves the elementary concentration step (poor mixing ⇒
+      `|A-A mod p| ≤ s²`, with the `s=1` strip-and-recurse case), **formalized in
+      Lean** (`value_diff_mem_wsum_diff`, `value_diff_mod_mem_wsum_mod_diff`,
+      `dvd_listSum_sub_length_mul`), derives the collision-energy criterion
+      `E_p = (1/p)Σ_k |e_w(ζ^k)|²`, and isolates the remaining **higher-order
+      energy / random-prime lifting** gap. Counterexample search
+      (`mixing_counterexample.md`) finds no poorly-mixing hard instance. Candidate pipeline
+      `src/representation.py` (gcd + superincreasing greedy + HGJ filter + MITM
+      fallback), measured correct on adversarial families
+      (`subset_sum_pipeline.md`). Evidence: `mixing_dichotomy.md` — only
+      structured families mix poorly. Next: prove the lifting, or find a
+      poorly-mixing hard instance (a clean barrier).
 - [ ] R14. **Conditional lower bound.** Attempt a reduction making a fast
       `{0,1}` sub-solver imply progress on modular subset sum / `k`-SUM /
       lattice problems (Jin–Williams–Zhang tie PESS to lattice hardness).
 - [ ] R15. **Reproduce the BCJ concrete algorithm.** Port the three-level
       `{-1,0,1}` construction (Algorithm 1 + eight lists) and verify the
       `0.291n` curve empirically; currently only the exponent model is reproduced.
-- [ ] R16. **Port `O*(2^(n/3))` PESS.** Implement the
-      `F = Σ_t max(0, cnt(t)-1)` structural algorithm and its subsampling/mod-p
-      case (Zhang / Jin–Williams–Zhang). The deterministic PESS baseline and
-      modular-bucket counting/sampling primitive exist; the structural
-      reductions and full randomized algorithm remain unimplemented.
-- [ ] R17. **Formalize.** Extend `lean/SubsetSum.lean` with the split / residue
-      enumeration lemmas used by the representation arguments.
+- [x] R16. **Port `O*(2^(n/3))` PESS (Jin–Williams–Zhang, ESA 2025).**
+      - R16a: `close_pairs_structured` runs the structural close-pair search as
+        a *complete* branch-and-bound: same pairs as the `2^(n-k)` reference,
+        but polynomially many nodes on a nearly geometric input (measured
+        `visit e ~ 0.3`, decreasing in `n`) and exponential only on
+        collision-heavy inputs (`pess_structure.md`).
+      - R16b: `jwz_disjoint_close_pairs` computes the poly(n)-size disjoint
+        close-pair set `D` of Lemma 9 from the geometric proxy `2^i` (forcing
+        every suffix index `j` with `2^j >= 6n^2 2^k` to the opposite side),
+        exhaustive-tested against brute force on valid PESS inputs and measured
+        to stay within the `200 n^5` bound while the naive suffix enumeration
+        is `3^(n-k)` (`jwz_close_pairs.md`). `pess_jwz_pigeonhole_equal_subset_sum`
+        applies the Equation (1) prefix reduction and the Lemma 10 reduction to
+        `W_{X,Y} = (w_1..w_k, w(X)-w(Y))`, lifting the witness. The asymptotics
+        use Lemma 6 (subsampling); the poly(n) constants are large, so this is
+        an asymptotic reproduction, not a practical speedup at small `n`.
+      Baseline, modular-bucket counting/sampling primitive, and Jin-Wu
+      `O*(2^(0.4n))` also exist.
+- [x] R17. **Formalize.** `lean/SubsetSum.lean` now proves the weight-resolved
+      split lemma `hasSumWeight_append` (the representation decomposition
+      `x = y + z` with `ku + kv = k`) and the modular-filter completeness lemma
+      `mem_residues` (every feasible sum survives a residue filter), plus
+      `hasSumWeight_sound/completes/le_length`. Axioms stay `[propext,
+      Quot.sound]`; clean `lake build`.
 - [ ] R18. **Survey upkeep.** Re-check the open-case map against the newest
       primary sources before any external release.
 
