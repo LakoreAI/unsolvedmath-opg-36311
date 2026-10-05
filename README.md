@@ -41,6 +41,7 @@ the report generator uses PyYAML.
 | `hgj.py` | Howgrave-Graham-Joux representation + modular-filter search for hard knapsacks. |
 | `representation.py` | Candidate `{0,1}` pipeline: gcd reduction, superincreasing greedy, HGJ filter, MITM fallback; mixing-coverage helper. |
 | `compatibility.py` | Sparse-OV disjointness (compatibility) primitives for broadened representations. |
+| `bcj.py` | Broadened `{-1,0,1}` representation search (BCJ Sect. 3.1) with exact compatibility. |
 | `additive.py` | Additive-combinatorics probes: `\|S(A)\|`, collision count `F`, additive energy, modular residue profiles, cardinality counts. |
 
 All solvers are exact and return occurrence-index witnesses (or `None`). `ss`

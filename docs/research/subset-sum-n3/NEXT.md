@@ -134,22 +134,25 @@ the next iteration.
 
 ## 6. BCJ port status
 
-The barriered plan is to broaden the representations (Becker-Coron-Joux, ePrint
-2011/474) so every solution is seen across all weight profiles, and to recover a
-compatible pair with a certificate (Randolph-Węgrzycki Thm 8.1). Status:
+The plan is to broaden the representations (Becker-Coron-Joux, ePrint 2011/474)
+so every solution is seen across all weight profiles, and to recover a compatible
+pair with a certificate (Randolph-Węgrzycki Thm 8.1). Status:
 
+- **Paper obtained.** The IACR ePrint PDF is reachable through Firecrawl (the
+  plain/`pdftotext` and HAL routes are bot-blocked); the full text of the
+  three-level construction (Sect. 3.3, eight lists + Algorithm 1) is now in hand.
+- **Broadened representation done (Sect. 3.1).** `src/bcj.py` implements the
+  two-piece `{-1,0,1}` representation: pieces with `(1/4+alpha)n` ones and
+  `alpha n` minus-ones, an exact compatibility test (`y+z in {0,1}^n`), a filter
+  modulus `M ~ N_D`, and a meet-in-the-middle fallback. Tests match brute force;
+  `bcj_broadened.md` shows `N_D` and the ambient list grow with `alpha` while the
+  filtered class stays small. This is the *single-level* construction, not the
+  recursion.
 - **Compatibility done (exact).** `src/compatibility.py` implements the
-  disjointness predicate as a sparse-OV search (`disjoint_pair_certified`,
-  `compatible_pair_with_sum`) and `hgj_search(..., certificate=True)` routes the
-  pseudo-solution step through it. It is *exact* (the sampled certificate only
-  prunes non-disjoint pairs), but the current submask enumeration is not
-  asymptotically better than the linear scan; the efficient version needs the
-  block/inclusion-exclusion certificate of RW Thm 8.1.
-- **Multi-level BCJ recursion not ported.** The ePrint/HAL PDFs are behind bot
-  challenges, and the three-level `{-1,0,1}` construction (Algorithm 1 plus the
-  eight lists) is intricate enough that a from-memory port would risk a subtle
-  error. The repository's own cost model (`docs/reports/representation`, App. B)
-  reproduces the exponents but not the algorithm.
-- **Next.** Obtain the BCJ source (library/institutional access), port the
-  three-level construction, and swap in the efficient certificate; then measure
-  the worst-case curve against the `0.4057n` balanced sub-solver.
+  disjointness predicate as a sparse-OV search; `hgj_search(..., certificate=True)`
+  routes the pseudo-solution step through it. It is exact, but the submask
+  enumeration is not asymptotically better than the linear scan; the efficient
+  version needs RW Thm 8.1's block/inclusion-exclusion certificate.
+- **Next.** Port BCJ's three-level recursion (Algorithm 1 with the eight lists
+  and moduli `M_nu < M_kappa < M_omega`), swap in the efficient certificate, and
+  measure the worst-case curve against the `0.4057n` balanced sub-solver.

@@ -259,6 +259,11 @@ Built for the deep-research plan in `docs/research/subset-sum-n3/PLAN.md`:
   exhaustively against `close_pairs` on small instances and check the geometric
   family is cheaper than dense; `pess_structure.md` reports `visit` exponents
   `~0.3` (decreasing in `n`) for nearly geometric inputs versus `~1.0` dense.
+- `src/bcj.py` (+ `tests/test_bcj.py`) — the broadened `{-1,0,1}`
+  representation of Becker-Coron-Joux Sect. 3.1: pieces with `(1/4+alpha)n`
+  ones and `alpha n` minus-ones, an exact compatibility test (`y+z in {0,1}^n`),
+  and a meet-in-the-middle fallback. `scripts/analysis/bcj_broadened.py` →
+  `bcj_broadened.md` measures `N_D`, the ambient list, and the filtered size.
 - `src/compatibility.py` (+ `tests/test_compatibility.py`) — sparse-OV
   disjointness primitives (`disjoint_pair_certified`, `compatible_pair_with_sum`)
   for the broadened-representation compatibility step; exact (the certificate
