@@ -49,6 +49,10 @@ as a new discovery.
 - `scripts/analysis/mixing_counterexample.py` → `mixing_counterexample.md` — the
   counterexample search: no poorly-mixing *hard* instance was found (hard
   families mix at `≥ 0.47`); only structured `short-ap` mixes poorly.
+- `scripts/analysis/average_energy.py` → `average_energy.md` — R13 candidate
+  lemma: average collision energy `E_p` over a prime window is `O(Y log Y)`, so a
+  random prime mixes; measured pointwise minimum coverage stays `≥ 0.27`. See
+  `docs/research/subset-sum-n3/NEXT.md`.
 - `docs/reports/baselines/paper.tex` (+ `paper.pdf`) — the baselines note.
 - `docs/reports/representation/representation.tex` (+ `.pdf`) — the
   representation-technique note.
@@ -79,6 +83,7 @@ specification chooses or skips each occurrence once.
 | `value_diff_mem_wsum_diff` | Concentration kernel: two weight-`w` sets differing in `i` vs `j` have sums differing by `a i - a j`, so value differences lie in `V - V` |
 | `value_diff_mod_mem_wsum_mod_diff` | Residue form of the concentration kernel (`Int.sub_emod`) |
 | `dvd_listSum_sub_length_mul` | `r = 1` contraction: if `p ∣ a i - ρ` for all `i` then `p ∣ listSum a s - s.length·ρ` |
+| `residue_collision_iff` | The summand of `E_p`: `a % p = b % p ↔ (a - b) % p = 0` |
 
 The reference matcher uses linear membership; its runtime is not the sorted
 Python matcher's runtime. The Lean file does not prove a refinement of the

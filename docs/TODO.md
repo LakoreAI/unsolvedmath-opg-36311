@@ -152,7 +152,14 @@ is not hardness.
       `dvd_listSum_sub_length_mul`), derives the collision-energy criterion
       `E_p = (1/p)Σ_k |e_w(ζ^k)|²`, and isolates the remaining **higher-order
       energy / random-prime lifting** gap. Counterexample search
-      (`mixing_counterexample.md`) finds no poorly-mixing hard instance. Candidate pipeline
+      (`mixing_counterexample.md`) finds no poorly-mixing hard instance.
+      `NEXT.md` adds the **average-over-primes energy lemma** (`avg E_p =
+      O(Y log Y)`, so a random prime mixes to within a polylog; `average_energy.md`
+      shows even the pointwise min coverage stays `≥ 0.27`) and sharpens the
+      target to: *find the adversarial poorly-mixing family, or identify the
+      sub-solver/profile barrier*. Also flags the unsound Salas preprint
+      (arXiv:2503.20162) and the rigorous tools (RW24 small doubling, AKKN
+      density, BSG/Freiman/Shkredov energy→GAP). Candidate pipeline
       `src/representation.py` (gcd + superincreasing greedy + HGJ filter + MITM
       fallback), measured correct on adversarial families
       (`subset_sum_pipeline.md`). Evidence: `mixing_dichotomy.md` — only

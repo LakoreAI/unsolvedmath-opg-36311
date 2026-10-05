@@ -275,6 +275,12 @@ theorem value_diff_mod_mem_wsum_mod_diff {m w : Nat} (a : Fin m → Int) (p : In
       omega
     rw [hdiff]
 
+/-- The summand of the collision energy `E_p` (`NEXT.md`): two representation
+sums collide modulo `p` exactly when their difference is `0` modulo `p`. -/
+theorem residue_collision_iff (a b p : Int) :
+    a % p = b % p ↔ (a - b) % p = 0 :=
+  Int.emod_eq_emod_iff_emod_sub_eq_zero
+
 /-- `r = 1` contraction kernel: if every value is congruent to `ρ` modulo `p`
 (as divisibility), then every weight-`w` sum is congruent to `w · ρ`, so `p` can
 be stripped from the instance (`docs/research/subset-sum-n3/MIXING.md`). -/
@@ -310,5 +316,6 @@ theorem dvd_listSum_sub_length_mul {m : Nat} (a : Fin m → Int) (p ρ : Int)
 #print axioms value_diff_mem_wsum_diff
 #print axioms value_diff_mod_mem_wsum_mod_diff
 #print axioms dvd_listSum_sub_length_mul
+#print axioms residue_collision_iff
 
 end SubsetSum

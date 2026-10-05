@@ -53,7 +53,8 @@ is `O*(2^(n/2))` time with `O*(2^(n/4))` space; the DP is pseudopolynomial in
   (`report.md` — 20 sourced approach items; `PLAN.md`; `PHASE1.md`;
   `TRANSFER.md` — why the PESS `2^(n/3)` structure does not transfer to `{0,1}`;
   `ATTACK.md` — reducing the `{0,1}` bound to a target-problem mixing dichotomy;
-  `MIXING.md` — the proved concentration step and the lifting gap).
+  `MIXING.md` — the proved concentration step and the lifting gap;
+  `NEXT.md` — literature check, average-energy lemma, and the obstruction).
 - Plan and progress: [`docs/TODO.md`](docs/TODO.md).
 
 ## Repository layout
