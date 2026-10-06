@@ -49,7 +49,7 @@ is `O*(2^(n/2))` time with `O*(2^(n/4))` space; the DP is pseudopolynomial in
 `W = sum(abs(a_i))`.
 
 ## Measurements and research
-
+,
 - Measurements, figures, and provenance: `docs/analysis/2026-10-03/subset-sum/`
   `docs/analysis/2026-10-05/subset-sum/`, and `docs/analysis/2026-10-06/subset-sum/`.
 - Papers (source, PDF, figures, tables): `docs/reports/<topic>/`.
