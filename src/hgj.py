@@ -95,6 +95,7 @@ def hgj_search(
     residues: int = 8,
     seed: int = 0,
     certificate: bool = False,
+    modulus: int | None = None,
 ) -> HgjResult:
     """Heuristic HGJ search for a Hamming-``weight`` solution.
 
@@ -102,6 +103,8 @@ def hgj_search(
     for a disjoint exact match. ``weight`` defaults to n//2. With
     ``certificate=True`` the disjoint (compatibility) step goes through the
     sparse-OV primitive of ``src.compatibility`` instead of the inline scan.
+    ``modulus`` overrides the default power-of-two filter modulus (a prime
+    avoids the structure of inputs whose low bits are degenerate).
     """
     values = tuple(values)
     n = len(values)
@@ -115,7 +118,8 @@ def hgj_search(
             modulus_bits = max(1, representations.bit_length() - 1)
         else:
             modulus_bits = max(1, n // 2)
-    modulus = 1 << modulus_bits
+    if modulus is None:
+        modulus = 1 << modulus_bits
     rng = random.Random(seed)
 
     per_attempt = enumerated_size(n, block_weight)
@@ -154,4 +158,67 @@ def hgj_search(
             plus = tuple(i for i in range(n) if plus_mask >> i & 1)
             minus = tuple(i for i in range(n) if minus_mask >> i & 1)
             return HgjResult(plus + minus, enumerated, tried)
+    return HgjResult(None, enumerated, tried)
+
+
+def balanced_probability(n: int, weight: int) -> float:
+    """Chance a random permutation puts a weight-``weight`` support balanced.
+
+    The sub-solver sees a solution only if exactly ``weight // 2`` of its
+    elements lie in each half (``weight`` even); for a uniformly random
+    permutation this is ``C(n/2, w/2)^2 / C(n, w)``, which is ``Theta(1/sqrt(n))``
+    at ``w = n/2`` -- polynomial, not exponential. Odd ``weight`` or odd ``n``
+    are rounded to the nearest balanced split.
+    """
+    left = n // 2
+    right = n - left
+    want = weight // 2
+    if not (0 <= want <= left and 0 <= weight - want <= right):
+        return 0.0
+    return (
+        math.comb(left, want) * math.comb(right, weight - want) / math.comb(n, weight)
+    )
+
+
+def hgj_permuted_search(
+    values: Sequence[int],
+    target: int,
+    weight: int | None = None,
+    permutations: int = 8,
+    residues: int = 8,
+    seed: int = 0,
+    modulus: int | None = None,
+    certificate: bool = False,
+) -> HgjResult:
+    """``hgj_search`` retried over random permutations of the input.
+
+    The balanced sub-solver is incomplete on a fixed order (it needs exactly
+    ``weight // 2`` support elements in each half). Permuting the values
+    repairs this with probability ``balanced_probability(n, weight)`` per
+    permutation, so ``O(sqrt(n))`` permutations suffice for ``weight = n/2``.
+    Indices in the result refer to the original order.
+    """
+    values = tuple(values)
+    n = len(values)
+    rng = random.Random(seed)
+    enumerated = 0
+    tried = 0
+    for attempt in range(permutations):
+        order = list(range(n))
+        if attempt:  # first attempt keeps the natural order
+            rng.shuffle(order)
+        result = hgj_search(
+            [values[i] for i in order],
+            target,
+            weight=weight,
+            residues=residues,
+            seed=seed + attempt,
+            certificate=certificate,
+            modulus=modulus,
+        )
+        enumerated += result.enumerated
+        tried += result.residues_tried
+        if result.feasible:
+            indices = tuple(sorted(order[i] for i in result.indices))
+            return HgjResult(indices, enumerated, tried)
     return HgjResult(None, enumerated, tried)

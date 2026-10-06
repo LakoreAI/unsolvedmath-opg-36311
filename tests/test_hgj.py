@@ -4,7 +4,13 @@ import math
 import random
 import unittest
 
-from src.hgj import enumerated_size, hgj_search, weight_residue_subsets
+from src.hgj import (
+    balanced_probability,
+    enumerated_size,
+    hgj_permuted_search,
+    hgj_search,
+    weight_residue_subsets,
+)
 
 
 def _planted(n, rng):
@@ -66,6 +72,43 @@ class HgjTests(unittest.TestCase):
                     self.assertEqual(sum(values[i] for i in got), target)
                     successes += 1
             self.assertGreaterEqual(successes, trials - 2, n)
+
+    def test_balanced_probability_is_polynomial(self):
+        # C(n/2,n/4)^2 / C(n,n/2) decays like 1/sqrt(n), not exponentially.
+        self.assertAlmostEqual(balanced_probability(4, 2), 4 / 6)
+        previous = 1.0
+        for n in (16, 64, 256, 1024):
+            p = balanced_probability(n, n // 2)
+            self.assertLess(p, previous)
+            self.assertGreater(p * math.sqrt(n), 0.5)
+            previous = p
+        self.assertEqual(balanced_probability(8, 10), 0.0)
+
+    def test_permutation_repairs_concentrated_support(self):
+        n = 24
+        successes = 0
+        for t in range(6):
+            rng = random.Random(500 + t)
+            values = [rng.randrange(1, 1 << 24) for _ in range(n)]
+            support = rng.sample(range(n // 2), n // 2)  # entirely in the first half
+            target = sum(values[i] for i in support)
+            self.assertFalse(hgj_search(values, target, seed=t).feasible)
+            result = hgj_permuted_search(
+                values, target, permutations=24, residues=16, seed=t
+            )
+            if result.feasible:
+                got = set(result.indices)
+                self.assertEqual(sum(values[i] for i in got), target)
+                self.assertEqual(len(got), n // 2)
+                successes += 1
+        self.assertGreaterEqual(successes, 5)
+
+    def test_explicit_modulus(self):
+        rng = random.Random(9)
+        values, target, _ = _planted(16, rng)
+        result = hgj_search(values, target, modulus=10007, residues=16)
+        if result.feasible:
+            self.assertEqual(sum(values[i] for i in result.indices), target)
 
 
 if __name__ == "__main__":

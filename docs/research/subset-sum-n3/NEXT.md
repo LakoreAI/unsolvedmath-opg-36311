@@ -94,6 +94,22 @@ following is the true barrier, and identifying it is now the concrete goal:
    `sum_i C(n/2,i)C(n/2,n/4-i) = C(n,n/4) = 2^{0.811n}`, above meet-in-the-middle.
    This is the genuine obstacle, and it is a *completeness* rather than a mixing
    problem.
+
+   **Correction (2026-10-06, `profile_permutation.md`).** The `2^{0.811n}` cost
+   is not the price of completeness. A uniformly random permutation of the
+   inputs balances a weight-`w` support with probability
+   `C(n/2,w/2)^2 / C(n,w) ~ sqrt(8/(pi n))` at `w = n/2` (exact vs sampled
+   agree to sampling error, `n` up to 1024), so `O(sqrt n)` permutations
+   restore completeness at a polynomial factor (`src.hgj.hgj_permuted_search`;
+   concentrated solutions at `n = 24, 32` are all found within a budget of
+   `4 sqrt n` permutations). Unknown weight costs a further factor `n`. The
+   profile is therefore **not** an exponential barrier, and obstruction 2 should
+   be read as a polynomial overhead. This sharpens the contradiction in the
+   opening of Sect. 3: with profile removed, what remains is mixing
+   (obstruction 1) and the accounting (obstruction 3). A second finding from the
+   same run: the power-of-two filter modulus is itself a weakness on
+   structured inputs (geometric family: success 0.50 vs 1.00 at `n = 32` with a
+   prime modulus of the same size), so a prime modulus is the right default.
 3. **Accounting subtlety.** The retry/coverage argument loses a polylog; a
    constant-exponent claim needs coverage constant for a *single* prime, which
    Markov alone does not give (it gives a `1/polylog` fraction of good primes).

@@ -60,7 +60,7 @@ is not hardness.
 - [x] B5. `src/additive.py`: `|S(A)|`, collision count `F`, additive energy,
       modular residue profiles, cardinality counts.
 - [x] B6. Tests (`tests/`): `test_subset_sum`, `test_equal_subset_sum`,
-      `test_dissection`, `test_hgj`, `test_additive` — 58 stdlib tests, all pass.
+      `test_dissection`, `test_hgj`, `test_additive` — stdlib tests, all pass (68 at last count).
 - [x] B7. Modules are dependency-free (stdlib only).
 
 ## 3. Measurement harnesses — done
@@ -100,7 +100,7 @@ is not hardness.
 
 ## 5. Verification — done
 
-- [x] E1. `python3 -m unittest discover -s tests -p "test_*.py"` — 58 pass.
+- [x] E1. `python3 -m unittest discover -s tests -p "test_*.py"` — 71 pass.
 - [x] E2. Ruff lint clean and repo-wide `ruff format --check` clean across
       `src/`, `tests/`, `scripts/analysis/` (including the previously flagged
       `scripts/analysis/plot_representation.py`).
@@ -172,10 +172,20 @@ is not hardness.
       (`subset_sum_pipeline.md`). Evidence: `mixing_dichotomy.md` — only
       structured families mix poorly. Next: prove the lifting, or find a
       poorly-mixing hard instance (a clean barrier).
+      **Profile barrier resolved (2026-10-06).** `profile_permutation.md`: a
+      random permutation balances the support with probability
+      `~sqrt(8/(pi n))`, so completeness costs `O(sqrt n)` permutations, not
+      `2^(0.811n)` (`src.hgj.hgj_permuted_search`, `balanced_probability`).
+      The remaining barrier is mixing / accounting. A prime filter modulus beats
+      the power-of-two default on structured families. Small-`n` total work still
+      exceeds MITM (the polynomial factor dominates), so this is an asymptotic
+      statement, not a speedup.
 - [ ] R14. **Conditional lower bound.** Attempt a reduction making a fast
       `{0,1}` sub-solver imply progress on modular subset sum / `k`-SUM /
       lattice problems (Jin–Williams–Zhang tie PESS to lattice hardness).
-- [ ] R15. **Reproduce the BCJ concrete algorithm.** Port the three-level
+- [ ] R15. **Reproduce the BCJ concrete algorithm.** (Single-level broadened
+      search is in `src/bcj.py`; the ePrint text is in
+      `docs/research/subset-sum-n3/refs/`.) Port the three-level
       `{-1,0,1}` construction (Algorithm 1 + eight lists) and verify the
       `0.291n` curve empirically; currently only the exponent model is reproduced.
 - [x] R16. **Port `O*(2^(n/3))` PESS (Jin–Williams–Zhang, ESA 2025).**

@@ -162,7 +162,7 @@ Compile each paper twice from its own directory:
   `false`, and the residue list as expected; every theorem depends only on
   `[propext, Quot.sound]` (the two pure-structure weight lemmas on none).
 - Repository consolidation: the ML-template code was removed; `src/` now holds
-  only the subset-sum research modules. The remaining test suite (58 stdlib
+  only the subset-sum research modules. The remaining test suite (71 stdlib
   tests) runs with no third-party packages.
 
 ## Phase 0 research artifacts (2026-10-03)
