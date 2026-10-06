@@ -44,10 +44,11 @@ residual instance has `n - 2k` elements and target `t - sigma(P u Q)`.
 * Solving the residual by MITM costs `2^{(n-2k)/2}`.
 
 Combined exponent `max(h2(k/n), (1 - 2k/n)/2)` (columns of `relation_length.md`):
-`0.4922` at `delta = 0.05` falling to `0.395-0.485` around `delta = 0.311`, and below
-`0.40` for `delta >= 0.35`. Together with `LIFT.md` this is `< 0.5` for every `delta`
-**conditional on the relation lying in `S`**. The best point is at `delta ~ 0.3-0.4`, the
-worst (`0.49`) at tiny `D`; for `D = n^{O(1)}` small-doubling/DP tools apply instead.
+`0.492` at `delta = 0.05`, `0.448` at `0.20`, `0.466` at `0.30`, `0.485` at the crossover
+`delta = 0.311`. Above the crossover the finding cost exceeds `0.5` (`0.554` at `0.35`) and
+`LIFT.md` takes over (`0.461` at `0.35`, `0.4057` from `0.405`). So, **conditional on the
+relation lying in `S`**, the best of the two is `<= 0.492 < 0.5` for every `delta`; the worst
+cases are tiny `D` (where small-doubling/DP tools apply instead) and the crossover.
 
 ## 4. What blocks it (the real open step)
 
