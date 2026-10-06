@@ -130,6 +130,12 @@ The model's assumption `|Sigma(S)| <= 2^{delta n}` (all sizes) would follow, up 
 `max_k |Sigma_k(X)| <= poly(m) |Sigma_{m/2}(X)|`. Searches over random, structured and
 hill-climbed sets (`m = 8..14`) never found a ratio above `1.032`; the counts are not always
 unimodal (structured sets show a dip of 1 at the exact middle) but the middle is always within
-a few percent of the maximum. Unproved. If U holds, the only remaining assumption of the model
+a few percent of the maximum. The family that produces dips (two APs with a gap) has a
+worst middle-to-maximum ratio tending to 1 (`0.946` at `m = 12`, `0.998` at `m = 400`), and an AP
+plus a dissociated block keeps the maximum at the middle up to `m = 400`. A literature check
+found no theorem on this (nearest: ranges of sumset sizes, arXiv 2505.07679 / 2510.23022, and
+inverse theorems for restricted sumsets, 2505.07415). Unproved; a proof attempt via shifting
+injections and two-block decompositions did not close (sumsets can be far smaller than
+products, which kills the decomposition bound). If U holds, the only remaining assumption of the model
 is A1 (no short relations among non-support elements), plus LIFT's pair-count condition
 `N_t <= A`; those two are where a genuine worst-case barrier would have to live.

@@ -11,3 +11,22 @@
 | 10 | hill-climb x4 | 6000 | 1.000 | [1, 10, 44, 114, 195, 232, 195, 114, 44, 10, 1] |
 | 12 | hill-climb x4 | 6000 | 1.000 | [1, 9, 32, 66, 96, 115, 122, 115, 96, 66, 32, 9, 1] |
 | 14 | hill-climb x4 | 6000 | 1.000 | [1, 12, 67, 232, 561, 1012, 1419, 1584, 1419, 1012, 561, 232, 67, 12, 1] |
+
+## Analytic families at larger m
+
+The two-AP family is the one on which the hill-climb found dips; its worst middle-to-maximum ratio tends to 1 as `m` grows (`0.946` at `m = 12`, `0.998` at `m = 400`).
+
+| family | m | min over parameters of |Sigma_mid| / max_k |Sigma_k| |
+| :-- | ---: | ---: |
+| two APs with a gap (dips at the middle) | 12 | 0.9464 |
+| two APs with a gap (dips at the middle) | 20 | 0.9593 |
+| two APs with a gap (dips at the middle) | 40 | 0.9771 |
+| two APs with a gap (dips at the middle) | 100 | 0.9906 |
+| two APs with a gap (dips at the middle) | 200 | 0.9952 |
+| two APs with a gap (dips at the middle) | 400 | 0.9976 |
+| AP plus dissociated block | 20 | 1.0000 |
+| AP plus dissociated block | 60 | 1.0000 |
+| AP plus dissociated block | 120 | 1.0000 |
+| AP plus dissociated block | 400 | 1.0000 |
+
+Literature check (2026-10-06): no theorem on unimodality or middle-dominance of restricted sumset sizes `|k^ X|` in `k` was found; the nearest work studies the range of sumset sizes `R(h,k)` (arXiv 2505.07679, 2510.23022) and inverse theorems for restricted sumsets (arXiv 2505.07415), which answer different questions. Conjecture U remains open here.

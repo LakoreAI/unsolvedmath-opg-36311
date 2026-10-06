@@ -16,6 +16,7 @@ Writes docs/analysis/2026-10-06/subset-sum/ksum_unimodal.md.
 
 import argparse
 import random
+from math import comb
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -73,6 +74,34 @@ def climb(m, rng, iters):
     return cur, xs
 
 
+def two_ap_count(h, g, k):
+    """|Sigma_k| for X = {1..h} u {g+1..g+h} via a union of intervals."""
+    ivs = []
+    for j in range(max(0, k - h), min(k, h) + 1):
+        a = k - j
+        lo = a * (a + 1) // 2 + j * (j + 1) // 2 + j * g
+        hi = a * (2 * h - a + 1) // 2 + j * (2 * h - j + 1) // 2 + j * g
+        ivs.append((lo, hi))
+    ivs.sort()
+    total = 0
+    cur = None
+    for lo, hi in ivs:
+        if cur is None or lo > cur[1] + 1:
+            if cur:
+                total += cur[1] - cur[0] + 1
+            cur = [lo, hi]
+        else:
+            cur[1] = max(cur[1], hi)
+    return total + cur[1] - cur[0] + 1
+
+
+def ap_plus_dissociated(h, k):
+    """|Sigma_k| for X = {1..h} u {N 2^i : i < h}, N huge (exact formula)."""
+    return sum(
+        comb(h, j) * ((k - j) * (h - k + j) + 1) for j in range(0, k + 1) if k - j <= h
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
@@ -105,6 +134,24 @@ def main() -> None:
             f"| {m} | hill-climb x4 | 6000 | {worst[0]:.3f} | {ksums(worst[1])} |"
         )
         print(rows[-1], flush=True)
+    fam = [
+        "| family | m | min over parameters of |Sigma_mid| / max_k |Sigma_k| |",
+        "| :-- | ---: | ---: |",
+    ]
+    for h in (6, 10, 20, 50, 100, 200):
+        worst = min(
+            two_ap_count(h, g, h) / max(two_ap_count(h, g, k) for k in range(2 * h + 1))
+            for g in range(h, h * h + 2 * h, max(1, h // 10))
+        )
+        fam.append(
+            f"| two APs with a gap (dips at the middle) | {2 * h} | {worst:.4f} |"
+        )
+    for h in (10, 30, 60, 200):
+        counts = [ap_plus_dissociated(h, k) for k in range(2 * h + 1)]
+        fam.append(
+            f"| AP plus dissociated block | {2 * h} | {counts[h] / max(counts):.4f} |"
+        )
+    print("\n".join(fam))
     lines = [
         "# R13a: is |Sigma_k| maximized at the middle size? (Conjecture U)",
         "",
@@ -114,6 +161,20 @@ def main() -> None:
         "maximum.",
         "",
         *rows,
+        "",
+        "## Analytic families at larger m",
+        "",
+        "The two-AP family is the one on which the hill-climb found dips; its worst "
+        "middle-to-maximum ratio tends to 1 as `m` grows (`0.946` at `m = 12`, `0.998` "
+        "at `m = 400`).",
+        "",
+        *fam,
+        "",
+        "Literature check (2026-10-06): no theorem on unimodality or middle-dominance of "
+        "restricted sumset sizes `|k^ X|` in `k` was found; the nearest work studies "
+        "the range of sumset sizes `R(h,k)` (arXiv 2505.07679, 2510.23022) and inverse "
+        "theorems for restricted sumsets (arXiv 2505.07415), which answer different "
+        "questions. Conjecture U remains open here.",
     ]
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "ksum_unimodal.md").write_text("\n".join(lines) + "\n")
