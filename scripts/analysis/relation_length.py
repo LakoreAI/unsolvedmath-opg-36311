@@ -2,15 +2,18 @@
 """R13a: how short a relation must a high-energy support contain?
 
 Rigorous counting lemma (see ``HIGH_ENERGY.md``). Let ``S`` be the support of a
-solution, ``m = |S| = n/2``, and ``T = Sigma_{m/2}(S)`` with ``D = |T|``. If
-every pair of distinct ``j``-subsets of ``S`` has distinct sums for ``j <= k``
-(``S`` is ``k``-dissociated), then fixing any ``R subset S`` with ``|R| = m/2 - k``
-the sums ``R + K`` over ``k``-subsets ``K`` of ``S \\ R`` are distinct elements
-of ``T``, so ``D >= C(m/2 + k, k)``. Hence ``D < C(m/2 + k, k)`` forces two
-distinct ``k'``-subsets (``k' <= k``) of ``S`` with equal sum, i.e. disjoint
-``P, Q subset S``, ``|P| = |Q| <= k``, ``sum P = sum Q``.
+solution, ``m = |S| = n/2``, split into two halves ``S1, S2`` of size ``m/2``
+(the split induced by the balanced sub-solver), and let ``T*`` be the set of sums
+``sigma(y1) + sigma(y2)`` with ``y_i subset S_i``, ``|y_i| = m/4``; put
+``D* = |T*|``. If ``S`` is ``k``-dissociated (distinct equal-size subsets of size
+``j <= k`` have distinct sums), then with ``j = k/2``: fix ``R_i subset S_i`` of
+size ``m/4 - j`` and let ``K_i`` range over the ``j``-subsets of ``S_i \\ R_i``
+(``m/4 + j`` elements); the ``C(m/4 + j, j)^2`` sums ``sigma(R) + sigma(K_1) +
+sigma(K_2)`` are distinct elements of ``T*``, so ``D* >= C(m/4 + j, j)^2``.
+Hence ``D* < C(m/4 + j, j)^2`` forces disjoint ``P, Q subset S`` with
+``|P| = |Q| <= 2j = k`` and ``sigma(P) = sigma(Q)``.
 
-For ``D = 2^(delta n)`` this tabulates the smallest such ``k`` (as a fraction of
+For ``D* = 2^(delta n)`` this tabulates the smallest such ``k`` (as a fraction of
 ``n``), the cost exponent of finding an equal-sum pair of ``k``-subsets among all
 ``n`` elements by sorting (``log2 C(n, k) / n``), the residual meet-in-the-middle
 exponent if ``P u Q`` is known to lie in the solution (``(n - 2k)/(2n)``), and the
@@ -40,16 +43,16 @@ def h2(p: float) -> float:
 
 
 def smallest_k_fraction(delta: float, n: int = 20000) -> float:
-    """Smallest k/n with log2 C(m/2+k, k) > delta*n, m = n/2 (asymptotic, via bisection)."""
+    """Smallest k/n with 2*log2 C(m/4+k/2, k/2) > delta*n, m = n/2 (bisection)."""
     m = n / 2
-    lo, hi = 0.0, m
+    lo, hi = 0.0, m / 2
     for _ in range(60):
         mid = (lo + hi) / 2
-        if log2_comb(m / 2 + mid, mid) > delta * n:
+        if 2 * log2_comb(m / 4 + mid, mid) > delta * n:
             hi = mid
         else:
             lo = mid
-    return hi / n
+    return 2 * hi / n
 
 
 def main() -> None:
@@ -75,7 +78,7 @@ def main() -> None:
         "# R13a: forced relation length in the high-energy regime",
         "",
         "Asymptotic exponents (`n -> infinity`, `m = n/2`). `k/n` is the smallest "
-        "`k` with `C(m/2 + k, k) > D`; below it the support must contain disjoint "
+        "`k` with `C(m/4 + k/2, k/2)^2 > D*`; below it the support must contain disjoint "
         "`P, Q` with `|P| = |Q| <= k` and equal sum (rigorous counting; "
         "`HIGH_ENERGY.md`). `find relation exp` is `log2 C(n,k)/n`, the cost of "
         "finding an equal-sum pair of `k`-subsets among all `n` inputs by sorting. "

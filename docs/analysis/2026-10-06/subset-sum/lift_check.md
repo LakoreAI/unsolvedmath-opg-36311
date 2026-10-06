@@ -1,20 +1,20 @@
 # R13: single-prime coverage under the distinct-sums hypothesis
 
-`Y = C(n/2, n/4)` representations of a planted weight-`n/2` support; `D` the number of distinct weight-`n/4` sub-sums; window `p in [M, 2M]` with `M` the power of two `>= 4D`. `bound` is the `LIFT.md` lower bound `1/(1 + D B / pi)` on mean coverage per distinct sum. The bound is a lower bound, so `mean cover/D >= bound` must hold.
+`Y = C(n/4, n/8)^2` balanced representations of a planted weight-`n/2` support; `D = D*` the number of distinct sums of balanced weight-`n/4` sub-sets (`n/8` from each half of the support); window `p in [M, 2M]` with `M` the power of two `>= 4D`. `bound` is the `LIFT.md` lower bound `1/(1 + D B / pi)` on mean coverage per distinct sum. The bound is a lower bound, so `mean cover/D >= bound` must hold.
 
 | n | family | Y | D | D/Y | M | mean cover/D | bound | min cover/D |
 | ---: | :-- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 24 | random-b1.0 | 924 | 924 | 1.000 | 4096 | 0.925 | 0.190 | 0.680 |
-| 24 | random-b1.5 | 924 | 924 | 1.000 | 4096 | 0.927 | 0.137 | 0.587 |
-| 24 | geometric | 924 | 924 | 1.000 | 4096 | 0.932 | 0.201 | 0.509 |
-| 24 | arithmetic-large | 924 | 83 | 0.090 | 512 | 1.000 | 0.306 | 1.000 |
-| 24 | two-scale | 924 | 924 | 1.000 | 4096 | 0.923 | 0.103 | 0.364 |
-| 24 | gap-rank2 | 924 | 916 | 0.991 | 4096 | 0.942 | 0.278 | 0.648 |
-| 24 | q-multiple | 924 | 908 | 0.983 | 4096 | 0.942 | 0.252 | 0.144 |
-| 28 | random-b1.0 | 3432 | 3432 | 1.000 | 16384 | 0.930 | 0.185 | 0.631 |
-| 28 | random-b1.5 | 3432 | 3432 | 1.000 | 16384 | 0.931 | 0.130 | 0.675 |
-| 28 | geometric | 3432 | 3432 | 1.000 | 16384 | 0.937 | 0.191 | 0.695 |
-| 28 | arithmetic-large | 3432 | 95 | 0.028 | 512 | 1.000 | 0.263 | 1.000 |
-| 28 | two-scale | 3432 | 3432 | 1.000 | 16384 | 0.930 | 0.093 | 0.663 |
-| 28 | gap-rank2 | 3432 | 3284 | 0.957 | 16384 | 0.942 | 0.275 | 0.632 |
-| 28 | q-multiple | 3432 | 3348 | 0.976 | 16384 | 0.941 | 0.246 | 0.231 |
+| 24 | random-b1.0 | 400 | 400 | 1.000 | 2048 | 0.942 | 0.215 | 0.610 |
+| 24 | random-b1.5 | 400 | 400 | 1.000 | 2048 | 0.933 | 0.156 | 0.690 |
+| 24 | geometric | 400 | 400 | 1.000 | 2048 | 0.939 | 0.226 | 0.770 |
+| 24 | arithmetic-large | 400 | 75 | 0.188 | 512 | 1.000 | 0.328 | 1.000 |
+| 24 | two-scale | 400 | 400 | 1.000 | 2048 | 0.938 | 0.118 | 0.780 |
+| 24 | gap-rank2 | 400 | 400 | 1.000 | 2048 | 0.938 | 0.311 | 0.600 |
+| 24 | q-multiple | 400 | 396 | 0.990 | 2048 | 0.944 | 0.282 | 0.535 |
+| 32 | random-b1.0 | 4900 | 4900 | 1.000 | 32768 | 0.950 | 0.216 | 0.689 |
+| 32 | random-b1.5 | 4900 | 4900 | 1.000 | 32768 | 0.950 | 0.157 | 0.700 |
+| 32 | geometric | 4900 | 4900 | 1.000 | 32768 | 0.952 | 0.227 | 0.717 |
+| 32 | arithmetic-large | 4900 | 88 | 0.018 | 512 | 1.000 | 0.261 | 1.000 |
+| 32 | two-scale | 4900 | 4900 | 1.000 | 32768 | 0.950 | 0.118 | 0.690 |
+| 32 | gap-rank2 | 4900 | 4748 | 0.969 | 32768 | 0.956 | 0.327 | 0.566 |
+| 32 | q-multiple | 4900 | 4884 | 0.997 | 32768 | 0.952 | 0.291 | 0.432 |

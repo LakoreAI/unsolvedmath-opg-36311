@@ -16,7 +16,7 @@ import argparse
 import random
 import sys
 from itertools import combinations
-from math import ceil, log, log2
+from math import ceil, comb, log, log2
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -26,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from hgj_adversarial import FAMILIES, make_family, next_prime  # noqa: E402
 
 DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-06" / "subset-sum"
-SIZES = (24, 28)
+SIZES = (24, 32)
 
 
 def primes_in(lo: int, hi: int) -> list[int]:
@@ -55,11 +55,17 @@ def main() -> None:
             rng = random.Random(args.seed + n)
             values = make_family(name, n, rng)
             support = rng.sample(range(n), n // 2)
-            sums = {
-                sum(values[support[i]] for i in c)
-                for c in combinations(range(n // 2), n // 4)
-            }
-            y = len(list(combinations(range(n // 2), n // 4)))
+            half = n // 4  # |S1| = |S2|; balanced y takes n/8 from each
+            halves = [support[:half], support[half:]]
+            parts = [
+                {
+                    sum(values[h[i]] for i in c)
+                    for c in combinations(range(half), n // 8)
+                }
+                for h in halves
+            ]
+            sums = {u + v for u in parts[0] for v in parts[1]}
+            y = comb(half, n // 8) ** 2
             d = len(sums)
             m = 1 << (ceil(log2(max(d, 2))) + 2)
             window = primes_in(m, 2 * m)
@@ -76,8 +82,8 @@ def main() -> None:
     lines = [
         "# R13: single-prime coverage under the distinct-sums hypothesis",
         "",
-        "`Y = C(n/2, n/4)` representations of a planted weight-`n/2` support; "
-        "`D` the number of distinct weight-`n/4` sub-sums; window "
+        "`Y = C(n/4, n/8)^2` balanced representations of a planted weight-`n/2` support; "
+        "`D = D*` the number of distinct sums of balanced weight-`n/4` sub-sets (`n/8` from each half of the support); window "
         "`p in [M, 2M]` with `M` the power of two `>= 4D`. `bound` is the "
         "`LIFT.md` lower bound `1/(1 + D B / pi)` on mean coverage per distinct "
         "sum. The bound is a lower bound, so `mean cover/D >= bound` must hold.",

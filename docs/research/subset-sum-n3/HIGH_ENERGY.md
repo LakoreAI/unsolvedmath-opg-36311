@@ -7,29 +7,32 @@ conditional algorithmic consequence, and a precise statement of what blocks it. 
 
 ## 1. Setting
 
-`x` is a weight-`n/2` solution with support `S`, `m = |S| = n/2`,
-`T = Sigma_{m/2}(S)`, `D = |T|`. `LIFT.md` solves the instance in
-`poly(n) (2^{0.4057n} + C(n,n/4)/D)`, which beats `2^{n/2}` iff `D > 2^{0.311n}`. The
-remaining regime is `D <= 2^{delta n}` with `delta <= 0.311`.
+`x` is a weight-`n/2` solution with support `S`, `m = |S| = n/2`, split into halves
+`S1, S2` of size `m/2` (the split induced by the balanced sub-solver) and
+`T(S1,S2) = sigma(y1) + sigma(y2)` over `|y_i| = m/4`, `D* = min |T(S1,S2)|`. `LIFT.md`
+solves the instance in `poly(n) (2^{0.4057n} + (A + N_t)/D*)`, which beats `2^{n/2}` iff
+`D* > 2^{0.311n}` (assuming the pair count `N_t <= A`). The remaining regime is
+`D* <= 2^{delta n}`, `delta <= 0.311`, or `N_t` large (large bins, AKKN).
 
 ## 2. Lemma (forced relation, rigorous)
 
 Call `S` *k-dissociated* if distinct subsets of `S` of the same size `j <= k` have distinct
 sums.
 
-**Lemma.** If `S` is `k`-dissociated then `D >= C(m/2 + k, k)`.
+**Lemma.** If `S` is `k`-dissociated (`k = 2j`) then `D* >= C(m/4 + j, j)^2`.
 
-*Proof.* Fix `R subset S`, `|R| = m/2 - k`, and let `U = S \ R`, `|U| = m/2 + k`. The
-`k`-subsets `K` of `U` have pairwise distinct sums (k-dissociation), so the sums
-`sigma(R) + sigma(K)` are `C(m/2+k, k)` distinct elements of `T`. `[]`
+*Proof.* Fix the partition. Choose `R_i subset S_i` with `|R_i| = m/4 - j` and let
+`U_i = S_i \ R_i`, `|U_i| = m/4 + j`. For `j`-subsets `K_i subset U_i` the sum
+`sigma(R_1 u R_2) + sigma(K_1) + sigma(K_2)` lies in `T(S1,S2)`, and the pairs `(K_1,K_2)`
+give distinct values because `K_1 u K_2` ranges over distinct `2j`-subsets of `S` with a fixed
+disjoint complement. There are `C(m/4+j, j)^2` pairs. `[]`
 
-**Corollary.** If `D < C(m/2 + k, k)` then `S` contains disjoint `P, Q` with
-`|P| = |Q| <= k` and `sigma(P) = sigma(Q)` (two distinct equal-size subsets with equal sum;
-remove their intersection). For `D = 2^{delta n}` the threshold `k(delta)` is in
-`relation_length.md`; at `delta = 0.311`, `k = 0.105 n` (`|P u Q| <= 0.21 n`).
+**Corollary.** If `D* < C(m/4 + j, j)^2` then `S` contains disjoint `P, Q` with
+`|P| = |Q| <= k = 2j` and `sigma(P) = sigma(Q)`. For `D* = 2^{delta n}` the threshold `k(delta)`
+is in `relation_length.md`; at `delta = 0.311`, `k = 0.105 n` (`|P u Q| <= 0.21 n`).
 
 Tightness: a "box" support (`m` vectors in `[0,L)^d`, random generators) is
-`k`-dissociated for `k ~ d log(kL)/log(m/k)` yet has `D <= (mL/2)^d`, matching the lemma up to
+`k`-dissociated for `k ~ d log(kL)/log(m/k)` yet has `D* <= (mL/2)^d`, matching the lemma up to
 constants, so `k = Theta(m)` relations are the right scale in this regime (not `O(1)`, not
 `o(m)`). Constant-length relations (the additive quadruples of `high_energy.py`) are *not*
 forced; the experiment finds them only for small rank.
