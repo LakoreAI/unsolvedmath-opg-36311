@@ -31,11 +31,11 @@ disjoint complement. There are `C(m/4+j, j)^2` pairs. `[]`
 `|P| = |Q| <= k = 2j` and `sigma(P) = sigma(Q)`. For `D* = 2^{delta n}` the threshold `k(delta)`
 is in `relation_length.md`; at `delta = 0.311`, `k = 0.105 n` (`|P u Q| <= 0.21 n`).
 
-Tightness: a "box" support (`m` vectors in `[0,L)^d`, random generators) is
-`k`-dissociated for `k ~ d log(kL)/log(m/k)` yet has `D* <= (mL/2)^d`, matching the lemma up to
-constants, so `k = Theta(m)` relations are the right scale in this regime (not `O(1)`, not
-`o(m)`). Constant-length relations (the additive quadruples of `high_energy.py`) are *not*
-forced; the experiment finds them only for small rank.
+Tightness is NOT established (correction, 2026-10-06). A "box" support (`m` vectors in
+`[0,L)^d`, random generators) has `D* <= (mL/2)^d` and relations of length about `d+1`, which
+for `D* <= 2^{0.311n}` is `O(n/log n)`, far below the lemma's `0.105n`. Earlier text claiming
+that `Theta(n)`-length relations are "the right scale" was a heuristic and is withdrawn.
+Whether `D* <= 2^{0.311n}` with *every* relation of length `Theta(n)` is possible is open.
 
 ## 3. Conditional dichotomy
 
@@ -86,3 +86,18 @@ A support that is Sidon-like (no 4-term relation) and has `D <= 2^{0.311n}` need
 `(2L)^d >= m^4` and `d log(mL/2) <= 0.622 m`, i.e. `m` in the low hundreds (`n` in the
 hundreds). Direct experiments at `n <= 40` can only probe the small-rank corner
 (`high_energy.md`); the conclusions above are asymptotic counting.
+
+## 7. A compressible core gives an exact algorithm (2026-10-06, experiments)
+
+Not a worst-case result. For any set `C` of inputs, a meet-in-the-middle whose one side is
+`Sigma(C) + Sigma(R1)` runs in `~ sqrt(2^{|R|} |Sigma(C)|)` (`src/compress_mitm.py`), exact
+whatever `C` is. `C` is found as the union of elements in equal-sum pairs of small subsets
+(`relation_core.md`): at toy size every such relation lay inside the hidden structured support
+for `s` below the noise threshold, including supports on which LLL failed
+(`relation_detect.md`). Measured (`compress_eval.md`, exact in all 22 rows): states shrink
+`7-25x` for strong structure (`n = 32`, rank 3-4) and the gain vanishes at rank 8 and on random
+inputs, where `|Sigma(C)|` is almost `2^{|C|}`. Savings need `|Sigma(C)| << 2^{|C|/2}`,
+which toy sizes barely reach. This is the AKKN/small-doubling few-sums regime applied to a
+sub-collection, with an automatic detector; instances with no compressible sub-collection are
+untouched, and a decoy-adversarial input can make the detector include non-structured elements
+(slower, never wrong).

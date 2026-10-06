@@ -233,10 +233,11 @@ sums by dissociation. There are $\binom{n/8+j}{j}^2$ pairs. The consequence is
 the contrapositive: two distinct equal-size subsets of size $\le 2j$ with equal
 sum exist; deleting their common elements leaves $P,Q$.
 \end{proof}
-The lemma is plausibly tight in order (heuristic, not proved): a support of $n/2$ vectors in $[0,L)^d$ with random
-generators is $k$-dissociated for $k\approx d\log(kL)/\log(m/k)$ while
-$D^*\le(mL/2)^d$, which suggests relations of length $\Theta(n)$ are the right scale; short
-(constant-length) relations are not forced.
+The lemma need not be tight. For a support of $n/2$ vectors in $[0,L)^d$ with
+random generators, $D^*\le(mL/2)^d$ and the shortest relations have length about
+$d+1$, which for $D^*\le 2^{0.311n}$ is $\Oh(n/\log n)$, much shorter than the
+lemma's guaranteed $0.105n$. Whether a support can have $D^*\le2^{0.311n}$ and
+\emph{every} relation of length $\Theta(n)$ is open.
 
 \paragraph*{Conditional use.}
 Write $D^*=2^{\delta n}$ and $k=k(\delta)$ the smallest length allowed by the

@@ -106,7 +106,7 @@ is not hardness.
 
 ## 5. Verification — done
 
-- [x] E1. `python3 -m unittest discover -s tests -p "test_*.py"` — 76 pass.
+- [x] E1. `python3 -m unittest discover -s tests -p "test_*.py"` — 82 pass.
 - [x] E2. Ruff lint clean and repo-wide `ruff format --check` clean across
       `src/`, `tests/`, `scripts/analysis/` (including the previously flagged
       `scripts/analysis/plot_representation.py`).
@@ -196,6 +196,11 @@ is not hardness.
       exponent `< 0.5` for every `delta`; the open step is bounding collisions among
       `Theta(n)`-subsets of all inputs (few: branch; many: AKKN band).
       Evidence: `docs/analysis/2026-10-06/subset-sum/{high_energy,relation_length}.md`.
+      Algorithm attempt (2026-10-06): `src/compress_mitm.py` (exact; compressible-core MITM
+      `sqrt(2^|R| |Sigma(C)|)`, core by short relations). `docs/analysis/2026-10-06/subset-sum/
+      {relation_detect,relation_core,compress_eval}.md`: LLL fails where short subset
+      relations still work; speedups `7-25x` at `n = 32` rank 3-4, none at rank 8 or on random.
+      Quotient-by-relations idea ruled out (random: prune fraction `2^{-0.08n}`).
 - [ ] R14. **Conditional lower bound.** Attempt a reduction making a fast
       `{0,1}` sub-solver imply progress on modular subset sum / `k`-SUM /
       lattice problems (Jin–Williams–Zhang tie PESS to lattice hardness).
