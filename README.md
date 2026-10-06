@@ -69,7 +69,8 @@ is `O*(2^(n/2))` time with `O*(2^(n/4))` space; the DP is pseudopolynomial in
   `MIXING.md` — the proved concentration step and the lifting gap;
   `NEXT.md` — literature check, average-energy lemma, and the obstruction;
   `LIFT.md` — single-prime lift under a distinct-sums hypothesis;
-  `HIGH_ENERGY.md` — forced relations in the remaining high-energy regime).
+  `HIGH_ENERGY.md` — forced relations in the remaining high-energy regime;
+  `EXPERT_QUESTIONS.md` — two self-contained questions for expert review).
 - Plan and progress: [`docs/TODO.md`](docs/TODO.md).
 
 ## Repository layout

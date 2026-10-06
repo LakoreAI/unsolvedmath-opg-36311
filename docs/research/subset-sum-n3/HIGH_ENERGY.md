@@ -181,3 +181,11 @@ birthday prediction. BCH-type constructions behave the same way (redundancy `~ k
 (`adversary_model.md`). A hard family for detect-and-compress would need sets whose relations
 are all near the *pigeonhole* scale while staying compressible, which no construction known to
 us achieves (`long_relation_search.md` searches for one directly).
+
+### Larger n with adversarial decoys (`grow_scale.md`)
+
+Sampled greedy growth (`solve_grow(..., sample=1024)`) solves every instance with a verified
+witness up to `n = 180` (rank-2/3 supports plus random or `shifted` decoys): `2.2e7-2.4e7`
+states against `1.2e27` for plain MITM, keeping `150/154` of the chosen elements inside the
+support under the gluing attack. Small-doubling supports only; the open questions are written
+up for an expert in `EXPERT_QUESTIONS.md`.

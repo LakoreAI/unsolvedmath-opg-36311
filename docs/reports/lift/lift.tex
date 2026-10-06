@@ -321,6 +321,40 @@ $d$ & $D$ & $D/Y$ & core & support in core\\
 \end{tabular}
 \end{table}
 
+\section{Detect and compress (experimental)}\label{sec:compress}
+Everything in this section is measured or heuristic. For any sub-collection $C$ of the
+input, a meet-in-the-middle with $\Sigma(C)+\Sigma(R_1)$ on one side and $\Sigma(R_2)$ on the
+other ($R=R_1\cup R_2$ the rest) is exact and costs about
+$|\Sigma(C)|+\sqrt{2^{|R|}|\Sigma(C)|}$; it helps when $C$ is compressible,
+$|\Sigma(C)|\ll2^{|C|}$. This is the few-distinct-sums regime of~\cite{akkn,rwdoubling}
+applied to a sub-collection; we do not claim it is new. We choose $C$ greedily: add the element
+that makes $\Sigma(C)$ grow least, preferring elements that occur in short equal-sum relations,
+and keep the best prefix. An element unrelated to $C$ doubles $\Sigma(C)$, so decoys are left
+out wherever they sit.
+
+\paragraph*{Robustness and scale.}
+Decoys built to carry their own short relations ($a+b=c$ gadgets, elements linked to the
+support, and pairs $e,e+s_i$ that glue random elements into the support's relation component)
+defeat a solver that takes whole relation components, but not the greedy rule: at $n=32$ it
+is exact and $4.7$--$12.2\times$ faster than meet-in-the-middle on every attack. With a rank-2
+or rank-3 structured support it solves instances up to $n=180$ (verified witness, about
+$2.4\cdot10^7$ states against $1.2\cdot10^{27}$ for plain meet-in-the-middle), keeping
+$150$ of the $154$ chosen elements inside the support under the gluing attack. These supports
+have small doubling, so this shows the method scales, not that it reaches the hard band.
+
+\paragraph*{Where a hard instance could still hide.}
+The greedy rule sees structure only once a relation is complete, so the remaining question is
+whether a compressible support can have all its relations long. Pigeonhole bounds the shortest
+relation by $s$ with $\sum_{j\le s}\binom mj>|\Sigma_{\le s}|$; random-like sets collide at the
+much earlier birthday scale, and algebraic $B_h$ or MDS constructions give only $O(m/\log m)$.
+Searches up to $m=60$ found nothing beyond the birthday scale except a Sidon set at $m=40$ (one
+step). Under random decoys and $|\Sigma(S)|\le 2^{\delta n}$ for all sizes, a heuristic model
+puts the best of Theorem~\ref{thm:lift} and this route at exponent at most $0.431$ (birthday
+model) or $0.4913$ (pigeonhole-extremal relations). The second assumption follows, up to a
+factor $n$, from the unproved statement that $\max_k|\Sigma_k(X)|\le\mathrm{poly}(m)\,
+|\Sigma_{\lfloor m/2\rfloor}(X)|$ for every $m$-set $X$, for which all our searches found a
+ratio at most $1.032$.
+
 \section{Limits and honest status}
 Everything above is conditional or partial. Theorem~\ref{thm:lift} solves instances with
 $D^*>2^{0.311n}$ and a controlled pair count in time between $2^{0.4057n}$ and
@@ -333,12 +367,14 @@ meet-in-the-middle at these sizes: all measurements validate the structure, not 
 speedup. The proofs are pen-and-paper; only the correctness layer of the
 repository is machine-checked.
 
-\paragraph*{Open problem.}
-Show that for every $\{0,1\}$ instance either $N_c$ (collisions among
-$\Theta(n)$-subsets of the whole input) is $2^{o(n)}$, or the input lies in the
-large-bin regime where~\cite{akkn} applies, in a way that combines to
-$2^{(1/2-\varepsilon)n}$; or exhibit a hard family in which a Sidon-like low-rank
-support hides among decoys that create their own relations.
+\paragraph*{Open problems.}
+(i)~Prove or refute $\max_k|\Sigma_k(X)|\le\mathrm{poly}(m)\,|\Sigma_{\lfloor m/2\rfloor}(X)|$
+for every set $X$ of $m$ integers. (ii)~Is there a family of sets with
+$|\Sigma(X)|\le2^{cm}$, $c<1$, whose shortest equal-sum relation is asymptotically longer than
+the birthday scale? A negative answer with a bound, together with~(i) and a way to remove the
+random-decoy assumption, would turn the model of Section~\ref{sec:compress} into a theorem for
+every instance whose solution support has $D^*\le2^{0.311n}$. The unconditional worst-case
+question below $2^{n/2}$ stays open.
 
 \begin{thebibliography}{9}
 \bibitem{hs} E. Horowitz and S. Sahni, ``Computing partitions with applications

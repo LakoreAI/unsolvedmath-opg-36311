@@ -40,6 +40,7 @@ class CompressedResult:
     states: int
     core_size: int
     sigma_size: int
+    core: tuple[int, ...] = ()
 
 
 def find_cores(values: Sequence[int], smax: int, cap: int = 1 << 21):
@@ -135,9 +136,16 @@ def _mitm_with_core(values, target, indices, sigma, label) -> CompressedResult:
                 mask = m_c | m_1 | hit
                 found = tuple(i for i in range(n) if mask >> i & 1)
                 return CompressedResult(
-                    found, label, states + left_count, len(indices), len(sigma)
+                    found,
+                    label,
+                    states + left_count,
+                    len(indices),
+                    len(sigma),
+                    tuple(indices),
                 )
-    return CompressedResult(None, label, states + left_count, len(indices), len(sigma))
+    return CompressedResult(
+        None, label, states + left_count, len(indices), len(sigma), tuple(indices)
+    )
 
 
 def relation_components(values: Sequence[int], smax: int, cap: int = 1 << 21):
