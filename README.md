@@ -60,7 +60,8 @@ is `O*(2^(n/2))` time with `O*(2^(n/4))` space; the DP is pseudopolynomial in
   `ATTACK.md` — reducing the `{0,1}` bound to a target-problem mixing dichotomy;
   `MIXING.md` — the proved concentration step and the lifting gap;
   `NEXT.md` — literature check, average-energy lemma, and the obstruction;
-  `LIFT.md` — single-prime lift under a distinct-sums hypothesis).
+  `LIFT.md` — single-prime lift under a distinct-sums hypothesis;
+  `HIGH_ENERGY.md` — forced relations in the remaining high-energy regime).
 - Plan and progress: [`docs/TODO.md`](docs/TODO.md).
 
 ## Repository layout

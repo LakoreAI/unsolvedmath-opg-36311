@@ -185,6 +185,11 @@ is not hardness.
       time is `poly(n)(2^{0.4057n} + C(n,n/4)/D)`; below `2^{n/2}` iff `D >
       2^{0.311n}`. Remaining: prove/refute a hard instance with `D <= 2^{0.311n}`.
       `docs/analysis/2026-10-06/subset-sum/lift_check.md` checks the coverage step.
+      `HIGH_ENERGY.md`: rigorous forced-relation lemma (`D < C(m/2+k,k)` => relation of
+      length `<= 2k`); with the relation known to lie in the support the regime is solved at
+      exponent `< 0.5` for every `delta`; the open step is bounding collisions among
+      `Theta(n)`-subsets of all inputs (few: branch; many: AKKN band).
+      Evidence: `docs/analysis/2026-10-06/subset-sum/{high_energy,relation_length}.md`.
 - [ ] R14. **Conditional lower bound.** Attempt a reduction making a fast
       `{0,1}` sub-solver imply progress on modular subset sum / `k`-SUM /
       lattice problems (Jin–Williams–Zhang tie PESS to lattice hardness).
@@ -223,7 +228,10 @@ is not hardness.
       `hasSumWeight_sound/completes/le_length`. Axioms stay `[propext,
       Quot.sound]`; clean `lake build`.
 - [ ] R18. **Survey upkeep.** Re-check the open-case map against the newest
-      primary sources before any external release.
+      primary sources before any external release. Pending: Equal-Subset-Sum results
+      arXiv 2608.08260 (`(5/3)^n`, one-sided Monte Carlo) and 2607.09289 (new
+      state of the art claim) are not yet in `docs/reports/survey/`; verify them against
+      the primary text first (only abstracts were read).
 
 ## 8. Standing commands (do not lose)
 
