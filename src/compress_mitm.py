@@ -238,6 +238,8 @@ def solve_grow(
     target: int,
     smax: int = 3,
     sigma_cap: int = 1 << 21,
+    sample: int | None = None,
+    seed: int = 0,
 ) -> CompressedResult:
     """Greedy element-wise core growth, robust to decoys glued into relation components.
 
@@ -245,8 +247,12 @@ def solve_grow(
     in a short relation) whose addition makes ``Sigma(C)`` grow least; an element unrelated
     to ``C`` doubles it, a structured one grows it by less. The prefix of this order with the
     smallest predicted cost ``|Sigma(C)| + 2 sqrt(2^{n-|C|} |Sigma(C)|)`` is used. Exact
-    whatever the order is.
+    whatever the order is. With ``sample`` set, each candidate's growth is estimated from that
+    many random elements of ``Sigma(C)`` (speed only; the answer stays exact).
     """
+    import random as _random
+
+    rand = _random.Random(seed)
     values = tuple(values)
     n = len(values)
     cores, _ = find_cores(values, smax)
@@ -257,8 +263,15 @@ def solve_grow(
     remaining = set(range(n))
     while remaining:
         pick = None
+        probe = None
+        if sample and len(sigma) > sample:
+            probe = rand.sample(list(sigma), sample)
         for e in sorted(remaining, key=lambda i: (i not in related, i)):
-            size = len(sigma.keys() | {t + values[e] for t in sigma})
+            if probe is None:
+                size = len(sigma.keys() | {t + values[e] for t in sigma})
+            else:
+                fresh = sum(1 for t in probe if t + values[e] not in sigma)
+                size = len(sigma) * (1 + fresh / len(probe))
             if pick is None or size < pick[0]:
                 pick = (size, e)
         _size, e = pick

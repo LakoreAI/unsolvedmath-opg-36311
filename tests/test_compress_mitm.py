@@ -92,7 +92,7 @@ class CompressTests(unittest.TestCase):
             )
             if seed % 3 == 0:
                 target += 7
-            got = solve_grow(values, target)
+            got = solve_grow(values, target, sample=8 if seed % 2 else None)
             ref = meet_in_middle(values, target)
             self.assertEqual(got.indices is None, ref.indices is None, seed)
             if got.indices is not None:

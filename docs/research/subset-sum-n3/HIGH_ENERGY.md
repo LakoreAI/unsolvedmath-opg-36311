@@ -151,3 +151,33 @@ row. The remaining attack is structure that becomes visible only once a long rel
 complete: greedy then sees factor-2 growth at every step. This is the same long-relation
 regime as before, so A1 reduces (at toy size) to the relation-length question rather than to
 the decoys themselves.
+
+## 8. Compressibility versus relation length (2026-10-06)
+
+**Lemma T (pigeonhole, rigorous).** Let `S` be a set of `m` integers. If
+`sum_{j<=s} C(m, j) > |Sigma_{<=s}(S)|` (more subsets of size `<= s` than distinct sums of
+such subsets), then two distinct subsets of size `<= s` have equal sums; removing common
+elements gives disjoint `P, Q` with `sigma(P) = sigma(Q)` and `|P|, |Q| <= s`. In particular,
+if `|Sigma(S)| <= 2^{cm}` then a relation of size `<= s` exists for every `s` with
+`sum_{j<=s} C(m,j) > 2^{cm}`, i.e. at `s ~ h2^{-1}(c) m`. *Proof:* pigeonhole on the map from
+subsets of size `<= s` to their sums. `[]`
+
+**Birthday scale (heuristic).** For random-like structure, collisions appear once the number
+of pairs of small subsets exceeds the number of reachable sums: `s ~ h2^{-1}(c/2) m`. Measured
+shortest relations match this prediction or are shorter (`long_relation.md`: every
+compressible random box had `s* = 2`; the box-volume birthday prediction matched `s*` in every
+row).
+
+**Algebraic constructions do not help the adversary (heuristic).** Vandermonde columns mod `p`
+(an MDS code) guarantee every relation has total length `>= d + 1`, but their sums range over
+`(mp)^d` values, so `d + 1 ~ log|Sigma| / log(mp)`: the guaranteed length is
+`O(log|Sigma| / log m)`, *shorter* than the birthday scale `Theta(m)`. In `long_relation.md`
+no Vandermonde support was compressible at `m <= 60`, and their measured `s*` equalled the
+birthday prediction. BCH-type constructions behave the same way (redundancy `~ k log m`).
+
+**Consequence (heuristic, labelled).** The best adversary known is random-like
+(birthday / Gilbert-Varshamov scale), which the relation search detects at cost
+`2^{h2(k/n) n}` with `k/n ~ 0.03-0.04` near the crossover, i.e. about `2^{0.19n}-2^{0.25n}`
+(`adversary_model.md`). A hard family for detect-and-compress would need sets whose relations
+are all near the *pigeonhole* scale while staying compressible, which no construction known to
+us achieves (`long_relation_search.md` searches for one directly).
