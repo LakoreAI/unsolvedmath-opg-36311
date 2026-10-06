@@ -122,3 +122,14 @@ at `delta = 0.38`) and `0.4913` (the lemma's extremal relation length, at `delta
 always `< 1/2`. A hard family would need an adversarial decoy structure (relations among
 decoys), a support with `|Sigma(S)|` much larger than `D*`, or relations near the pigeonhole
 extremum.
+
+### Assumption A2 and Conjecture U (`ksum_unimodal.md`)
+
+The model's assumption `|Sigma(S)| <= 2^{delta n}` (all sizes) would follow, up to a factor
+`n`, from **Conjecture U**: for every set `X` of `m` integers,
+`max_k |Sigma_k(X)| <= poly(m) |Sigma_{m/2}(X)|`. Searches over random, structured and
+hill-climbed sets (`m = 8..14`) never found a ratio above `1.032`; the counts are not always
+unimodal (structured sets show a dip of 1 at the exact middle) but the middle is always within
+a few percent of the maximum. Unproved. If U holds, the only remaining assumption of the model
+is A1 (no short relations among non-support elements), plus LIFT's pair-count condition
+`N_t <= A`; those two are where a genuine worst-case barrier would have to live.
