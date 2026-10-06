@@ -1,5 +1,12 @@
 # OPG-36311: Exact Subset Sum Research
 
+> **Warning.** This repository uses AI to attack an open conjecture. Almost all of
+> the code, proofs, experiments and papers here were produced by AI under my
+> direction. If anything in it turns out to be a real new finding, it says nothing
+> about how good I am at math. It only shows how well I can use AI to work on math.
+> Treat every claim as unreviewed until a human mathematician has checked it; the
+> proofs outside the Lean layer are pen-and-paper and may contain errors.
+
 A dependency-free research repository on exact subset sum: correct implementa-
 tions, Lean-checked correctness proofs, reproducible measurements, and a
 roadmap toward the open `O*(2^(n/3))` worst-case bound.
