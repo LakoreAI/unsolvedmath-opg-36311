@@ -100,7 +100,7 @@ is not hardness.
 
 ## 5. Verification — done
 
-- [x] E1. `python3 -m unittest discover -s tests -p "test_*.py"` — 71 pass.
+- [x] E1. `python3 -m unittest discover -s tests -p "test_*.py"` — 76 pass.
 - [x] E2. Ruff lint clean and repo-wide `ruff format --check` clean across
       `src/`, `tests/`, `scripts/analysis/` (including the previously flagged
       `scripts/analysis/plot_representation.py`).
@@ -180,14 +180,24 @@ is not hardness.
       the power-of-two default on structured families. Small-`n` total work still
       exceeds MITM (the polynomial factor dominates), so this is an asymptotic
       statement, not a speedup.
+- [ ] R13a. **Single-prime lift (conditional result).** `LIFT.md`: for any
+      instance whose solution support has `D` distinct weight-`n/4` sub-sums,
+      time is `poly(n)(2^{0.4057n} + C(n,n/4)/D)`; below `2^{n/2}` iff `D >
+      2^{0.311n}`. Remaining: prove/refute a hard instance with `D <= 2^{0.311n}`.
+      `docs/analysis/2026-10-06/subset-sum/lift_check.md` checks the coverage step.
 - [ ] R14. **Conditional lower bound.** Attempt a reduction making a fast
       `{0,1}` sub-solver imply progress on modular subset sum / `k`-SUM /
       lattice problems (Jin–Williams–Zhang tie PESS to lattice hardness).
-- [ ] R15. **Reproduce the BCJ concrete algorithm.** (Single-level broadened
-      search is in `src/bcj.py`; the ePrint text is in
-      `docs/research/subset-sum-n3/refs/`.) Port the three-level
+- [x] R15. **Reproduce the BCJ concrete algorithm.** Done at toy size:
+      `src/bcj_tree.py` is the three-level tree (eight leaf lists, `M_omega`,
+      `M_kappa`, `M_nu`, consistency filters) with exact solutions at `n = 16, 32`;
+      `docs/analysis/2026-10-06/subset-sum/bcj_tree_lists.md` shows measured list
+      sizes match BCJ's model (leaf `1.00`, kappa `0.92-0.98`, nu `1.16-1.35`) and a
+      constant per-attempt success `0.13-0.20`. The `0.291n` exponent is asymptotic
+      and not readable at `n <= 32`; leaves are enumerated directly, not by the
+      birthday split. (Original task: port the three-level
       `{-1,0,1}` construction (Algorithm 1 + eight lists) and verify the
-      `0.291n` curve empirically; currently only the exponent model is reproduced.
+      `0.291n` curve empirically.)
 - [x] R16. **Port `O*(2^(n/3))` PESS (Jin–Williams–Zhang, ESA 2025).**
       - R16a: `close_pairs_structured` runs the structural close-pair search as
         a *complete* branch-and-bound: same pairs as the `2^(n-k)` reference,

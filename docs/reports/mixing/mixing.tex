@@ -32,9 +32,11 @@ pipeline---modular filter, balanced sub-solver, disjointness match---on
 adversarial families. Low mixing appears only on arithmetic structure, which is
 easy; the hard large-value and generalized-progression families mix at
 $0.85$--$0.95$ and are solved at the sub-solver cost
-$2\binom{n/2}{n/8}=2^{0.4057n}$. We conclude that for the coefficient set
-$\{0,1\}$ the obstruction is the completeness of the balanced sub-solver, not
-mixing, and we state the resulting open problem. The two lemmas are
+$2\binom{n/2}{n/8}=2^{0.4057n}$. The balanced sub-solver is incomplete on a fixed input order, but a random
+permutation repairs this with probability $\Theta(1/\sqrt n)$, a polynomial
+cost. We conclude that the remaining obstruction for the coefficient set
+$\{0,1\}$ is lifting the average-over-primes mixing bound to a single prime, and
+we state the resulting open problem. The two lemmas are
 machine-checked in Lean.
 \end{abstract}
 \begin{IEEEkeywords}
@@ -231,8 +233,13 @@ solution only if the solution has such a balanced representation. Planting
 solutions with a controlled number of elements in the first half (Table
 ~\ref{tab:profile}), the search succeeds with probability $1.00$ exactly at the
 balanced share $n/4$ and $0.00$ at every other share: on an off-balance
-solution it returns a wrong ``no''. A single random permutation of the values
-repairs this only with the (small) probability that the support lands balanced.
+solution it returns a wrong ``no''. This is an \emph{order} effect, not an exponential barrier: a uniformly
+random permutation of the inputs places a weight-$w$ support balanced with
+probability $\binom{n/2}{w/2}^2/\binom{n}{w}$, which equals
+$\sqrt{8/(\pi n)}\,(1+o(1))$ at $w=n/2$ (measured and exact values agree for
+$n\le1024$). Hence $\Oh(\sqrt n)$ permutations, and a further factor $n$ for an
+unknown weight, restore completeness; at $n=24,32$ every concentrated planted
+solution was found within $4\sqrt n$ permutations.
 
 \begin{table}[t]
 \centering
@@ -258,15 +265,21 @@ would already beat $2^{n/2}$ using the balanced sub-solver, since
 $0.4057<1/2$. It does not, so for $\{0,1\}$ the obstruction must lie elsewhere.
 The experiments isolate two candidates.
 
-\emph{(a) The balanced sub-solver is incomplete.} The filtered class is
-enumerated by matching weight-$n/8$ subsets of two fixed halves, so only
-representations that are weight-balanced across the split are seen
-(Table~\ref{tab:profile}). An off-balance solution is never found, and the
-search returns a wrong ``no''. Enumerating every weight profile instead costs
-$\sum_i\binom{n/2}{i}\binom{n/2}{n/4-i}=\binom{n}{n/4}=2^{0.811n}$, above
-meet-in-the-middle; the recursion that replaces the balanced sub-solver---the
-four-way decomposition of~\cite{hgj,bcj}---is where the published $0.291n$ bound
-is won. This is a completeness obstruction, not a mixing one.
+\emph{(a) Completeness of the sub-solver is only a polynomial factor.} The
+filtered class is enumerated by matching weight-$n/8$ subsets of two fixed
+halves, so only representations balanced across the split are seen
+(Table~\ref{tab:profile}). Enumerating every profile would cost
+$\binom{n}{n/4}=2^{0.811n}$, but it is not needed: random permutations of the
+inputs balance the support with probability $\Theta(1/\sqrt n)$. The profile is
+therefore not an exponential obstruction.
+
+\emph{(a$'$) Lifting the average to one prime.} What remains of the mixing
+question is Markov-type: Lemma~\ref{lem:avg} bounds the \emph{average} energy
+over a window of primes, so only a $1/\mathrm{polylog}$ fraction of primes is
+guaranteed to mix. Coverage was a constant fraction for every prime tested
+(measured list sizes stay within $1.3\times$ of the random-input expectation on
+every non-progression family up to $n=40$), but no proof exists that a single
+prime suffices on every input.
 
 \emph{(b) Compatibility and exactness.} Two pieces may combine to an invalid
 coefficient vector (a ``pseudo-solution''), and recovering a compatible pair with
@@ -276,10 +289,11 @@ must be kept list-linear.
 The open problem suggested by the experiments is therefore:
 \begin{quote}
 \itshape
-Find a broadening of the balanced representations---overlaps, as in the four-way
-decomposition---such that a solution can be enumerated and recovered within
-$2^{(1/2-\varepsilon)n}$ for a constant $\varepsilon>0$, or an algorithm that
-solves the off-balance instances below $2^{n/2}$ by other means.
+Prove that for every instance a constant fraction of primes in the window mix
+the weight-$n/4$ representations (equivalently, bound the collision energy by
+$\Oh(Y)$ for a constant fraction of primes, not only on average), or exhibit a
+$\{0,1\}$ instance family on which every prime mixes poorly while the
+instance remains hard.
 \end{quote}
 
 \emph{Remark on a recent preprint.} A 2025 preprint~\cite{salas} claims a
@@ -297,11 +311,10 @@ bound: on average over primes the collision energy is $\Oh(Y\log Y)$, and
 pointwise coverage stayed above $0.27$ on every input we tested. In the full
 pipeline the hard, unstructured families mix at $0.9$ and run at the balanced
 sub-solver cost, while low mixing coincides with arithmetic structure and easy
-inputs. For the coefficient set $\{0,1\}$ this points to the completeness of the
-balanced sub-solver, not mixing, as the obstruction: an off-balance solution is
-invisible to it and costs $2^{0.811n}$ to cover by brute force. Broadening the
-representations so that every solution is seen within $2^{(1/2-\varepsilon)n}$ is
-the concrete next step.
+inputs. For the coefficient set $\{0,1\}$ the sub-solver's
+completeness costs only a polynomial factor (random permutations), so what
+remains is the lift from the average over primes to a single prime. Proving it,
+or finding a hard family that defeats every prime, is the concrete next step.
 
 \appendices
 \section{Proofs}\label{app:proofs}
