@@ -11,7 +11,8 @@ repository proves the meet-in-the-middle correctness reduction, gives an
 documents which hypotheses about the barrier hold and which fail. The
 repository includes a [baselines paper](docs/reports/baselines/paper.tex), a
 [representation paper](docs/reports/representation/representation.tex), a
-[mixing note](docs/reports/mixing/mixing.tex), and a
+[mixing note](docs/reports/mixing/mixing.tex), a
+[conditional-bounds note](docs/reports/lift/lift.tex), and a
 [survey](docs/reports/survey/survey.tex); see the
 [validation report](docs/reports/validation.md) for scope.
 
