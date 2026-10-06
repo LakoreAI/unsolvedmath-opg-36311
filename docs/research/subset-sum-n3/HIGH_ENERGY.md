@@ -31,11 +31,12 @@ disjoint complement. There are `C(m/4+j, j)^2` pairs. `[]`
 `|P| = |Q| <= k = 2j` and `sigma(P) = sigma(Q)`. For `D* = 2^{delta n}` the threshold `k(delta)`
 is in `relation_length.md`; at `delta = 0.311`, `k = 0.105 n` (`|P u Q| <= 0.21 n`).
 
-Tightness is NOT established (correction, 2026-10-06). A "box" support (`m` vectors in
-`[0,L)^d`, random generators) has `D* <= (mL/2)^d` and relations of length about `d+1`, which
-for `D* <= 2^{0.311n}` is `O(n/log n)`, far below the lemma's `0.105n`. Earlier text claiming
-that `Theta(n)`-length relations are "the right scale" was a heuristic and is withdrawn.
-Whether `D* <= 2^{0.311n}` with *every* relation of length `Theta(n)` is possible is open.
+Tightness is NOT established, and the corrected picture is this (2026-10-06, replaces two
+earlier claims). A box support with random coordinates (`[0,L)^d`, random generators) has
+`Theta(n)`-length relations, not `d+1`: relations here need ternary coefficients, and a
+birthday count puts the shortest at `k/n ~ h2^{-1}(delta)/2` (`0.029` at `delta = 0.32`);
+Gilbert-Varshamov-type avoidance gives `0.041`; the lemma's `0.11` would need near-perfect `B_k`
+sets, for which no construction is known. See `adversary_model.md`.
 
 ## 3. Conditional dichotomy
 
@@ -112,3 +113,12 @@ decoys; predicted cost `2^46` versus `2^112` (box-volume estimate, not run). Sco
 have a small-doubling structured part and constant-times-`r` doubling overall, the regime of the
 small-doubling algorithms; they show a practical exact solver and detector, not progress on the
 hard band where no sub-collection is compressible.
+
+### Adversary model (`adversary_model.md`)
+
+Under random decoys and `|Sigma(S)| <= 2^{delta n}` (both assumptions, not proved), the best of
+LIFT and detect-then-compress has worst-case exponent `0.431` (birthday and GV relation models,
+at `delta = 0.38`) and `0.4913` (the lemma's extremal relation length, at `delta = 0.32`),
+always `< 1/2`. A hard family would need an adversarial decoy structure (relations among
+decoys), a support with `|Sigma(S)|` much larger than `D*`, or relations near the pigeonhole
+extremum.

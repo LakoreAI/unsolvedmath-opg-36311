@@ -233,11 +233,12 @@ sums by dissociation. There are $\binom{n/8+j}{j}^2$ pairs. The consequence is
 the contrapositive: two distinct equal-size subsets of size $\le 2j$ with equal
 sum exist; deleting their common elements leaves $P,Q$.
 \end{proof}
-The lemma need not be tight. For a support of $n/2$ vectors in $[0,L)^d$ with
-random generators, $D^*\le(mL/2)^d$ and the shortest relations have length about
-$d+1$, which for $D^*\le 2^{0.311n}$ is $\Oh(n/\log n)$, much shorter than the
-lemma's guaranteed $0.105n$. Whether a support can have $D^*\le2^{0.311n}$ and
-\emph{every} relation of length $\Theta(n)$ is open.
+The lemma need not be tight, and no construction is known that attains it. For a support
+whose coordinates are random (a box in $[0,L)^d$ with random generators) a birthday count
+puts the shortest relation at $k/n\approx h_2^{-1}(\delta)/2$ (about $0.029$ at
+$\delta=0.32$), still $\Theta(n)$ but far below the lemma's $0.11$. Avoiding collisions
+as well as the Gilbert--Varshamov bound for codes gives $k/n\approx0.041$ at the same
+$\delta$. Reaching the lemma's value needs near-perfect $B_k$ sets, which are not known.
 
 \paragraph*{Conditional use.}
 Write $D^*=2^{\delta n}$ and $k=k(\delta)$ the smallest length allowed by the
@@ -272,6 +273,17 @@ $\delta$ & $k/n$ & find & residual & route & Thm.~\ref{thm:lift}\\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\paragraph*{A heuristic model.}
+Take the three relation-length models above (birthday, Gilbert--Varshamov, and the lemma's
+extremal value), random decoys (so that no relation shorter than $0.11n$ involves a
+decoy), and $|\Sigma(S)|\le 2^{\delta n}$ for the sums of all sizes. Running
+Theorem~\ref{thm:lift} and the relation route in parallel has exponent
+$\min\{\text{Thm.~\ref{thm:lift}},\max\{\text{find},\text{compress}\}\}$ with
+compress $=1/4+\delta/2$. Its worst case over $\delta$ is $0.431$ for the birthday and
+Gilbert--Varshamov models ($\delta\approx0.38$) and $0.4913$ for the extremal model
+($\delta\approx0.32$), always below $1/2$. This is a model, not a theorem: decoys are
+assumed random and $|\Sigma(S)|$ is not bounded by $D^*$.
 
 \paragraph*{The gap.}
 Nothing prevents a relation found among all $n$ inputs from using decoys outside
