@@ -42,6 +42,7 @@ the report generator uses PyYAML.
 | `representation.py` | Candidate `{0,1}` pipeline: gcd reduction, superincreasing greedy, HGJ filter, MITM fallback; mixing-coverage helper. |
 | `compatibility.py` | Sparse-OV disjointness (compatibility) primitives for broadened representations. |
 | `bcj.py` | Broadened `{-1,0,1}` representation search (BCJ Sect. 3.1) with exact compatibility. |
+| `bcj_tree.py` | Three-level BCJ tree (Sect. 3.3): eight leaf lists, three moduli, consistency-filtered merges; toy-`n` structural port. |
 | `additive.py` | Additive-combinatorics probes: `\|S(A)\|`, collision count `F`, additive energy, modular residue profiles, cardinality counts. |
 
 All solvers are exact and return occurrence-index witnesses (or `None`). `ss`
@@ -58,7 +59,8 @@ is `O*(2^(n/2))` time with `O*(2^(n/4))` space; the DP is pseudopolynomial in
   `TRANSFER.md` — why the PESS `2^(n/3)` structure does not transfer to `{0,1}`;
   `ATTACK.md` — reducing the `{0,1}` bound to a target-problem mixing dichotomy;
   `MIXING.md` — the proved concentration step and the lifting gap;
-  `NEXT.md` — literature check, average-energy lemma, and the obstruction).
+  `NEXT.md` — literature check, average-energy lemma, and the obstruction;
+  `LIFT.md` — single-prime lift under a distinct-sums hypothesis).
 - Plan and progress: [`docs/TODO.md`](docs/TODO.md).
 
 ## Repository layout
