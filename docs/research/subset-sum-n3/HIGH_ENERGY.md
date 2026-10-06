@@ -101,3 +101,14 @@ which toy sizes barely reach. This is the AKKN/small-doubling few-sums regime ap
 sub-collection, with an automatic detector; instances with no compressible sub-collection are
 untouched, and a decoy-adversarial input can make the detector include non-structured elements
 (slower, never wrong).
+
+### Beyond toy size (`compress_scale.md`)
+
+Solved with verified witnesses at `n = 56, 76, 80` (rank-3 structured part of 40-60 elements plus
+16-20 random decoys): `1.5e5 .. 8.3e5` states against `2^28 .. 2^40` for plain MITM
+(`1.7e3 .. 1.3e6`-fold). Detection at `n = 224` (200 distinct weight-3 vectors in `Z^12` plus 24
+decoys): the `s = 2` search (about 25 000 subsets) returns exactly the 200 structured elements, no
+decoys; predicted cost `2^46` versus `2^112` (box-volume estimate, not run). Scope: these inputs
+have a small-doubling structured part and constant-times-`r` doubling overall, the regime of the
+small-doubling algorithms; they show a practical exact solver and detector, not progress on the
+hard band where no sub-collection is compressible.

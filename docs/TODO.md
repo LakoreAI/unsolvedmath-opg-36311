@@ -200,6 +200,8 @@ is not hardness.
       `sqrt(2^|R| |Sigma(C)|)`, core by short relations). `docs/analysis/2026-10-06/subset-sum/
       {relation_detect,relation_core,compress_eval}.md`: LLL fails where short subset
       relations still work; speedups `7-25x` at `n = 32` rank 3-4, none at rank 8 or on random.
+      Beyond toy size (`compress_scale.md`): exact witnesses at `n = 56-80` with `1.7e3-1.3e6`x fewer
+      states than MITM; detector exact at `n = 224` (structured part with small doubling only).
       Quotient-by-relations idea ruled out (random: prune fraction `2^{-0.08n}`).
 - [ ] R14. **Conditional lower bound.** Attempt a reduction making a fast
       `{0,1}` sub-solver imply progress on modular subset sum / `k`-SUM /
