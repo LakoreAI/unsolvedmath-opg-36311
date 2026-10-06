@@ -11,7 +11,7 @@ coverage). Conjectures, from `docs/research/subset-sum-n3/{LIFT.md,HIGH_ENERGY.m
   (`D*` = distinct balanced half-sums).
 
 **Reliability.** The deep-research agents mostly read abstracts, introductions and theorem
-statements, not proofs; 128 field values across the files are marked `[uncertain]`
+statements, not proofs; 107 field values across the files are marked `[uncertain]`
 (inverse Littlewood-Offord 18, Fourier 16, lattice 13 are largely recall-based). Nothing here
 is a verified citation until checked against the primary text. Items 2, 6, 8-13 of the original
 outline came from model memory and several descriptions were wrong (corrected below).
