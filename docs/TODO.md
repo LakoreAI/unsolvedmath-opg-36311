@@ -98,6 +98,11 @@ is not hardness.
       across adversarial families; argues the `{0,1}` barrier is the balanced
       sub-solver, not mixing. (3 pp.)
 
+- [x] P7 `docs/reports/lift/` — "From Profile Completeness to a Distinct-Sums
+      Parameter": profile completeness theorem (`sqrt(8/(pi n))`), single-prime lift
+      with `D*` and `N_t`, forced-relation lemma, conditional exponent table, measurements.
+      Conditional/partial throughout; no unconditional worst-case claim. (3 pp.)
+
 ## 5. Verification — done
 
 - [x] E1. `python3 -m unittest discover -s tests -p "test_*.py"` — 76 pass.

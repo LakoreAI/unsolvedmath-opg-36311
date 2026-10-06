@@ -1,0 +1,356 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{hidelinks}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+\newcommand{\Oh}{\mathcal{O}}
+\newcommand{\Th}{\Theta}
+\title{From Profile Completeness to a Distinct-Sums Parameter:\\
+Conditional Bounds for Representation-Based Subset Sum}
+\author{\IEEEauthorblockN{Le Duc Minh}
+\IEEEauthorblockA{\href{mailto:minh.leduc.0210@gmail.com}{minh.leduc.0210@gmail.com}}}
+\begin{document}
+\maketitle
+\begin{abstract}
+Whether subset sum can be solved in $2^{(1/2-\varepsilon)n}$ time on every input
+is open. The representation technique of Howgrave-Graham and Joux does far
+better on random inputs, but its worst-case analysis needs the representations
+of a solution to ``mix'' modulo a random prime. This note does \emph{not} give a
+worst-case algorithm. It makes three precise statements about the technique with
+a balanced $2^{0.4057n}$ sub-solver. (1)~Completeness of the sub-solver costs only
+a $\Theta(\sqrt n)$ factor: a random permutation of the input balances a
+weight-$n/2$ solution with probability $\sqrt{8/(\pi n)}(1+o(1))$, so the
+$2^{0.811n}$ price of enumerating every weight profile, which an earlier version
+of our own analysis charged, is not needed. (2)~Mixing for a single prime follows
+from one parameter: if the sums of the balanced half-weight sub-collections of a
+solution's support take $D^*$ distinct values and no input has too many exact
+sum-matching pairs, the expected time is
+$\mathrm{poly}(n)\bigl(2^{0.4057n}+(A+N_t)/D^*\bigr)$, below $2^{n/2}$ exactly
+when $D^*>2^{0.311n}$. (3)~When $D^*$ is smaller, the support is forced to contain
+an equal-sum pair of subsets of length at most $k$, where $k/n$ is explicit
+($0.105$ at the threshold), and \emph{if} such a relation lies in the solution the
+remaining cost is at most $2^{0.492n}$ whenever $D^*\ge2^{0.05n}$. The unproved step is
+bounding collisions among $\Theta(n)$-subsets of the whole input. We report
+measurements at $n\le 40$ that agree with every proved statement and mark
+clearly what toy sizes cannot show.
+\end{abstract}
+\begin{IEEEkeywords}
+subset sum, representation technique, meet-in-the-middle, additive energy,
+worst-case analysis
+\end{IEEEkeywords}
+
+\section{Introduction}
+Given integers $a_1,\dots,a_n$ and a target $t$, exact subset sum asks for
+$x\in\{0,1\}^n$ with $\sum_i a_ix_i=t$. Meet-in-the-middle~\cite{hs} solves it in
+$\widetilde\Oh(2^{n/2})$ and nothing better is known on every input, apart from
+a polynomial saving~\cite{chen}. On random (``hard knapsack'') inputs the
+representation technique of Howgrave-Graham and Joux~\cite{hgj}, improved by
+Becker, Coron and Joux~\cite{bcj}, reaches $2^{0.337n}$ and $2^{0.291n}$.
+Randolph and W\k{e}grzycki~\cite{rw} recently beat meet-in-the-middle in the
+worst case for many coefficient sets, but not for $\{0,1\}$ (equivalently,
+Partition), which is the case studied here.
+
+\paragraph*{What this note contributes.}
+The technique has three places where an average-case argument must become a
+worst-case one: completeness of the sub-solver, mixing of the representations
+modulo a prime, and the exact matching step. We settle the first, reduce the
+second to a single combinatorial parameter, and reduce what is left to a
+collision-counting question. Nothing here improves the worst-case exponent
+below $1/2$ unconditionally; the contribution is the sharp form of the
+remaining obstruction.
+
+\paragraph*{Setting and notation.}
+Throughout $n\equiv 0\pmod 8$, the target solution $x$ has weight $n/2$ and support
+$S$, $|S|=n/2$. The sub-solver enumerates ``balanced'' subsets
+$y\subseteq[n]$ with $|y|=n/4$ and exactly $n/8$ elements in each of two fixed halves
+$H_1,H_2$ of the input; their number is
+$A=\binom{n/2}{n/8}^2=2^{0.811n}$, enumerated in
+$2\binom{n/2}{n/8}=2^{0.4057n}$ time per list plus output
+(a balanced meet-in-the-middle on residue classes). The solution is
+written $x=y+z$ with $y,z$ disjoint balanced; a modulus $p\approx\binom{n/4}{n/8}^2\approx 2^{n/2}$
+and a random residue $r$ keep, in expectation, one representation.
+We treat weight $n/2$, the hardest case; other weights change constants.
+
+\section{Completeness is a polynomial factor}\label{sec:profile}
+The sub-solver sees a representation only if the support is split $n/4$--$n/4$
+across $H_1,H_2$. An earlier version of the author's note~\cite{mixing} treated this
+as a barrier and priced the repair at the cost of all weight profiles,
+$\sum_i\binom{n/2}{i}\binom{n/2}{n/4-i}=\binom{n}{n/4}=2^{0.811n}>2^{n/2}$. That
+price is wrong, because the input order is free.
+
+\begin{theorem}[Profile completeness]\label{thm:profile}
+Let $\pi$ be a uniformly random permutation of the inputs. A fixed support of
+size $w$ (even) has exactly $w/2$ elements in each half with probability
+\[
+q_w=\binom{n/2}{w/2}^2\Big/\binom{n}{w},\qquad
+q_{n/2}=\sqrt{\tfrac{8}{\pi n}}\,(1+o(1)).
+\]
+\end{theorem}
+\begin{proof}
+The first formula is the hypergeometric probability of splitting $w$ chosen
+positions evenly. By Stirling, $\binom{2a}{a}=4^a/\sqrt{\pi a}\,(1+o(1))$;
+with $a=n/4$, $\binom{n/2}{n/4}^2=2^n\cdot 4/(\pi n)$, and
+$\binom{n}{n/2}=2^n/\sqrt{\pi n/2}$. Divide.
+\end{proof}
+Hence $\Oh(\sqrt n\log(1/\delta))$ permutations succeed with probability
+$1-\delta$, and an unknown weight adds a factor $n$ (try each $w$).
+Table~\ref{tab:profile} compares the exact value, sampling, and the real
+search on planted solutions whose support lies entirely in one half: all were
+found within a budget of $4\sqrt n$ permutations at $n=24,32$.
+
+\begin{table}[t]
+\centering
+\caption{Balancing probability at $w=n/2$ (exact, $20\,000$ samples) and the
+permutations needed for $99\%$ coverage.}
+\label{tab:profile}
+\begin{tabular}{rrrrr}
+\toprule
+$n$ & exact $q$ & $q\sqrt n$ & sampled & perms\\
+\midrule
+16 & 0.3807 & 1.523 & 0.3887 & 10\\
+64 & 0.1971 & 1.577 & 0.1951 & 21\\
+256 & 0.0994 & 1.591 & 0.1011 & 44\\
+1024 & 0.0498 & 1.595 & 0.0510 & 91\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{A distinct-sums parameter controls a single prime}\label{sec:lift}
+Mixing was previously controlled only on average over a window of primes, which
+by Markov gives a $1/\mathrm{polylog}$ fraction of good primes and loses the
+constant-fraction accounting needed for an exponent~\cite{mixing}. We show that
+one quantity suffices.
+
+For a partition $S=S_1\cup S_2$, $|S_i|=n/4$, let
+$T(S_1,S_2)=\{\sigma(y_1)+\sigma(y_2): y_i\subseteq S_i,\ |y_i|=n/8\}$
+and $D^*=\min|T(S_1,S_2)|$ over partitions. Let $N_t$ be the expected (over the random permutation) number of pairs
+$(y,z)$ of balanced $n/4$-subsets with $\sigma(y)+\sigma(z)=t$ (not
+necessarily disjoint), and $a_{\max}=\max a_i$.
+
+\begin{theorem}[Single-prime lift]\label{thm:lift}
+There is a randomized algorithm (permute, draw a prime $p\in[M,2M]$, a residue
+$r$, enumerate the two balanced residue lists, match on the exact sum and
+test disjointness), run for $O(n)$ guesses $M=2^j$, that finds a solution with
+expected time
+\[
+\mathrm{poly}(n,\log a_{\max})\Bigl(2^{0.4057n}+\frac{A+N_t}{D^*}\Bigr).
+\]
+\end{theorem}
+\begin{proof}
+Let $\pi$ balance $S$ (probability $q_{n/2}$, Thm.~\ref{thm:profile}), giving the
+partition $(S_1,S_2)$, and $T=T(S_1,S_2)$, $D=|T|\ge D^*$. Every balanced
+$y\subseteq S$ has balanced complement $S\setminus y$ in $S$. So if
+$r\equiv\sigma(y)\pmod p$ for some such $y$, the pair $(y,S\setminus y)$ is in
+$Y_r\times Z_r$ ($Z_r$ has residue $t-r$).
+
+\emph{Coverage.} Let $c_\rho=\#\{s\in T:s\equiv\rho\}$. Then
+$\sum c_\rho^2=D+K_p$ with $K_p$ the number of ordered pairs $s\ne s'$ in $T$
+with $p\mid s-s'$. By Cauchy--Schwarz at least $D^2/(D+K_p)$ residues are
+covered. A nonzero difference has absolute value $\le n a_{\max}$, so has at most
+$B=\log(na_{\max})/\log M$ prime factors $\ge M$; averaged over the $\pi_w$
+primes of the window, $\mathbb E_pK_p\le D^2B/\pi_w$. Since
+$u\mapsto D^2/(D+u)$ is convex, Jensen gives
+$\mathbb E_p|T\bmod p|\ge D/(1+DB/\pi_w)$. With $\pi_w\sim M/\ln M$ and
+$M\ge 2DB\ln M$ this is $\ge D/2$, hence $\Pr_r[r\ \text{covered}]\ge D/(4M)$.
+
+\emph{Lists and matches.} For every prime, $\sum_\rho|Y_\rho|=A$, so
+$\mathbb E_r|Y_r|=\mathbb E_r|Z_r|=A/p$. Each pair counted by $N_t$ lies in
+exactly one $Y_r\times Z_{t-r}$ (its residue is determined by $y$), so
+$\mathbb E_r[\#\text{exact pairs}]=N_t/p$. By Markov and a union bound with
+$\lambda=24M/D$, the event ``covered, $|Y_r|,|Z_r|\le\lambda A/p$, pairs
+$\le\lambda N_t/p$'' has probability $\ge D/(8M)$.
+
+\emph{Cost.} A good attempt costs the balanced split $2^{0.4057n}$ plus
+$\lambda(A+N_t)/p\le 48(A+N_t)/D$. The expected number of attempts is
+$\Oh(\sqrt n)\cdot 8M/D$, which is $\mathrm{poly}(n,\log a_{\max})$ for the guess $M\approx 2DB\ln M$.
+\end{proof}
+
+\begin{corollary}\label{cor:lift}
+If $N_t\le A$ then the time is $\mathrm{poly}(n)\,2^{0.4057n}$ for
+$D^*\ge 2^{0.4057n}$ and $\mathrm{poly}(n)\,2^{0.811n}/D^*$ below it; this is below
+$2^{n/2}$ exactly when $D^*>2^{0.311n}$.
+\end{corollary}
+
+\paragraph*{Remarks.}
+(i)~Theorem~\ref{thm:lift} is of the same flavor as the Austrin--Kaski--Koivisto--Nederlof
+density dichotomy~\cite{akkn}: a large pair count $N_t$ means large exact-sum bins
+and is their regime. We do not claim it is new, only that it is the clean form of
+the representation argument for one prime. (ii)~Nothing in the proof assumes the
+inputs are random; only $D^*$ and $N_t$ enter. (iii)~Random inputs have
+$D^*=\Theta(\binom{n/4}{n/8}^2)=2^{n/2}/\mathrm{poly}$ and negligible $N_t$.
+
+\begin{table}[t]
+\centering
+\caption{Coverage check (Thm.~\ref{thm:lift}, ``Coverage'') at $n=32$: balanced
+$D^*$, mean fraction of the $D^*$ sums covered over the prime window, the proved
+lower bound $1/(1+D^*B/\pi_w)$. Planted supports, $Y=\binom{n/4}{n/8}^2=4900$.}
+\label{tab:lift}
+\begin{tabular}{lrrr}
+\toprule
+family & $D^*$ & mean cover & bound\\
+\midrule
+random $n$-bit & 4900 & 0.950 & 0.216\\
+geometric & 4900 & 0.952 & 0.227\\
+two-scale & 4900 & 0.950 & 0.118\\
+gap rank 2 & 4748 & 0.956 & 0.327\\
+$q$-multiples & 4884 & 0.952 & 0.291\\
+arithmetic prog. & 88 & 1.000 & 0.261\\
+\bottomrule
+\end{tabular}
+\end{table}
+Table~\ref{tab:lift} agrees: the proved bound is conservative, and a low $D^*$
+(here $88$) occurs only on arithmetic progressions, which small-doubling
+algorithms~\cite{rwdoubling} solve anyway. A complementary measurement,
+$|Y_r|/\mathbb E|Y_r|$ for a random prime of the window at $n\le40$, stayed within
+$1.3\times$ on every non-progression family (mean $1.00$). Prime moduli matter:
+on the geometric family at $n=32$ the default power-of-two modulus found the
+solution in only half the runs, a prime of the same size in all of them.
+
+\section{What a small $D^*$ forces}\label{sec:relation}
+By Corollary~\ref{cor:lift} the uncovered instances have $D^*\le2^{0.311n}$, far
+fewer distinct sums than the $2^{n/2}$ representations. Pigeonhole forces
+collisions, and a counting argument bounds how long the colliding sets must be.
+Call $S$ \emph{$k$-dissociated} if distinct subsets of $S$ of equal size
+$j\le k$ have distinct sums.
+
+\begin{lemma}[Forced relation]\label{lem:relation}
+If $S$ is $2j$-dissociated then $D^*\ge\binom{n/8+j}{j}^2$. Consequently, if
+$D^*<\binom{n/8+j}{j}^2$ there are disjoint $P,Q\subseteq S$ with
+$|P|=|Q|\le 2j$ and $\sigma(P)=\sigma(Q)$.
+\end{lemma}
+\begin{proof}
+Fix a partition and $R_i\subseteq S_i$ with $|R_i|=n/8-j$; put
+$U_i=S_i\setminus R_i$, $|U_i|=n/8+j$. For $j$-subsets $K_i\subseteq U_i$ the sum
+$\sigma(R_1\cup R_2)+\sigma(K_1)+\sigma(K_2)$ lies in $T(S_1,S_2)$, and distinct
+pairs $(K_1,K_2)$ give distinct $2j$-subsets $K_1\cup K_2$ of $S$, hence distinct
+sums by dissociation. There are $\binom{n/8+j}{j}^2$ pairs. The consequence is
+the contrapositive: two distinct equal-size subsets of size $\le 2j$ with equal
+sum exist; deleting their common elements leaves $P,Q$.
+\end{proof}
+The lemma is plausibly tight in order (heuristic, not proved): a support of $n/2$ vectors in $[0,L)^d$ with random
+generators is $k$-dissociated for $k\approx d\log(kL)/\log(m/k)$ while
+$D^*\le(mL/2)^d$, which suggests relations of length $\Theta(n)$ are the right scale; short
+(constant-length) relations are not forced.
+
+\paragraph*{Conditional use.}
+Write $D^*=2^{\delta n}$ and $k=k(\delta)$ the smallest length allowed by the
+lemma. Finding an equal-sum pair of $k$-subsets among the $n$ inputs by sorting costs
+$\binom nk$. \emph{If} the pair found lies in $S$, the $\le 2k$ elements
+$P\cup Q$ are fixed in the solution and the remainder is solved by
+meet-in-the-middle in $2^{(n-2k)/2}$. The exponent is
+$\max\{h_2(k/n),\,(1-2k/n)/2\}$, listed with the Theorem~\ref{thm:lift} exponent in
+Table~\ref{tab:relation}. Below the crossover $\delta\approx0.311$ the relation route
+is at most $0.492$ for the values shown; above it Theorem~\ref{thm:lift} takes over.
+So \emph{conditionally on the relation lying in the support} every instance with
+$D^*\ge2^{0.05n}$ has exponent at most $0.492<1/2$; as $\delta\to0$ the route
+tends to $1/2$, and tiny $D^*$ is the natural domain of small-doubling
+algorithms~\cite{rwdoubling} (not proved here).
+
+\begin{table}[t]
+\centering
+\caption{Asymptotic exponents (base $2$, divided by $n$). $k/n$: smallest forced
+relation length. Find: $\log_2\binom nk/n$. Residual: $(1-2k/n)/2$.
+Thm.~\ref{thm:lift}: $\max\{0.4057,0.811-\delta\}$.}
+\label{tab:relation}
+\begin{tabular}{rrrrrr}
+\toprule
+$\delta$ & $k/n$ & find & residual & route & Thm.~\ref{thm:lift}\\
+\midrule
+0.05 & 0.0078 & 0.066 & 0.492 & 0.492 & 0.761\\
+0.20 & 0.0522 & 0.296 & 0.448 & 0.448 & 0.611\\
+0.30 & 0.0992 & 0.466 & 0.401 & 0.466 & 0.511\\
+0.311 & 0.1053 & 0.486 & 0.395 & 0.486 & 0.500\\
+0.35 & 0.1290 & 0.555 & 0.371 & 0.555 & 0.461\\
+0.40 & 0.1637 & 0.643 & 0.336 & 0.643 & 0.411\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph*{The gap.}
+Nothing prevents a relation found among all $n$ inputs from using decoys outside
+$S$. Let $N_c$ be the number of equal-sum disjoint pairs of $k$-subsets among all
+inputs. If $N_c\le 2^{\epsilon n}$, branch on each (time
+$N_c\,2^{(n-2k)/2}$); if $N_c$ is large the input has many equal-sum subset pairs
+at scale $\Theta(n)$, which is the large-bin regime of~\cite{akkn}, whose
+intermediate range is the open band. Bounding $N_c$ against the bin size is the
+single missing lemma.
+
+\paragraph*{Toy-size evidence.}
+Planted supports in a rank-$d$ progression with random $n$-bit generators and
+random decoys (Table~\ref{tab:energy}) have small $D^*/Y$, and for
+small rank the additive-quadruple core equals the support exactly: random decoys
+produced \emph{no} spurious relations. At rank $8$ ($n=32$) the core misses the
+support, i.e. relations are longer than $4$ terms, which the lemma allows (it forces length only at scale $\Theta(n)$). A
+Sidon-like yet low-rank support needs $n$ in the hundreds, so these tests
+probe only the small-rank corner.
+
+\begin{table}[t]
+\centering
+\caption{Rank-$d$ supports plus decoys at $n=32$: $D$ (distinct sums of all weight-$n/4$ subsets of the
+support, so $D^*\le D$), $Y=12870$ such subsets, additive-quadruple
+core size, and whether it contains the support.}
+\label{tab:energy}
+\begin{tabular}{rrrrr}
+\toprule
+$d$ & $D$ & $D/Y$ & core & support in core\\
+\midrule
+3 & 168 & 0.01 & 16 & yes\\
+4 & 522 & 0.04 & 16 & yes\\
+6 & 3260 & 0.25 & 16 & yes\\
+8 & 7642 & 0.59 & 4 & no\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Limits and honest status}
+Everything above is conditional or partial. Theorem~\ref{thm:lift} solves instances with
+$D^*>2^{0.311n}$ and a controlled pair count in time between $2^{0.4057n}$ and
+$2^{n/2}$, never $2^{n/3}$: that needs a sub-solver faster than the balanced one.
+Our three-level Becker--Coron--Joux port at $n=16,32$ matches the predicted list
+sizes (leaf $1.00$, middle $0.92$--$0.98$, top $1.16$--$1.35$ of the model) but
+asymptotics cannot be read from $n\le32$, and total work including the
+$\Theta(\sqrt n)$ permutations and polynomial factors exceeds
+meet-in-the-middle at these sizes: all measurements validate the structure, not a
+speedup. The proofs are pen-and-paper; only the correctness layer of the
+repository is machine-checked.
+
+\paragraph*{Open problem.}
+Show that for every $\{0,1\}$ instance either $N_c$ (collisions among
+$\Theta(n)$-subsets of the whole input) is $2^{o(n)}$, or the input lies in the
+large-bin regime where~\cite{akkn} applies, in a way that combines to
+$2^{(1/2-\varepsilon)n}$; or exhibit a hard family in which a Sidon-like low-rank
+support hides among decoys that create their own relations.
+
+\section*{Reproducibility}
+Code and scripts are in the accompanying repository (\texttt{src/hgj.py},
+\texttt{src/bcj\_tree.py}, \texttt{scripts/analysis/profile\_permutation.py},
+\texttt{lift\_check.py}, \texttt{relation\_length.py}, \texttt{high\_energy.py});
+the notes \texttt{LIFT.md} and \texttt{HIGH\_ENERGY.md} contain the same
+statements in plain text.
+
+\begin{thebibliography}{9}
+\bibitem{hs} E. Horowitz and S. Sahni, ``Computing partitions with applications
+to the knapsack problem,'' \emph{J.\ ACM}, vol.~21, no.~2, pp.~277--292, 1974.
+\bibitem{hgj} N. Howgrave-Graham and A. Joux, ``New generic algorithms for hard
+knapsacks,'' in \emph{EUROCRYPT}, 2010; IACR ePrint 2010/189.
+\bibitem{bcj} A. Becker, J.-S. Coron, and A. Joux, ``Improved generic algorithms
+for hard knapsacks,'' in \emph{EUROCRYPT}, 2011; IACR ePrint 2011/474.
+\bibitem{chen} X. Chen, Y. Jin, T. Randolph, and R. A. Servedio, ``Subset sum
+in time $2^{n/2}/\mathrm{poly}(n)$,'' in \emph{RANDOM}, 2023; arXiv:2301.07134.
+\bibitem{rw} T. Randolph and K. W\k{e}grzycki, ``Beating meet-in-the-middle for
+subset balancing problems,'' arXiv:2511.10823, 2025.
+\bibitem{rwdoubling} T. Randolph and K. W\k{e}grzycki, ``Parameterized algorithms
+on integer sets with small doubling: Integer programming, subset sum and
+$k$-SUM,'' arXiv:2407.18228, 2024.
+\bibitem{akkn} P. Austrin, P. Kaski, M. Koivisto, and J. Nederlof, ``Dense subset
+sum may be the hardest,'' in \emph{STACS}, 2016; arXiv:1508.06019.
+\bibitem{mixing} L. D. Minh, ``Elementary mixing bounds and experiments for the
+representation technique in subset sum,'' technical note, this repository
+(\texttt{docs/reports/mixing}), 2026.
+\end{thebibliography}
+\end{document}
