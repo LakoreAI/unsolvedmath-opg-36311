@@ -51,7 +51,7 @@ is `O*(2^(n/2))` time with `O*(2^(n/4))` space; the DP is pseudopolynomial in
 ## Measurements and research
 
 - Measurements, figures, and provenance: `docs/analysis/2026-10-03/subset-sum/`
-  and `docs/analysis/2026-10-05/subset-sum/`.
+  `docs/analysis/2026-10-05/subset-sum/`, and `docs/analysis/2026-10-06/subset-sum/`.
 - Papers (source, PDF, figures, tables): `docs/reports/<topic>/`.
 - Deep-research program toward the open bound: `docs/research/subset-sum-n3/`
   (`report.md` — 20 sourced approach items; `PLAN.md`; `PHASE1.md`;

@@ -11,7 +11,7 @@ the modulus: ``near-ap`` (small common difference) and ``mod-cluster``
 (``a_i = q b_i + r_i`` with ``q`` a prime near ``P``, so values cluster mod a
 prime in the window).
 
-Writes docs/analysis/2026-10-05/subset-sum/list_blowup.md.
+Writes docs/analysis/2026-10-06/subset-sum/list_blowup.md.
 """
 
 import argparse
@@ -28,7 +28,7 @@ from hgj_adversarial import FAMILIES, make_family, next_prime  # noqa: E402
 
 from src.hgj import weight_residue_subsets  # noqa: E402
 
-DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-05" / "subset-sum"
+DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-06" / "subset-sum"
 SIZES = (24, 32, 40)
 EXTRA = ("near-ap", "mod-cluster")
 

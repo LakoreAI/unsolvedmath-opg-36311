@@ -95,7 +95,7 @@ following is the true barrier, and identifying it is now the concrete goal:
    This is the genuine obstacle, and it is a *completeness* rather than a mixing
    problem.
 
-   **Correction (2026-10-06, `profile_permutation.md`).** The `2^{0.811n}` cost
+   **Correction (2026-10-06, `docs/analysis/2026-10-06/subset-sum/profile_permutation.md`).** The `2^{0.811n}` cost
    is not the price of completeness. A uniformly random permutation of the
    inputs balances a weight-`w` support with probability
    `C(n/2,w/2)^2 / C(n,w) ~ sqrt(8/(pi n))` at `w = n/2` (exact vs sampled

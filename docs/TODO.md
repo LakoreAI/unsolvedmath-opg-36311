@@ -172,7 +172,7 @@ is not hardness.
       (`subset_sum_pipeline.md`). Evidence: `mixing_dichotomy.md` — only
       structured families mix poorly. Next: prove the lifting, or find a
       poorly-mixing hard instance (a clean barrier).
-      **Profile barrier resolved (2026-10-06).** `profile_permutation.md`: a
+      **Profile barrier resolved (2026-10-06).** `docs/analysis/2026-10-06/subset-sum/profile_permutation.md`: a
       random permutation balances the support with probability
       `~sqrt(8/(pi n))`, so completeness costs `O(sqrt n)` permutations, not
       `2^(0.811n)` (`src.hgj.hgj_permuted_search`, `balanced_probability`).

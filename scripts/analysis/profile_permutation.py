@@ -14,7 +14,7 @@ permutation budget, and (d) re-runs the adversarial families with a prime
 modulus in place of the power-of-two default, to separate the profile effect
 from the modulus effect.
 
-Writes docs/analysis/2026-10-05/subset-sum/profile_permutation.md.
+Writes docs/analysis/2026-10-06/subset-sum/profile_permutation.md.
 """
 
 import argparse
@@ -31,7 +31,7 @@ from hgj_adversarial import FAMILIES, make_family, next_prime  # noqa: E402
 
 from src.hgj import balanced_probability, hgj_permuted_search  # noqa: E402
 
-DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-05" / "subset-sum"
+DEFAULT_OUT = REPO_ROOT / "docs" / "analysis" / "2026-10-06" / "subset-sum"
 
 
 def formula_table(rng: random.Random) -> list[str]:
