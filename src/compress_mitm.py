@@ -111,6 +111,12 @@ def solve_compressed(
         return CompressedResult(fallback.indices, "mitm", fallback.states, core_size, 0)
 
     _cost, indices, sigma = best
+    return _mitm_with_core(values, target, indices, sigma, "compress")
+
+
+def _mitm_with_core(values, target, indices, sigma, label) -> CompressedResult:
+    """Exact MITM with ``Sigma(core) + Sigma(R1)`` on one side and ``Sigma(R2)`` on the other."""
+    n = len(values)
     in_core = set(indices)
     rest = [i for i in range(n) if i not in in_core]
     r = len(rest)
@@ -119,22 +125,155 @@ def solve_compressed(
     sums1 = _subset_sums(values, r1, 1 << 30)
     sums2 = _subset_sums(values, r2, 1 << 30)
     assert sums1 is not None and sums2 is not None
-    right = {}
-    for total, mask in sums2.items():
-        right.setdefault(total, mask)
     states = len(sigma) + len(sums1) + len(sums2)
     left_count = 0
     for s_c, m_c in sigma.items():
         for s_1, m_1 in sums1.items():
             left_count += 1
-            need = target - s_c - s_1
-            hit = right.get(need)
+            hit = sums2.get(target - s_c - s_1)
             if hit is not None:
                 mask = m_c | m_1 | hit
                 found = tuple(i for i in range(n) if mask >> i & 1)
                 return CompressedResult(
-                    found, "compress", states + left_count, len(indices), len(sigma)
+                    found, label, states + left_count, len(indices), len(sigma)
                 )
-    return CompressedResult(
-        None, "compress", states + left_count, len(indices), len(sigma)
-    )
+    return CompressedResult(None, label, states + left_count, len(indices), len(sigma))
+
+
+def relation_components(values: Sequence[int], smax: int, cap: int = 1 << 21):
+    """``{s: [component, ...]}``: connected components of the relation graph.
+
+    Two elements are joined when they occur in the same relation (an equal-sum pair of
+    distinct subsets of size ``<= s``, common elements removed).
+    """
+    n = len(values)
+    by_sum: dict[int, list[int]] = defaultdict(list)
+    parent = list(range(n))
+
+    def find(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    out: dict[int, list[set[int]]] = {}
+    seen = 0
+    for s in range(1, smax + 1):
+        if seen + comb(n, s) > cap:
+            break
+        for idx in combinations(range(n), s):
+            total = 0
+            mask = 0
+            for i in idx:
+                total += values[i]
+                mask |= 1 << i
+            by_sum[total].append(mask)
+        seen += comb(n, s)
+        involved = set()
+        for masks in by_sum.values():
+            if len(masks) > 1:
+                for a, b in combinations(masks, 2):
+                    rel = (a | b) & ~(a & b)
+                    members = [i for i in range(n) if rel >> i & 1]
+                    involved.update(members)
+                    for i in members[1:]:
+                        ra, rb = find(members[0]), find(i)
+                        if ra != rb:
+                            parent[rb] = ra
+        groups: dict[int, set[int]] = defaultdict(set)
+        for i in involved:
+            groups[find(i)].add(i)
+        out[s] = list(groups.values())
+    return out
+
+
+def solve_components(
+    values: Sequence[int],
+    target: int,
+    smax: int = 4,
+    sigma_cap: int = 1 << 20,
+    min_gain: float = 0.5,
+) -> CompressedResult:
+    """Like ``solve_compressed`` but builds the core from compressible components only.
+
+    Each relation-graph component ``K`` has gain ``|K| - log2 |Sigma(K)|``; components are
+    added in decreasing gain per element while the total predicted cost
+    ``|Sigma(C)| + 2 sqrt(2^{n-|C|} |Sigma(C)|)`` decreases. Elements in short relations
+    that do not compress (adversarial decoy gadgets) are therefore left out.
+    """
+    values = tuple(values)
+    n = len(values)
+    best = None
+    for comps in relation_components(values, smax).values():
+        scored = []
+        for comp in comps:
+            sig = _subset_sums(values, sorted(comp), sigma_cap)
+            if sig is None:
+                continue
+            gain = len(comp) - log2(len(sig))
+            if gain >= min_gain:
+                scored.append((gain / len(comp), sorted(comp)))
+        scored.sort(reverse=True)
+        chosen: list[int] = []
+        sigma = {0: 0}
+        cost = 2 * 2 ** (n / 2)
+        for _ratio, comp in scored:
+            trial = sorted(chosen + comp)
+            sig = _subset_sums(values, trial, sigma_cap)
+            if sig is None:
+                break
+            new_cost = len(sig) + 2 * (2 ** (n - len(trial)) * len(sig)) ** 0.5
+            if new_cost < cost:
+                chosen, sigma, cost = trial, sig, new_cost
+        if chosen and (best is None or cost < best[0]):
+            best = (cost, chosen, sigma)
+    if best is None or best[0] >= 2 ** (n // 2 + 1):
+        fallback = meet_in_middle(values, target)
+        return CompressedResult(fallback.indices, "mitm", fallback.states, 0, 0)
+    return _mitm_with_core(values, target, best[1], best[2], "components")
+
+
+def solve_grow(
+    values: Sequence[int],
+    target: int,
+    smax: int = 3,
+    sigma_cap: int = 1 << 21,
+) -> CompressedResult:
+    """Greedy element-wise core growth, robust to decoys glued into relation components.
+
+    Starting from the empty set, repeatedly add the element (preferring elements that occur
+    in a short relation) whose addition makes ``Sigma(C)`` grow least; an element unrelated
+    to ``C`` doubles it, a structured one grows it by less. The prefix of this order with the
+    smallest predicted cost ``|Sigma(C)| + 2 sqrt(2^{n-|C|} |Sigma(C)|)`` is used. Exact
+    whatever the order is.
+    """
+    values = tuple(values)
+    n = len(values)
+    cores, _ = find_cores(values, smax)
+    related = set().union(*cores.values()) if cores else set()
+    sigma: dict[int, int] = {0: 0}
+    chosen: list[int] = []
+    best = (2 * 2 ** (n / 2), [], {0: 0})
+    remaining = set(range(n))
+    while remaining:
+        pick = None
+        for e in sorted(remaining, key=lambda i: (i not in related, i)):
+            size = len(sigma.keys() | {t + values[e] for t in sigma})
+            if pick is None or size < pick[0]:
+                pick = (size, e)
+        _size, e = pick
+        grown = dict(sigma)
+        for t, mask in sigma.items():
+            grown.setdefault(t + values[e], mask | (1 << e))
+        if len(grown) > sigma_cap:
+            break
+        sigma = grown
+        chosen.append(e)
+        remaining.discard(e)
+        cost = len(sigma) + 2 * (2 ** (n - len(chosen)) * len(sigma)) ** 0.5
+        if cost < best[0]:
+            best = (cost, list(chosen), sigma)
+    if not best[1] or best[0] >= 2 ** (n // 2 + 1):
+        fallback = meet_in_middle(values, target)
+        return CompressedResult(fallback.indices, "mitm", fallback.states, 0, 0)
+    return _mitm_with_core(values, target, sorted(best[1]), best[2], "grow")

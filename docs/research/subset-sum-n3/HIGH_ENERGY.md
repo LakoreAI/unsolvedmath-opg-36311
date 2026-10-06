@@ -139,3 +139,15 @@ injections and two-block decompositions did not close (sumsets can be far smalle
 products, which kills the decomposition bound). If U holds, the only remaining assumption of the model
 is A1 (no short relations among non-support elements), plus LIFT's pair-count condition
 `N_t <= A`; those two are where a genuine worst-case barrier would have to live.
+
+### Assumption A1 under attack (`decoy_adversary.md`)
+
+Decoys built to carry their own short relations (`triples` a+b=c; `linked` d = s_i+s_j-s_k;
+`shifted` pairs d, d+s_i that glue random elements into the support's relation component), at
+`n = 32`. Whole-core and component selection break on `linked`/`shifted` (fall back to MITM).
+Element-wise greedy growth (`solve_grow`: add the element that grows `Sigma(C)` least, prefer
+elements in short relations, use the best prefix) beats all four, `4.7-12.2x`, exact in every
+row. The remaining attack is structure that becomes visible only once a long relation is
+complete: greedy then sees factor-2 growth at every step. This is the same long-relation
+regime as before, so A1 reduces (at toy size) to the relation-length question rather than to
+the decoys themselves.

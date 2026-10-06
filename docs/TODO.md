@@ -204,7 +204,9 @@ is not hardness.
       states than MITM; detector exact at `n = 224` (structured part with small doubling only).
       Adversary model (`adversary_model.md`): best-of exponent `<= 0.4913` (extremal relation
       length) / `0.431` (birthday, GV) for every `delta`, under random decoys and
-      `|Sigma(S)| <= 2^{delta n}` (assumptions). Conjecture U (`ksum_unimodal.md`, max ratio 1.032 over `m <= 14`) would remove assumption A2.
+      `|Sigma(S)| <= 2^{delta n}` (assumptions). A1 attack (`decoy_adversary.md`): greedy core growth (`solve_grow`) survives triples/linked/
+      shifted decoys, 4.7-12.2x exact; the residual attack is long-relation-only structure.
+      Conjecture U (`ksum_unimodal.md`, max ratio 1.032 over `m <= 14`) would remove assumption A2.
       Quotient-by-relations idea ruled out (random: prune fraction `2^{-0.08n}`).
 - [ ] R14. **Conditional lower bound.** Attempt a reduction making a fast
       `{0,1}` sub-solver imply progress on modular subset sum / `k`-SUM /
