@@ -98,8 +98,9 @@ is not hardness.
       across adversarial families; argues the `{0,1}` barrier is the balanced
       sub-solver, not mixing. (3 pp.)
 
-- [x] P7 `docs/reports/lift/` — "From Profile Completeness to a Distinct-Sums
-      Parameter": profile completeness theorem (`sqrt(8/(pi n))`), single-prime lift
+- [x] P7 `docs/reports/lift/` — "Conditional Bounds for Representation-Based Subset Sum
+      via Profile Completeness and a Distinct-Sums Parameter": profile completeness theorem
+      (`sqrt(8/(pi n))`), single-prime lift
       with `D*` and `N_t`, forced-relation lemma, conditional exponent table, measurements.
       Conditional/partial throughout; no unconditional worst-case claim. (3 pp.)
 
