@@ -235,8 +235,8 @@ is not hardness.
       Quot.sound]`; clean `lake build`.
 - [ ] R18. **Survey upkeep.** Re-check the open-case map against the newest
       primary sources before any external release. Pending: Equal-Subset-Sum results
-      arXiv 2608.08260 (`(5/3)^n`, one-sided Monte Carlo) and 2607.09289 (new
-      state of the art claim) are not yet in `docs/reports/survey/`; verify them against
+      arXiv 2608.08260 (Ye, `(5/3)^n`, one-sided Monte Carlo) and 2607.09289 (Yamano-Shibuya,
+      `1.6994^n`; plain ESS, not PESS) are not yet in `docs/reports/survey/`; verify them against
       the primary text first (only abstracts were read).
 
 ## 8. Standing commands (do not lose)

@@ -1,0 +1,77 @@
+# Field definitions for the deep-research pass (flat JSON output, one object per item).
+fields:
+  basic:
+    - name: name
+      description: Canonical name of the approach/result/item.
+      detail_level: brief
+    - name: category
+      description: Category as given in outline.yaml.
+      detail_level: brief
+    - name: description
+      description: One-paragraph plain-language summary of the approach and what it proves.
+      detail_level: moderate
+    - name: authors_year_venue
+      description: Authors, year, venue or arXiv id of the primary source(s).
+      detail_level: brief
+    - name: status_and_verification
+      description: Peer-reviewed, preprint, or unread; and whether the claim was checked against the primary text (state which sections were read).
+      detail_level: moderate
+
+  result:
+    - name: key_theorem_or_bound
+      description: The exact statement or bound, with all parameters (quote the theorem if short).
+      detail_level: detailed
+    - name: regime_exponents
+      description: The exponent window covered (beta, D* thresholds, 0.311n, 0.5n, 0.661n, n/2 baseline).
+      detail_level: detailed
+    - name: proof_type_and_tools
+      description: Combinatorial, Fourier/analytic, lattice, algebraic, or probabilistic; named lemmas used.
+      detail_level: moderate
+    - name: quantitative_loss
+      description: Polynomial vs exponential losses (e.g. BSG poly(K), PFR quasi-poly); does the bound survive exponential energy?
+      detail_level: detailed
+    - name: worst_case_vs_average_case
+      description: Random, generic or adversarial inputs, and whether the result transfers to worst case.
+      detail_level: moderate
+    - name: coefficient_set
+      description: Set sums {0,1} versus {-1,0,1} or multiset/repetition versions.
+      detail_level: brief
+    - name: subset_size_regime
+      description: Theta(n)-subsets versus fixed k versus all subsets.
+      detail_level: moderate
+
+  relevance:
+    - name: relevance_to_Nc
+      description: How the item could bound or exploit N_c (equal-sum disjoint pairs of Theta(n)-subsets among all inputs).
+      detail_level: detailed
+    - name: relevance_to_Dstar
+      description: How the item could bound D* (distinct balanced half-sums of a solution support) or forbid D* <= 2^{0.311n} for hard instances.
+      detail_level: detailed
+    - name: applicability_gap
+      description: Exactly what fails when transferring to {0,1}, Theta(n)-subsets, polynomial doubling.
+      detail_level: detailed
+    - name: counterexample_or_hard_instance_family
+      description: Known constructions (Sidon-like, AP-free, near-extremal, rank-d GAP with random generators) that probe N_c and D* limits.
+      detail_level: moderate
+    - name: dependency_chain
+      description: Other items it composes with (e.g. BSG then PFR then constructive Freiman) to build a branch-or-bin argument.
+      detail_level: moderate
+
+  practicality:
+    - name: constructiveness
+      description: Is the structure theorem algorithmic (efficient witness), and at what cost?
+      detail_level: moderate
+    - name: lean_formalizable
+      description: Whether the key lemma could be formalized in the repo's mathlib-free Lean setting.
+      detail_level: brief
+    - name: computational_check
+      description: Largest scale tested in the source and whether the repo scripts (scripts/analysis) could check it at n <= 40.
+      detail_level: moderate
+    - name: next_experiment
+      description: One concrete experiment or proof step for this repo that follows from the item.
+      detail_level: moderate
+    - name: open_issues
+      description: Unproved steps, known errors or doubts in the source.
+      detail_level: moderate
+
+uncertain: []

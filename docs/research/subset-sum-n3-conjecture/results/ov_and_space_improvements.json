@@ -1,0 +1,30 @@
+{
+  "name": "Nederlof-Wegrzycki OV reduction for Subset Sum and Belova-Chukhin-Kulikov-Mihajlin space improvement",
+  "category": "algorithmic-family",
+  "description": "Nederlof and Wegrzycki (STOC 2021) combine Schroeppel-Shamir with the Howgrave-Graham-Joux representation technique to reduce worst-case Subset Sum to many instances of Orthogonal Vectors on {0,1}^d vectors with support d/4, giving the first improvement over Schroeppel-Shamir: time O*(2^{0.5n}) with space O*(2^{0.249999n}) (instead of 2^{n/4}). Belova, Chukhin, Kulikov and Mihajlin (ESA 2024) simplify the algorithm and analysis and reduce the space to O*(2^{0.246n}) by also filtering lists with a random prime inside Schroeppel-Shamir, yielding more but smaller weighted OV instances. The OV step is the matching/disjointness step that rules out pseudosolutions (elements used twice) produced by representations, which is the same disjointness test needed to pick out disjoint equal-sum pairs.",
+  "authors_year_venue": "J. Nederlof, K. Wegrzycki, Improving Schroeppel and Shamir's algorithm for subset sum via orthogonal vectors, STOC 2021 (arXiv 2010.08576); T. Belova, N. Chukhin, A. S. Kulikov, I. Mihajlin, Improved Space Bounds for Subset Sum, ESA 2024 (arXiv 2402.13170)",
+  "status_and_verification": "Peer-reviewed (STOC 2021, ESA 2024). Abstracts (via search/fetch) checked; the CJRS paper's description of the OV subroutine (Section 1.2) was also read. Full proofs of NW21 and BCKM24 were NOT read. [uncertain]",
+  "key_theorem_or_bound": "NW21: randomized O*(2^{0.5n}) time and O*(2^{0.249999n}) space for worst-case Subset Sum with n integers; OV algorithm detecting an orthogonal pair among N vectors in {0,1}^d with support size d/4 in time O~(N * 2^{d}/d^{d/4}) (as stated in abstract via search snippet, formula typeset not verified). BCKM24: O*(2^{0.5n}) time, O*(2^{0.246n}) space. [uncertain]",
+  "regime_exponents": "Time is exactly the n/2 baseline (no time saving); only space moves from 0.25n to 0.249999n to 0.246n. No relation to D* <= 2^{0.311n} or 0.661n thresholds.",
+  "proof_type_and_tools": "Combinatorial and probabilistic: Schroeppel-Shamir 4-list split, representation technique with random-prime filtering (Howgrave-Graham-Joux), reduction to (weighted) Orthogonal Vectors with a dedicated OV algorithm for low-weight vectors.",
+  "quantitative_loss": "Only sub-exponential/poly losses in time; the space saving is a small exponential constant (0.0010...0.004n). No structural theorem, so no BSG/PFR style loss is involved.",
+  "worst_case_vs_average_case": "Worst case for Subset Sum (randomization is internal via random primes); no average-case assumption.",
+  "coefficient_set": "{0,1} subset sums (Subset Sum); representation step temporarily uses extended coefficients ({0,1,2}-type) and OV removes pseudosolutions.",
+  "subset_size_regime": "All subsets; the OV vectors have a fixed relative support (d/4) from the Schroeppel-Shamir split, not a Theta(n)-subset constraint on solutions.",
+  "relevance_to_Nc": "The OV/disjointness step is exactly what finds a disjoint equal-sum pair among colliding candidates; N_c measures how many such candidate pairs exist. If N_c is large the matching stage has many valid outputs, which may allow subsampled/filtered runs with a smaller list (an unproved route).",
+  "relevance_to_Dstar": "None directly. A small D* (few distinct balanced half-sums) would mean OV lists have many repeated sums, making hash-bucketing cheaper, but the papers do not exploit this.",
+  "applicability_gap": "No time improvement over 2^{n/2}; structure (density, doubling) is not used. Handles space only. Pseudosolution removal assumes lists built from the representation technique, not general bins of colliding Theta(n)-subsets.",
+  "counterexample_or_hard_instance_family": "None specific; hard instances are generic (random 2^{Omega(n)} bit integers) where the algorithm runs at 2^{n/2}.",
+  "dependency_chain": "Schroeppel-Shamir -> representation technique (HGJ) -> OV (NW21) -> prime filtering (BCKM24); CJRS poly-saving reuses the OV + representation combination; a structural dichotomy (C1/C2) would supply the 'few distinct sums' branch.",
+  "constructiveness": "Fully algorithmic, randomized (Monte Carlo, one-sided).",
+  "lean_formalizable": "Algorithmic probability analysis; low priority. Only the combinatorial counting of representations might be formalizable.",
+  "computational_check": "Source reports no large-scale experiments (theoretical). Not checkable by repo scripts at n<=40 in a meaningful way (asymptotic gains). [uncertain]",
+  "next_experiment": "Implement the representation + OV filter at n<=30 and measure how many pseudosolutions vs true disjoint pairs survive, to calibrate how N_c interacts with the matching step.",
+  "open_issues": "A time bound below 2^{n/2} remains open (the central open problem); only poly saving known (CJRS). Whether the 0.246n space can be pushed to 0.25n/2 or to poly space with 2^{n/2} time is open. Details of the constant 0.249999 vs exact value not verified. [uncertain]",
+  "uncertain": [
+    "status_and_verification",
+    "key_theorem_or_bound",
+    "computational_check",
+    "open_issues"
+  ]
+}

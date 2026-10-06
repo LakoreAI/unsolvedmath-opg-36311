@@ -1,0 +1,27 @@
+{
+  "name": "Chen-Jin-Randolph-Servedio: Subset Sum in time 2^{n/2}/poly(n)",
+  "category": "algorithmic-family",
+  "description": "The first worst-case improvement over Horowitz-Sahni meet-in-the-middle for n-input Subset Sum: time O(2^{n/2} * n^{-gamma}) with gamma > 0.5023 in standard word RAM or circuit RAM. Three algorithms: (1) bit-packing from Baran-Demaine-Patrascu's 3SUM log-shaving (n^{-1/2} factor, O~(2^{n/2} l^{-1/2})); (2) representation method plus Orthogonal Vectors to remove pseudosolutions (n^{-0.01}); (3) a delicate combination giving n^{-0.5023}. Saving is a polynomial factor only, analogous to log-shaving; it is the only worst-case saving known and is the baseline any structural dichotomy has to beat.",
+  "authors_year_venue": "X. Chen, Y. Jin, T. Randolph, R. A. Servedio, arXiv 2301.07134 (Jan 2023, v2); presented as Subset Sum in Time 2^{n/2}/poly(n)",
+  "status_and_verification": "Preprint on arXiv (v2); I read the abstract, introduction, the model section, results/techniques overview (Section 1.1-1.2) from alphaXiv full text. Proof sections 3-5 not read. Peer-review venue not confirmed (APPROX/RANDOM 2022 or similar not verified). [uncertain]",
+  "key_theorem_or_bound": "Randomized algorithm for worst-case Subset Sum running in O(2^{n/2} * n^{-gamma}) for constant gamma > 0.5023 in word RAM/circuit RAM, zero-sided-in-yes (one-sided error), error probability <= 1/4, with word length l = poly(n). Simplest algorithm: O~(2^{n/2} * l^{-1/2}) <= O~(2^{n/2} n^{-1/2}). Second: O(2^{n/2} n^{-gamma}), gamma > 0.01. Remark in paper: an O(n^2/log^alpha n) algorithm for 4SUM would imply 2^{n/2}/n^alpha for Subset Sum.",
+  "regime_exponents": "Exponent stays exactly n/2; saving only a polynomial factor n^{-0.5023}. Nothing at 0.311n, 0.661n, or any exponential improvement. Assumes t = 2^{Omega(n)} (else DP is faster).",
+  "proof_type_and_tools": "Algorithmic/combinatorial: bit-packing of hashes in machine words, representation technique (Howgrave-Graham-Joux; Austrin-Kaski-Koivisto-Nederlof; Nederlof-Wegrzycki), and Orthogonal Vectors subroutine (Hash-OV) with packing for small OV instances.",
+  "quantitative_loss": "Polynomial saving only; does not survive as an exponential energy improvement (it is a 1/poly factor on 2^{n/2}).",
+  "worst_case_vs_average_case": "Worst case over all inputs; randomized.",
+  "coefficient_set": "{0,1} Subset Sum with target t (positive integers); representation step introduces {0,1,2}-like pseudosolutions removed by OV.",
+  "subset_size_regime": "All subsets; no restriction to Theta(n)-subsets.",
+  "relevance_to_Nc": "Sets the baseline: any C1-type argument (bounding N_c or using large bins) must produce a saving that beats n^{-0.5023} to be interesting, i.e. a 2^{(1/2-c)n} or at least a faster-than-poly saving. It uses no collision-counting, so provides no direct bound on N_c.",
+  "relevance_to_Dstar": "None; the algorithm is oblivious to D*. A hard-instance dichotomy (C2) would complement it by showing that instances where bit-packing/OV gain only poly(n) are those with D* > 2^{0.311n}.",
+  "applicability_gap": "No structural statement is made. Speedups depend on word-RAM packing of hashes, which do not transfer to a combinatorial bound on N_c or D*.",
+  "counterexample_or_hard_instance_family": "The instances on which the algorithm only saves poly(n) are generic hard Subset Sum instances (e.g. random with t = 2^{Theta(n)}).",
+  "dependency_chain": "Builds on HGJ representation, AKKN16, NW21 OV reduction, BDP05 bit packing; used as baseline for BCKM24-style space work and Randolph-Wegrzycki (ESS) follow-ups.",
+  "constructiveness": "Fully algorithmic (randomized), explicit time bound.",
+  "lean_formalizable": "Not feasible in mathlib-free Lean in a reasonable scope (word-RAM model, packing, OV analysis).",
+  "computational_check": "No experiments in the source (theoretical); at n<=40 the repo cannot measure an n^{-0.5} factor meaningfully.",
+  "next_experiment": "Estimate the poly-saving baseline for n in 20..40 as 2^{n/2}/n^{0.5023} and compare to 2^{0.311n}-based branch costs in the repo's cost model, to see at which n a D*-dichotomy would win.",
+  "open_issues": "Exponential saving 2^{(1/2-c)n} remains open (a major open problem). Proof sections not independently checked here.",
+  "uncertain": [
+    "status_and_verification"
+  ]
+}

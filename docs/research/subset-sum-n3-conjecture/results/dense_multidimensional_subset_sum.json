@@ -1,0 +1,30 @@
+{
+  "name": "Dense Subset Sum in Multi-Dimension (Chen-Hu-Mao-Zhang)",
+  "category": "additive-combinatorics-algorithmic",
+  "description": "For a set A of n vectors in the box [N_1]x...x[N_d] (Phi = prod N_i) with n >> sqrt(Phi) and constant d, the paper shows S(A) (set of subset sums) contains a long generalized progression, and if no proper sublattice contains most of A then S(A) contains all integer points of the zonotope {sum x_j a_j : o(1) <= x_j <= 1-o(1)}. Methods include lattice remainders, Kneser's theorem on symmetry sets, convex-analysis (inradius of zonotopes). Gives an O~(n)-time algorithm for deciding t in S(A) in the dense regime. It extends the 1-D results (Sarkozy, Szemeredi-Vu, Lev; Galil-Margalit, Bringmann-Wellnitz) to constant d, reducing density thresholds from Phi^{2/3} (d=2) and Phi^{(d-1)/d} (d>=3).",
+  "authors_year_venue": "Lin Chen, Tingwei Hu, Yuchen Mao, Guochuan Zhang, arXiv 2607.10343v2 (15/16 July 2026)",
+  "status_and_verification": "Preprint. I read the abstract, table of contents and informal Theorem 1 with its Corollary (alphaXiv full text, excerpt); the proofs, Kneser/lattice sections and algorithm details were not read. [uncertain]",
+  "key_theorem_or_bound": "Informal Thm 1 (formal Thm 50): A subset of [N]^d with L(A)=Z full-dimensional, N large, |A| >> N^{d/2}, spreadness |A\\Lambda| >> N^d/(|A| det(Z)) for every proper sublattice Lambda, and nondegeneracy |A\\V| >> N^d/|A| for every proper subspace V; then S(A) contains {v_0 + z_1 s e_1 + ... + z_d s e_d : 0<=z_j<=N} with s = det(Z) <= d^d N^d/|A| ; Corollary drops spreadness, with step s <= O~_d(N^d/|A|). Algorithm: O~(n) (poly(d) factors, constants depend on d) for membership of t.",
+  "regime_exponents": "Density threshold n >> sqrt(Phi) (= N^{d/2} for cube), sharp up to polylogs (Appendix A per paper). Not exponent-in-n regime: n polynomial in the box size, i.e. subset sums are dense. None of 0.311n, 0.661n or n/2 appears; relevant instance regime corresponds to values of poly size (DP-solvable) rather than 2^{Theta(n)}-bit integers. [uncertain]",
+  "proof_type_and_tools": "Additive combinatorics/lattice: Kneser's theorem, symmetry sets, lattice remainders, zonotope convex geometry, inradius estimates; algebraic/lattice reduction for the algorithm.",
+  "quantitative_loss": "Constants and polylog factors depend on d (exponentially in d via d^d); results are only for constant d; polylog losses in density threshold. Does not survive exponential energy: needs n >> sqrt(Phi), i.e. box volume at most n^2.",
+  "worst_case_vs_average_case": "Deterministic structural statement for adversarial A within the density/spread/nondegeneracy hypotheses; algorithm has one-sided error probability (poly small).",
+  "coefficient_set": "{0,1} subset sums (zonotope uses x_j in [0,1] reals).",
+  "subset_size_regime": "All subsets; no Theta(n)-subset restriction, no fixed-k version.",
+  "relevance_to_Nc": "In the dense regime many subsets collide (pigeonhole: 2^n subsets in Phi*n points), so N_c is huge; the structure theorem describes where, yielding a model where C1 'large-bin regime' holds trivially. It does not bound N_c for sparse 2^{Theta(n)}-sized instances.",
+  "relevance_to_Dstar": "With d constant and a rank-d generalized arithmetic progression structure of balanced half-sums, D* is polynomially bounded by the zonotope, which mirrors the 'few distinct half-sums' case (D* <= 2^{0.311n}) but only in the dense, constant-d setting.",
+  "applicability_gap": "Constant d only; dimensions growing with n (Subset Sum encodings with d ~ n/log n) break constants d^d. Requires n >> sqrt(Phi) i.e. poly-size values, whereas hard Subset Sum has values 2^{Theta(n)} with Phi exponential. Not for {-1,0,1} or Theta(n)-subsets. Spreadness/nondegeneracy hypotheses must be enforced.",
+  "counterexample_or_hard_instance_family": "Rank-d GAP with random generators and all sublattice-degenerate sets; the paper notes the density threshold sqrt(Phi) is sharp up to polylog (Appendix A), so instances below it (Sidon-like / sparse) escape the structure.",
+  "dependency_chain": "Kneser -> lattice structure -> long GAP in S(A) -> O~(n) algorithm; can compose with Freiman-type / BSG-PFR items in the repo for the structured branch of a dichotomy (constant-rank case) but not for exponential-energy case.",
+  "constructiveness": "Algorithmic: O~(n) (times poly(d)) decision for t in S(A); lattice computed in poly time (Lemma 35 in the text).",
+  "lean_formalizable": "Unlikely in mathlib-free Lean (Kneser's theorem, zonotope geometry, lattice theory). Only the 1-D toy statements might be formalizable.",
+  "computational_check": "No experiments stated in the portion read. For n<=40 the repo could test the d=1,2 statement on small boxes, but sqrt(Phi) << n requires Phi small (<=1600), which is far from the 2^{Theta(n)} regime. [uncertain]",
+  "next_experiment": "At n<=40 with d=2 and N~5-10 (Phi<=100, n>>sqrt(Phi)), verify empirically that S(A) contains a full lattice box and count N_c to compare with 2^n/(n*Phi) pigeonhole predictions.",
+  "open_issues": "Generalizing beyond constant d; whether sqrt(Phi) threshold sharpness holds in all d (per Appendix A, polylog gaps remain); formal theorem dependence on d is not stated in the excerpt read. Proofs not read. [uncertain]",
+  "uncertain": [
+    "status_and_verification",
+    "computational_check",
+    "open_issues",
+    "regime_exponents"
+  ]
+}
