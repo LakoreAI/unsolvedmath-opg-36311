@@ -1,5 +1,10 @@
 # Exact subset sum: proof scope and reproduction
 
+> **Historical record.** The Python implementation, tests, and analysis scripts
+> documented below were removed during the Lean-first migration. Their commands
+> and file paths are retained only to make the published measurements auditable.
+> The current runnable verification command is `cd lean && lake build`.
+
 ## Outcome
 
 The unrestricted worst-case `O*(2^(n/3))` question is **not proved**.

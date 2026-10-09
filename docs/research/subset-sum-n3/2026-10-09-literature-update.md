@@ -44,12 +44,12 @@ filter parameters and Appendix A provides a finite arithmetic certificate. The
 core randomized pieces include prime sampling, random phases, random filtering
 tables, random restrictions, and capped match sampling.
 
-`src/openai_049_model.py` now implements only two exact, small-instance
-components: the equation (2.1) isolation family and the Section 5 shared-mask
-compatibility predicate with an exhaustive recovery oracle. It intentionally
-does not claim the paper's running time. The missing estimator, filter tables,
-alias sampler, numerical certificate, and word-RAM implementation prevent a
-faithful end-to-end port.
+The former Python small-instance model was removed in the Lean-first migration.
+The current checked executable pipeline covers the proved reference
+meet-in-the-middle decision procedure only. A Lean formalization of the
+isolation family, shared-mask compatibility, estimator, filter tables, alias
+sampler, numerical certificate, and word-RAM implementation remains necessary
+before any end-to-end claim about this preprint.
 
 ## Next audit work
 

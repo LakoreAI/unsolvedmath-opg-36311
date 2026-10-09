@@ -4,3 +4,7 @@ defaultTargets = ["SubsetSum"]
 
 [[lean_lib]]
 name = "SubsetSum"
+
+[[lean_exe]]
+name = "subsetSumDemo"
+root = "Main"

@@ -8,9 +8,9 @@ and `docs/analysis/2026-10-05/subset-sum/` (R13/R16/R17 follow-ups).
 ## 0. Status snapshot
 
 **Question.** Worst-case `O*(2^(n/3))` for exact subset sum (`{0,1}`) is
-**open**. The repository builds correct baselines, a Lean correctness layer,
-reproducible measurements, three papers, and a research program that has
-isolated the frontier.
+**open**. The repository now keeps a Lean correctness layer and executable
+reference pipeline. The removed Python baselines and measurements remain
+documented under `docs/` as historical research artifacts.
 
 **Worst-case landscape (sourced).**
 
@@ -45,11 +45,12 @@ is not hardness.
 - [x] A1. Papers arranged under `docs/reports/<topic>/` (`baselines/`,
       `representation/`, `survey/`); `docs/reports/validation.md` at reports root.
 - [x] A2. `README.md`, `docs/RESEARCH.md`, `docs/README.md` link to the topic paths.
-- [x] A3. Removed ML-template code and placeholder dirs; `src/` is research-only.
-- [x] A4. `.gitignore` ignores Python, `.venv`, `.env`, and LaTeX/Lean build
+- [x] A3. Removed ML-template code, placeholder directories, and the Python
+      implementation, test, and analysis trees.
+- [x] A4. `.gitignore` ignores internal agent files and LaTeX/Lean build
       artifacts (`*.aux`, `*.log`, `*.fls`, `*.fdb_latexmk`, `lean/.lake/`).
 
-## 2. Algorithms and tests — done
+## 2. Historical Python algorithms and tests — retired
 
 - [x] B1. `src/subset_sum.py`: meet-in-the-middle, Schroeppel–Shamir (`ss`),
       signed DP (`dp`), `solve(...)`.
@@ -63,7 +64,7 @@ is not hardness.
       `test_dissection`, `test_hgj`, `test_additive` — stdlib tests, all pass (68 at last count).
 - [x] B7. Modules are dependency-free (stdlib only).
 
-## 3. Measurement harnesses — done
+## 3. Historical measurement harnesses — retired
 
 - [x] C1. `scripts/analysis/benchmark.py` → `bench.csv`, `memory.csv`,
       `correctness.csv`, `bench.md`, `provenance.md`.
@@ -104,12 +105,10 @@ is not hardness.
       with `D*` and `N_t`, forced-relation lemma, conditional exponent table, measurements.
       Conditional/partial throughout; no unconditional worst-case claim. (3 pp.)
 
-## 5. Verification — done
+## 5. Verification
 
-- [x] E1. `python3 -m unittest discover -s tests -p "test_*.py"` — 85 pass.
-- [x] E2. Ruff lint clean and repo-wide `ruff format --check` clean across
-      `src/`, `tests/`, `scripts/analysis/` (including the previously flagged
-      `scripts/analysis/plot_representation.py`).
+- [x] E1. Historical Python test suite: 85 pass before retirement.
+- [x] E2. Historical Python lint suite: clean before retirement.
 - [x] E3. Lean 4.19.0 `lake build` passes; axioms `[propext, Quot.sound]` only
       (the weight/residue lemmas add to the correctness layer; see R17).
 - [x] E4. `docs/reports/validation.md` records the checks actually run.
@@ -255,28 +254,12 @@ is not hardness.
       `1.6994^n`; plain ESS, not PESS) are not yet in `docs/reports/survey/`; verify them against
       the primary text first (only abstracts were read).
 
-## 8. Standing commands (do not lose)
+## 8. Standing commands
 
 ```bash
-# tests + lint
-python3 -m unittest discover -s tests -p "test_*.py"
-uv run --no-project --with ruff==0.15.15 ruff check src/ tests/ scripts/analysis/
-uv run --no-project --with ruff==0.15.15 ruff format --check src/ tests/ scripts/analysis/
-
-# measurements + figures/tables
-python3 scripts/analysis/benchmark.py
-python3 scripts/analysis/regimes.py
-python3 scripts/analysis/dichotomy.py
-python3 scripts/analysis/pseudo_solutions.py
-python3 scripts/analysis/modular_structure.py
-python3 scripts/analysis/synthetic_repr.py
-python3 scripts/analysis/representation_exponents.py
-python3 scripts/analysis/coefficient_shifting.py
-uv run --no-project --with matplotlib python3 scripts/analysis/plot_benchmarks.py
-uv run --no-project --with matplotlib python3 scripts/analysis/plot_representation.py
-
-# Lean
-cd lean && PATH="$HOME/.elan/bin:$PATH" lake clean && PATH="$HOME/.elan/bin:$PATH" lake build
+# Lean proof check and executable pipeline
+cd lean && lake build
+cd lean && lake env lean Main.lean
 
 # papers (twice each, from their own dir)
 (cd docs/reports/baselines && pdflatex -interaction=nonstopmode -halt-on-error paper.tex && pdflatex -interaction=nonstopmode -halt-on-error paper.tex)

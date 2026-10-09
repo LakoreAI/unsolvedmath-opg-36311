@@ -7,9 +7,9 @@
 > Treat every claim as unreviewed until a human mathematician has checked it; the
 > proofs outside the Lean layer are pen-and-paper and may contain errors.
 
-A dependency-free research repository on exact subset sum: correct implementa-
-tions, Lean-checked correctness proofs, reproducible measurements, and a
-roadmap toward the open `O*(2^(n/3))` worst-case bound.
+A Lean-first research repository on exact subset sum: checked executable
+reference algorithms, correctness proofs, reproducible legacy measurements,
+and a roadmap toward the open `O*(2^(n/3))` worst-case bound.
 
 **The general worst-case `O*(2^(n/3))` question is not solved here.** The
 repository proves the meet-in-the-middle correctness reduction, gives an
@@ -23,41 +23,29 @@ repository includes a [baselines paper](docs/reports/baselines/paper.tex), a
 [survey](docs/reports/survey/survey.tex); see the
 [validation report](docs/reports/validation.md) for scope.
 
-## Quickstart
+## Lean quickstart
 
-Requires Python 3.12+. The core modules and tests need no third-party packages.
+Requires Lean 4.19.0 via elan; the Lean project has no mathlib dependency.
 
 ```bash
-python3 -m src.subset_sum --values 3 -2 7 0 --target 5
-python3 -m src.subset_sum --values 2 4 8 --target 7 --method ss
-python3 -m unittest discover -s tests -p "test_*.py" -v
-
-# Lean 4.19.0 via elan; no mathlib dependency
 cd lean && lake build
+cd lean && lake env lean Main.lean
 ```
 
-Plotting uses matplotlib (`uv run python scripts/analysis/plot_benchmarks.py`);
-the report generator uses PyYAML.
+The current demo runs the proved reference meet-in-the-middle decision
+pipeline. Its correctness theorem is `SubsetSum.meetInMiddle_correct`.
 
-## Modules (`src/`)
+## Checked pipeline
 
-| Module | Contents |
-| --- | --- |
-| `subset_sum.py` | Exact subset sum: sorted meet-in-the-middle, Schroeppel-Shamir (`ss`), signed dense DP (`dp`), dispatched by `solve(values, target, method)`. |
-| `equal_subset_sum.py` | ESS via signed meet-in-the-middle (`O*(3^(n/2))`); PESS via binary-search MITM (`O*(2^(n/2))`); modular-bucket sampler. |
-| `dissection.py` | Wagner four-list modular k-sum core and verifier. |
-| `hgj.py` | Howgrave-Graham-Joux representation + modular-filter search for hard knapsacks. |
-| `representation.py` | Candidate `{0,1}` pipeline: gcd reduction, superincreasing greedy, HGJ filter, MITM fallback; mixing-coverage helper. |
-| `compatibility.py` | Sparse-OV disjointness (compatibility) primitives for broadened representations. |
-| `bcj.py` | Broadened `{-1,0,1}` representation search (BCJ Sect. 3.1) with exact compatibility. |
-| `bcj_tree.py` | Three-level BCJ tree (Sect. 3.3): eight leaf lists, three moduli, consistency-filtered merges; toy-`n` structural port. |
-| `additive.py` | Additive-combinatorics probes: `\|S(A)\|`, collision count `F`, additive energy, modular residue profiles, cardinality counts. |
-| `three_block.py` | Exact three-block reduction to structured three-set 3SUM, with a quadratic reference merge. |
-| `openai_049_model.py` | Small-instance isolation and shared-mask compatibility references from the October 2026 `O(2^(0.49n))` preprint; not its full algorithm. |
+`lean/SubsetSum.lean` defines the subset-selection specification and proves
+correctness of the executable meet-in-the-middle decision procedure. It also
+proves contiguous two- and three-block decomposition lemmas, a
+weight-resolved representation split, and modular-filter completeness.
+`lean/Main.lean` is the sole end-to-end executable demonstration.
 
-All solvers are exact and return occurrence-index witnesses (or `None`). `ss`
-is `O*(2^(n/2))` time with `O*(2^(n/4))` space; the DP is pseudopolynomial in
-`W = sum(abs(a_i))`.
+The former Python implementations, tests, analysis scripts, and package
+metadata have been removed. Their published measurements and reports remain
+under `docs/` as historical research artifacts.
 
 ## Measurements and research
 
@@ -78,10 +66,9 @@ is `O*(2^(n/2))` time with `O*(2^(n/4))` space; the DP is pseudopolynomial in
 ## Repository layout
 
 ```
-src/                      # dependency-free research modules
-scripts/analysis/         # benchmarks, probes, figure/table generators
-tests/                    # standard-library unittest suites
 lean/                     # Lean 4.19.0 correctness layer
+  Main.lean               #   executable reference pipeline
+  SubsetSum.lean          #   specification and checked theorems
 docs/                     # all documents (see docs/README.md)
   analysis/<date>/<topic>/#   measured outputs (CSV, markdown)
   reports/<topic>/        #   papers (source, PDF, figures, tables)

@@ -118,18 +118,16 @@ formalized~\cite{openai-release}. Accordingly, this repository labels the
 result \emph{unreviewed until independently checked}; that label concerns the
 state of this project's audit, not a claim that the manuscript is false.
 
-Two small, exact reference components now live in
-\texttt{src/openai\_049\_model.py}. The first constructs the isolation family
-in equation (2.1). The second exhaustively enumerates shared-mask records and
-uses mask disjointness to recover a small-instance subset witness. They provide
-an oracle for future differential checks, but intentionally omit the estimator,
-filter-table construction, alias sampler, arithmetic certificate, and word-RAM
-engineering. They carry no $2^{0.49n}$ performance claim.
+The former Python small-instance model was removed in the Lean-first migration.
+The current checked executable pipeline covers the proved reference
+meet-in-the-middle decision procedure only. A Lean formalization of the
+isolation family, shared-mask compatibility, estimator, filter-table
+construction, alias sampler, arithmetic certificate, and word-RAM engineering
+remains necessary before any end-to-end claim about this preprint.
 
-The repository also contains a direct structured three-block reference solver,
-PESS close-pair reduction components, and a Lean theorem for the three-block
-sum decomposition. Those remain useful comparison tools; none supplies the
-missing end-to-end implementation of the new manuscript.
+The historical reports record earlier three-block and PESS experiments. The
+Lean project retains a theorem for the three-block sum decomposition. Neither
+supplies the missing end-to-end implementation of the new manuscript.
 
 \section{Revised next steps}
 
