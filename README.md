@@ -52,6 +52,8 @@ the report generator uses PyYAML.
 | `bcj.py` | Broadened `{-1,0,1}` representation search (BCJ Sect. 3.1) with exact compatibility. |
 | `bcj_tree.py` | Three-level BCJ tree (Sect. 3.3): eight leaf lists, three moduli, consistency-filtered merges; toy-`n` structural port. |
 | `additive.py` | Additive-combinatorics probes: `\|S(A)\|`, collision count `F`, additive energy, modular residue profiles, cardinality counts. |
+| `three_block.py` | Exact three-block reduction to structured three-set 3SUM, with a quadratic reference merge. |
+| `openai_049_model.py` | Small-instance isolation and shared-mask compatibility references from the October 2026 `O(2^(0.49n))` preprint; not its full algorithm. |
 
 All solvers are exact and return occurrence-index witnesses (or `None`). `ss`
 is `O*(2^(n/2))` time with `O*(2^(n/4))` space; the DP is pseudopolynomial in

@@ -206,11 +206,15 @@ Branch on input parameters and aim for `2^(n/3)` in all branches:
 
 ## Ordered next tasks
 
-1. HGJ/BCJ dissection implementation + reproducible `2^(0.29n)` curve.
-2. PESS `2^(n/3)` implementation and a written account of its promise.
-3. Mixing harness for small `C`; search for synthetic representations.
-4. Formal 3-block → 3SUM reduction with complexity bookkeeping.
-5. Literature watch and re-verification: Randolph-Węgrzycki (STOC 2026),
+1. Audit the 2026-10-04 claimed `O(2^(0.49n))` worst-case Subset Sum result:
+   recover its precise source, verify its stated model and randomized guarantee,
+   and reproduce its compatibility reduction on small instances. See
+   `2026-10-09-literature-update.md`.
+2. HGJ/BCJ dissection implementation + reproducible `2^(0.29n)` curve.
+3. PESS `2^(n/3)` implementation and a written account of its promise.
+4. Mixing harness for small `C`; search for synthetic representations.
+5. Formal 3-block → 3SUM reduction with complexity bookkeeping.
+6. Literature watch and re-verification: Randolph-Węgrzycki (STOC 2026),
    Jin-Williams-Zhang (ESA 2025), Chukhin et al. (2026).
 
 ## Risks

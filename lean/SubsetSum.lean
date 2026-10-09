@@ -97,6 +97,21 @@ theorem hasSum_append (left right : List Int) (b : Int) :
         · left; exact (ih b).mpr ⟨u, v, hu, hv, he⟩
         · right; exact (ih (b - a)).mpr ⟨u - a, v, hu, hv, by omega⟩
 
+/-- Three contiguous blocks are exactly a three-set 3SUM instance. -/
+theorem hasSum_append3 (first second third : List Int) (b : Int) :
+    HasSum ((first ++ second) ++ third) b ↔
+      ∃ x y z, HasSum first x ∧ HasSum second y ∧ HasSum third z ∧ x + y + z = b := by
+  constructor
+  · intro h
+    rcases (hasSum_append (first ++ second) third b).mp h with ⟨u, z, hu, hz, huz⟩
+    rcases (hasSum_append first second u).mp hu with ⟨x, y, hx, hy, hxy⟩
+    exact ⟨x, y, z, hx, hy, hz, by omega⟩
+  · rintro ⟨x, y, z, hx, hy, hz, hxyz⟩
+    apply (hasSum_append (first ++ second) third b).mpr
+    refine ⟨x + y, z, ?_, hz, ?_⟩
+    · exact (hasSum_append first second (x + y)).mpr ⟨x, y, hx, hy, rfl⟩
+    · omega
+
 /-- Executable reference specification; linear membership is intentionally
 simple. Python uses sorting/binary search instead. -/
 def meetInMiddle (left right : List Int) (b : Int) : Bool :=

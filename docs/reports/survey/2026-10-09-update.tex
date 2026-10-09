@@ -1,0 +1,170 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,booktabs,array}
+\usepackage{hyperref}
+\hypersetup{hidelinks}
+\newcommand{\Oh}{\mathcal{O}}
+\title{Update: A Claimed $\Oh(2^{0.49n})$ Algorithm for Subset Sum}
+\author{Le Duc Minh}
+\date{October 9, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The accompanying survey, \emph{A Survey of Exact Algorithms for Subset Sum and
+Its Variants}, described the fixed-exponent worst-case improvement over
+$2^{n/2}$ as open. On October 6, 2026, OpenAI released a manuscript collection
+containing a preprint dated October 4 that claims a uniform randomized
+classical $\Oh(2^{0.49n})$ algorithm for Subset Sum. This note records the
+exact scope of that claim, its proof pipeline, its current verification status,
+and the resulting changes to the research program in this repository. It is an
+audit update, not an independent proof of the claimed theorem.
+\end{abstract}
+
+\section{Why this update is separate}
+
+The earlier survey remains useful as a record of the preprint landscape it
+described, but several of its central statements are now historically dated.
+In particular, its introduction, result table, chronology, conclusion, and
+open-problem discussion say that ordinary worst-case Subset Sum had no known
+constant improvement below $2^{n/2}$. Rewriting each statement in place would
+hide the distinction between the prior landscape and a new, not yet
+independently checked claim. This dated note supplies the correction and the
+appropriate qualification.
+
+\section{The claimed result}
+
+The primary artifact is the preprint \emph{Subset Sum in Time
+$\Oh(2^{0.49n})$}~\cite{openai-ss}, included in OpenAI's mathematics
+collection~\cite{openai-release}. Its Theorem 1.1 claims a single uniform
+randomized classical word-RAM algorithm with the following guarantees.
+
+\begin{itemize}
+\item The input is a target $t\geq 0$ and positive integer weights
+  $a_1,\ldots,a_n$, with repeated weights and the empty subset allowed.
+\item Let $b$ be the largest input bit length. The word length is
+  $w=\lceil4(n+b+\log_2(n+2))\rceil$ bits. Random word generation, input
+  access, preprocessing, and writable storage all count toward the running
+  time.
+\item The algorithm halts on every random execution and returns the correct
+  decision answer with probability at least $2/3$ for every fixed input.
+\item For every fixed $c>0$, inputs with $b\leq n^c$ are processed in
+  $C_c2^{0.49n}$ word operations for sufficiently large $n$, on every random
+  execution. The stated intermediate form is
+  $2^{0.489995n}\operatorname{poly}(n+b+2)$.
+\end{itemize}
+
+The claim is therefore a substantial change to the worst-case landscape, if
+correct. It is narrower than the signed-integer, witness-returning interface of
+this repository: the manuscript states a positive-integer decision theorem.
+An explicit reduction and witness reconstruction must be supplied before its
+bound can be assigned to the repository API.
+
+\begin{table}[t]
+\centering
+\caption{Corrected status of the main classical regimes.}
+\begin{tabular}{p{4.7cm}p{3.2cm}p{4.2cm}}
+\toprule
+Setting & Bound & Status \\
+\midrule
+Positive-integer Subset Sum, polynomial-bit word RAM & $2^{0.49n}$ & claimed in a new preprint \\
+Signed-integer Subset Sum with an occurrence witness & $2^{n/2}$ baseline & no reduction or implementation here \\
+Random hard knapsacks & $2^{0.291n}$ & BCJ model; average-case \\
+Pigeonhole Equal Subset Sum & $2^{n/3}$ & randomized promise result \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Pipeline in the manuscript}
+
+The new proof is not a direct extension of the HGJ or BCJ representation
+algorithm. Its five coupled components are:
+
+\begin{enumerate}
+\item \textbf{Isolation.} Random tie-breaking weights transform one input into
+  polynomially many positive-weight targets. With high constant probability, a
+  satisfiable input produces a target with exactly one representing subset.
+\item \textbf{Preliminary search.} A capped meet-in-the-middle procedure solves
+  instances whose random restrictions have a sufficiently small distinct
+  subset-sum support.
+\item \textbf{Modular checksum.} For a large random prime, a filtered
+  high/low-digit construction estimates a Fourier expression for each modular
+  target bin to small \emph{absolute} error. The filter uses fixed numerical
+  parameters and a finite interval-arithmetic certificate in the appendix.
+\item \textbf{Alias extraction.} A separate shared-block representation lists
+  modular false positives. Its records carry masks for the shared block; a pair
+  is compatible exactly when those masks are disjoint. Random primes bound
+  surviving nonzero integer discrepancies.
+\item \textbf{Subtraction and thresholding.} The estimated modular bin minus
+  the complete alias contribution distinguishes an empty bin from the isolated
+  one.
+\end{enumerate}
+
+This structure matters for reproducibility. The claimed exponent depends on
+the interaction of checksum variance, filtering coverage, alias enumeration,
+finite precision, and caps on every randomized loop. Replacing any one part by
+an uncapped heuristic does not reproduce Theorem~1.1.
+
+\section{Audit and repository status}
+
+The exact manuscript path, theorem scope, and published model were checked
+against the primary PDF. The official Lean formalization catalog does not list
+this manuscript~\cite{openai-lean}. The collection release also says that
+results are at different verification stages and that not all manuscripts are
+formalized~\cite{openai-release}. Accordingly, this repository labels the
+result \emph{unreviewed until independently checked}; that label concerns the
+state of this project's audit, not a claim that the manuscript is false.
+
+Two small, exact reference components now live in
+\texttt{src/openai\_049\_model.py}. The first constructs the isolation family
+in equation (2.1). The second exhaustively enumerates shared-mask records and
+uses mask disjointness to recover a small-instance subset witness. They provide
+an oracle for future differential checks, but intentionally omit the estimator,
+filter-table construction, alias sampler, arithmetic certificate, and word-RAM
+engineering. They carry no $2^{0.49n}$ performance claim.
+
+The repository also contains a direct structured three-block reference solver,
+PESS close-pair reduction components, and a Lean theorem for the three-block
+sum decomposition. Those remain useful comparison tools; none supplies the
+missing end-to-end implementation of the new manuscript.
+
+\section{Revised next steps}
+
+\begin{enumerate}
+\item Reproduce the modular-checksum and alias-extraction theorems on small
+  instances with explicit failure caps and a brute-force oracle.
+\item Independently check the filtering-moment inequalities and the rational
+  interval calculations in the appendix.
+\item Specify and prove a positive-to-signed reduction that preserves the
+  repository's witness semantics.
+\item Only after those steps, update the main survey's worst-case table and
+  conclusion from ``open'' to a properly qualified account of the preprint.
+\end{enumerate}
+
+\begin{thebibliography}{9}
+\bibitem{openai-ss}
+OpenAI, ``Subset Sum in Time $\Oh(2^{0.49n})$,'' October 4, 2026.
+\newblock \url{https://github.com/openai/math/blob/main/preprints/Subset-Sum-in-Time-2-power-0-49n-October-4-2026/subset-sum.pdf}
+
+\bibitem{openai-release}
+OpenAI, ``Sharing AI progress in mathematics,'' October 6, 2026.
+\newblock \url{https://openai.com/index/sharing-ai-progress-in-mathematics/}
+
+\bibitem{openai-lean}
+OpenAI, ``Lean formalization catalog,'' accessed October 9, 2026.
+\newblock \url{https://github.com/openai/math/blob/main/lean/formalization.yaml}
+
+\bibitem{bcj}
+A. Becker, J.-S. Coron, and A. Joux, ``Improved generic algorithms for hard
+knapsacks,'' EUROCRYPT 2011.
+\newblock \url{https://eprint.iacr.org/2011/474}
+
+\bibitem{jwz}
+C. Jin, R. Williams, and S. Zhang, ``New algorithms for Pigeonhole Equal
+Subset Sum,'' ESA 2025.
+\newblock \url{https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ESA.2025.86}
+\end{thebibliography}
+
+\end{document}
