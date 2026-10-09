@@ -4,6 +4,7 @@
 \usepackage{amsmath,amssymb,booktabs,array}
 \usepackage{hyperref}
 \hypersetup{hidelinks}
+\setlength{\emergencystretch}{1em}
 \newcommand{\Oh}{\mathcal{O}}
 \title{Update: A Claimed $\Oh(2^{0.49n})$ Algorithm for Subset Sum}
 \author{Le Duc Minh}
@@ -86,7 +87,7 @@ algorithm. Its five coupled components are:
 \item \textbf{Isolation.} Random tie-breaking weights transform one input into
   polynomially many positive-weight targets. With high constant probability, a
   satisfiable input produces a target with exactly one representing subset.
-\item \textbf{Preliminary search.} A capped meet-in-the-middle procedure solves
+\item \textbf{Preliminary search.} A capped MITM procedure solves
   instances whose random restrictions have a sufficiently small distinct
   subset-sum support.
 \item \textbf{Modular checksum.} For a large random prime, a filtered
