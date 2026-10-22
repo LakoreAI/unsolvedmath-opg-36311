@@ -37,6 +37,15 @@ def demoHgj : Option (List Bool) :=
 def demoCappedPrelim : Option Bool :=
   cappedPrelimSolve 8 [1, 2, 3] [10, 20] 16
 
+def demoFlip : Int × Int :=
+  let xs := [3, -2, 7, 0]
+  let fs := [true, false, true, false]
+  (maskSum (flipWeights fs xs) (xorMask [true, true, false, false] fs), 1 - maskSum xs fs)
+
+def demoFilterMoments : Float × Float × Float :=
+  let t := Audit049Filter.filterTable 64
+  (t.moment1, t.moment2, Audit049Filter.threshold)
+
 #eval demoDecision
 #eval demoWitness
 #eval demoSharedMask
@@ -44,6 +53,8 @@ def demoCappedPrelim : Option Bool :=
 #eval demoCompressMitm
 #eval demoHgj
 #eval demoCappedPrelim
+#eval demoFlip
+#eval demoFilterMoments
 
 def main : IO Unit := do
   IO.println s!"subset-sum decision: {demoDecision}"
@@ -53,3 +64,5 @@ def main : IO Unit := do
   IO.println s!"compressible-core MITM: {demoCompressMitm}"
   IO.println s!"HGJ witness: {repr demoHgj}"
   IO.println s!"capped preliminary search: {repr demoCappedPrelim}"
+  IO.println s!"flip (signed sum, a(I) - a(F)): {repr demoFlip}"
+  IO.println s!"Prop. 3.1 moments (T64, T64', 2^0.5168): {demoFilterMoments}"

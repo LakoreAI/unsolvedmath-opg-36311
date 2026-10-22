@@ -38,7 +38,7 @@ bin alias subtraction.
 
 ## Checked pipeline
 
-`lean/SubsetSum.lean` re-exports seven modular verification files under
+`lean/SubsetSum.lean` re-exports ten modular verification files under
 `lean/SubsetSum/`:
 - `lean/SubsetSum/Basic.lean`: `HasSum` occurrence specification, two- and
   three-block splits, `meetInMiddle_correct`, `threeBlock_correct`, and
@@ -72,6 +72,20 @@ bin alias subtraction.
   (`maskSum_high_low_split`), capped distinct-sum preliminary search
   (`cappedPrelimSolve_sound`), and end-to-end isolated alias-subtraction
   decision (`isolated_alias_decision_iff`).
+- `lean/SubsetSum/Audit049Lemmas.lean`: the preprint's Lemma 2.2 deficiency
+  bounds in exponentiated form (`coreSums_cons_length_le`,
+  `coreSums_length_le_pow`, `coreSums_append_length_le`,
+  `coreSums_exchange_length_le`), the flip bijection (5.5) (`maskSum_flip`,
+  `xorMask_involutive`, `flip_hits_iff`), and the alias carry (5.4)
+  (`alias_carry`).
+- `lean/SubsetSum/Audit049Constants.lean`: kernel-decided ledger of every
+  scalar inequality in the preprint's exponent bookkeeping (Sections 2, 4, 5
+  and Appendix A), including `1.429584295 < 2^0.5168` and `h(0.0567) + 0.0567 < 0.40`.
+  It checks arithmetic only, not that these quantities are running times.
+- `lean/SubsetSum/Audit049Filter.lean`: `Float` reproduction of the
+  Proposition 3.1 filtering moments (numerical, outside the kernel). The
+  averages are stable from `N = 32` to `256` at `1.428968` and `1.428847`,
+  below `2^0.5168 ≈ 1.430778`.
 
 `lean/Main.lean` is the end-to-end executable demonstration.
 

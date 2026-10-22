@@ -261,6 +261,16 @@ is not hardness.
       space, arXiv:2607.09289; Ye `(5/3)^n` one-sided Monte Carlo,
       arXiv:2608.08260, explicitly marked as preprints) and the new Lean
       formalizations of the October 2026 preprint's structural reductions.
+- [x] R19. **Preprint audit, layer 2.** `Audit049Lemmas.lean`: Lemma 2.2
+      deficiency bounds (exponentiated), flip bijection (5.5), alias carry
+      (5.4); axioms `[propext, Quot.sound]`. `Audit049Constants.lean`: every
+      scalar inequality of Sections 2/4/5 and Appendix A, kernel-decided with
+      no axioms. `Audit049Filter.lean`: `Float` reproduction of Prop. 3.1
+      moments, `1.428968` / `1.428847` vs `2^0.5168 = 1.430778`, grid-stable
+      for `N = 32..256`. Not covered: rigorous enclosure of the moment
+      integrals and the probabilistic claims (Lemma 5.2, Markov step).
+- [ ] R20. Rigorous interval enclosure of the Prop. 3.1 moments (bound the
+      `N`-point quadrature error for the trigonometric integrands).
 
 ## 8. Standing commands
 

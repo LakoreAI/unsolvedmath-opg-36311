@@ -5,6 +5,9 @@ import SubsetSum.Representation
 import SubsetSum.SharedMask
 import SubsetSum.HighEnergy
 import SubsetSum.Audit049
+import SubsetSum.Audit049Lemmas
+import SubsetSum.Audit049Constants
+import SubsetSum.Audit049Filter
 
 /-! # Exact Subset Sum Research — Root Module
 
@@ -29,7 +32,14 @@ Re-exports the modular Lean 4.19.0 correctness layer:
   solver (`hgjSolve`), and PESS crowded-interval halving (`pess_crowded_halving`).
 - `SubsetSum.Audit049`: high/low-digit decomposition (`maskSum_high_low_split`),
   capped preliminary search (`cappedPrelimSolve`), and end-to-end isolated
-  alias-subtraction decision (`isolated_alias_decision_iff`). -/
+  alias-subtraction decision (`isolated_alias_decision_iff`).
+- `SubsetSum.Audit049Lemmas`: Lemma 2.2 deficiency bounds in exponentiated form
+  (`coreSums_cons_length_le`, `coreSums_append_length_le`), the flip bijection
+  (`maskSum_flip`, `xorMask_involutive`), and the alias carry (`alias_carry`).
+- `SubsetSum.Audit049Constants`: kernel-decided ledger of the preprint's scalar
+  inequalities (Sections 2, 4, 5 and Appendix A).
+- `SubsetSum.Audit049Filter`: `Float` reproduction of the Proposition 3.1
+  filtering moments and Appendix A Table 1 (numerical, not a proof). -/
 namespace SubsetSum
 
 #eval meetInMiddle [3, -2] [7, 0] 5
@@ -87,5 +97,20 @@ namespace SubsetSum
 #print axioms maskSum_high_low_split
 #print axioms cappedPrelimSolve_sound
 #print axioms isolated_alias_decision_iff
+#print axioms length_le_of_nodup_subset
+#print axioms coreSums_length_le_cons
+#print axioms coreSums_cons_length_le
+#print axioms coreSums_length_le_pow
+#print axioms coreSums_append_length_le
+#print axioms coreSums_exchange_length_le
+#print axioms xorMask_involutive
+#print axioms maskSum_flip
+#print axioms flip_hits_iff
+#print axioms alias_carry
+#print axioms Audit049Constants.checksum_error_exponent
+#print axioms Audit049Constants.appendix_moment_threshold
+#print axioms Audit049Constants.entropy_sparse_lt
+#print axioms Audit049Constants.alias_pair_exponent
+#print axioms Audit049Constants.all_history_exponent
 
 end SubsetSum
