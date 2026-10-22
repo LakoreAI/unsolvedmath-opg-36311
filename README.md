@@ -32,16 +32,48 @@ cd lean && lake build
 cd lean && lake env lean Main.lean
 ```
 
-The current demo runs the proved reference meet-in-the-middle decision
-pipeline. Its correctness theorem is `SubsetSum.meetInMiddle_correct`.
+The current demo runs the proved reference meet-in-the-middle decision and
+witness pipeline, the three-block shared-mask compatibility solver, and modular
+bin alias subtraction.
 
 ## Checked pipeline
 
-`lean/SubsetSum.lean` defines the subset-selection specification and proves
-correctness of the executable meet-in-the-middle decision procedure. It also
-proves contiguous two- and three-block decomposition lemmas, a
-weight-resolved representation split, and modular-filter completeness.
-`lean/Main.lean` is the sole end-to-end executable demonstration.
+`lean/SubsetSum.lean` re-exports seven modular verification files under
+`lean/SubsetSum/`:
+- `lean/SubsetSum/Basic.lean`: `HasSum` occurrence specification, two- and
+  three-block splits, `meetInMiddle_correct`, `threeBlock_correct`, and
+  bounded-magnitude radius bounds.
+- `lean/SubsetSum/Witness.lean`: Boolean occurrence-mask semantics (`maskSum`)
+  and witness-returning `meetInMiddleWitness` (`meetInMiddleWitness_sound`,
+  `meetInMiddleWitness_isSome_iff`).
+- `lean/SubsetSum/Reductions.lean`: signed-to-nonnegative and strictly positive
+  weight reductions (`hasSum_signed_iff_nonneg`, `hasSum_signed_iff_pos`,
+  `flipNegMask_involutive`) and the tie-breaking solution isolation family
+  (`isolation_mask_iff`, `isolation_hasSum_iff`, `isolation_unique_mask`).
+- `lean/SubsetSum/Representation.lean`: weight-resolved certificates
+  (`HasSumWeight`, `hasSumWeight_append`), modular-filter completeness
+  (`mem_residues`), mixing concentration/contraction kernels, collision-energy
+  decomposition (`collision_energy_split`), and impossibility of coefficient
+  shifting for `{0,1}` and `{-1,1}` (`no_coefficient_shifting_01`,
+  `no_coefficient_shifting_pm1`).
+- `lean/SubsetSum/SharedMask.lean`: disjoint-mask union (`maskSum_orMask_of_disjoint`),
+  three-block shared-mask compatibility solver (`sharedMaskSolve_sound`,
+  `sharedMaskSolve_isSome_iff`), and exact modular bin alias subtraction
+  (`modBin_alias_subtraction`).
+- `lean/SubsetSum/HighEnergy.lean`: common-element stripping and Lemma T for
+  colliding subsets (`masksDisjoint_diffMask`, `maskSum_diffMask_eq_iff`,
+  `diffMask_ne_of_ne`, `lemma_T_forced_disjoint_relation`), scaled-geometric
+  transfer barrier (`maskSum_scaled_geomWeights_inj`), discrete Cauchy-Schwarz
+  collision energy (`sq_sum_le_length_mul_sumSq`), weight-slice sumset profiles
+  (`sliceProfile`), compressible-core MITM (`compressMitm_correct`), HGJ
+  modular-filter solver (`hgjSolve_sound`, `hgjSolve_isSome_of_representation`),
+  and PESS crowded-interval halving (`pess_crowded_halving`).
+- `lean/SubsetSum/Audit049.lean`: high/low-digit decomposition
+  (`maskSum_high_low_split`), capped distinct-sum preliminary search
+  (`cappedPrelimSolve_sound`), and end-to-end isolated alias-subtraction
+  decision (`isolated_alias_decision_iff`).
+
+`lean/Main.lean` is the end-to-end executable demonstration.
 
 The former Python implementations, tests, analysis scripts, and package
 metadata have been removed. Their published measurements and reports remain
@@ -68,7 +100,8 @@ under `docs/` as historical research artifacts.
 ```
 lean/                     # Lean 4.19.0 correctness layer
   Main.lean               #   executable reference pipeline
-  SubsetSum.lean          #   specification and checked theorems
+  SubsetSum.lean          #   root barrel module and axiom checks
+  SubsetSum/              #   modular specification and theorem files
 docs/                     # all documents (see docs/README.md)
   analysis/<date>/<topic>/#   measured outputs (CSV, markdown)
   reports/<topic>/        #   papers (source, PDF, figures, tables)

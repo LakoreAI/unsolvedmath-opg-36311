@@ -242,17 +242,25 @@ is not hardness.
         an asymptotic reproduction, not a practical speedup at small `n`.
       Baseline, modular-bucket counting/sampling primitive, and Jin-Wu
       `O*(2^(0.4n))` also exist.
-- [x] R17. **Formalize.** `lean/SubsetSum.lean` now proves the weight-resolved
-      split lemma `hasSumWeight_append` (the representation decomposition
-      `x = y + z` with `ku + kv = k`) and the modular-filter completeness lemma
-      `mem_residues` (every feasible sum survives a residue filter), plus
-      `hasSumWeight_sound/completes/le_length`. Axioms stay `[propext,
-      Quot.sound]`; clean `lake build`.
-- [ ] R18. **Survey upkeep.** Re-check the open-case map against the newest
-      primary sources before any external release. Pending: Equal-Subset-Sum results
-      arXiv 2608.08260 (Ye, `(5/3)^n`, one-sided Monte Carlo) and 2607.09289 (Yamano-Shibuya,
-      `1.6994^n`; plain ESS, not PESS) are not yet in `docs/reports/survey/`; verify them against
-      the primary text first (only abstracts were read).
+- [x] R17. **Formalize.** `lean/SubsetSum.lean` and `lean/SubsetSum/*.lean` now
+      prove the weight-resolved split lemma `hasSumWeight_append` (the
+      representation decomposition `x = y + z` with `ku + kv = k`), the
+      modular-filter completeness lemma `mem_residues`, witness-returning MITM
+      (`meetInMiddleWitness_sound`), signed-to-positive and tie-breaking
+      isolation reductions (`hasSum_signed_iff_pos`, `isolation_hasSum_iff`,
+      `isolation_unique_mask`), three-block shared-mask compatibility and
+      modular alias subtraction (`sharedMaskSolve_sound`,
+      `modBin_alias_subtraction`), disjoint forced-relation stripping
+      (`masksDisjoint_diffMask`, `maskSum_diffMask_eq_iff`,
+      `diffMask_ne_of_ne`), and the discrete Cauchy-Schwarz collision-energy
+      bound (`sq_sum_le_length_mul_sumSq`). Axioms stay `[propext, Quot.sound]`;
+      clean `lake build`.
+- [x] R18. **Survey upkeep.** Updated `docs/reports/survey/survey.tex` and
+      `docs/reports/survey/2026-10-09-update.tex` to include the 2026
+      Equal-Subset-Sum preprints (Yamano–Shibuya `1.6994^n` time / `1.5664^n`
+      space, arXiv:2607.09289; Ye `(5/3)^n` one-sided Monte Carlo,
+      arXiv:2608.08260, explicitly marked as preprints) and the new Lean
+      formalizations of the October 2026 preprint's structural reductions.
 
 ## 8. Standing commands
 

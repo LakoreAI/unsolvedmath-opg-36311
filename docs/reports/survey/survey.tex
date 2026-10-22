@@ -410,7 +410,10 @@ W\k{e}grzycki~\cite{mnpw} were the first to beat it, with $1.7088^n$, using a
 worst-case form of the representation technique. The key point is that ESS has
 the coefficient $0$ and the target $0$, so a solution has many representations
 for free: $0=0+0=1+(-1)=(-1)+1$. Randolph and W\k{e}grzycki~\cite{rw} improved
-this to $1.7067^n$, and Yamano and Shibuya~\cite{ys} to $1.6994^n$.
+this to $1.7067^n$. Two 2026 preprints report further improvements by branching
+on the zero-density of a minimum-support solution: Yamano and Shibuya~\cite{ys}
+give $1.6994^n$ time and $1.5664^n$ space, and Ye~\cite{ye} claims a one-sided
+Monte Carlo bound of $(5/3)^n\approx1.6667^n$.
 
 \subsection{Either-or subset sum}
 Randolph~\cite{rand} studied a hybrid problem: given an input, return
@@ -643,7 +646,8 @@ Becker--Coron--Joux~\cite{bcj} & $2^{0.291n}$ & & avg \\
 Bonnetain et al.~\cite{bbss} & $2^{0.283n}$ & & avg \\
 Esser--May~\cite{em} & $2^{0.65n}$ & polynomial & avg \\
 Either-or subset sum~\cite{rand} & $2^{0.461n}$ & & WC, relative \\
-ESS, Yamano--Shibuya~\cite{ys} & $1.6994^n$ & & WC, relative \\
+ESS, Yamano--Shibuya~\cite{ys} & $1.6994^n$ & $1.5664^n$ & WC, relative (preprint) \\
+ESS, Ye~\cite{ye} & $(5/3)^n$ & $(5/3)^n$ & WC, relative (preprint) \\
 PESS, Jin--Williams--Zhang~\cite{jwz} & $2^{n/3}$ & & promise \\
 Quantum, Chukhin et al.~\cite{cklm} & $2^{2n/7}$ & & WC, quantum \\
 \bottomrule
@@ -810,6 +814,8 @@ classical and quantum algorithms for subset-sum,'' ASIACRYPT 2020; ePrint
 subset balancing problems,'' arXiv:2511.10823, 2025.
 \bibitem{ys} Yamano and Shibuya, ``Faster exact algorithms for Equal-Subset-Sum,''
 arXiv:2607.09289, 2026.
+\bibitem{ye} L. Ye, ``Solving Equal Subset Sum in $O^*((5/3)^n)$ time,''
+arXiv:2608.08260, 2026.
 \bibitem{jw} C. Jin and H. Wu, ``A faster algorithm for Pigeonhole Equal Sums,''
 arXiv:2403.19117, 2024.
 \bibitem{jwsosa} C. Jin and H. Wu, ``A simple near-linear pseudopolynomial time

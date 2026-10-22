@@ -10,3 +10,5 @@ lean/.lake/
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+
+.venv/

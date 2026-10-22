@@ -15,31 +15,30 @@
 
 \begin{abstract}
 The accompanying survey, \emph{A Survey of Exact Algorithms for Subset Sum and
-Its Variants}, described the fixed-exponent worst-case improvement over
-$2^{n/2}$ as open. On October 6, 2026, OpenAI released a manuscript collection
-containing a preprint dated October 4 that claims a uniform randomized
-classical $\Oh(2^{0.49n})$ algorithm for Subset Sum. This note records the
-exact scope of that claim, its proof pipeline, its current verification status,
-and the resulting changes to the research program in this repository. It is an
-audit update, not an independent proof of the claimed theorem.
+Its Variants}, described a fixed-exponent worst-case improvement over $2^{n/2}$
+as open. On October 6, 2026, OpenAI released a manuscript collection containing
+a preprint dated October 4 that claims a uniform randomized classical
+$\Oh(2^{0.49n})$ decision algorithm for positive-integer Subset Sum. This note
+records the exact scope of that claim, its five-stage proof pipeline, and what
+has been independently machine-checked in Lean versus what remains unverified.
+It is an audit update, not an independent proof of the claimed runtime bound.
 \end{abstract}
 
 \section{Why this update is separate}
 
-The earlier survey remains useful as a record of the preprint landscape it
-described, but several of its central statements are now historically dated.
-In particular, its introduction, result table, chronology, conclusion, and
-open-problem discussion say that ordinary worst-case Subset Sum had no known
+The earlier survey remains useful as a record of the literature it described,
+but several of its central statements are now historically dated. In
+particular, its introduction, result table, chronology, conclusion, and
+open-problem discussion state that ordinary worst-case Subset Sum had no known
 constant improvement below $2^{n/2}$. Rewriting each statement in place would
-hide the distinction between the prior landscape and a new, not yet
-independently checked claim. This dated note supplies the correction and the
-appropriate qualification.
+blur the distinction between established results and a new, not yet
+independently verified claim. This dated note supplies the qualification.
 
 \section{The claimed result}
 
-The primary artifact is the preprint \emph{Subset Sum in Time
+The primary source is the preprint \emph{Subset Sum in Time
 $\Oh(2^{0.49n})$}~\cite{openai-ss}, included in OpenAI's mathematics
-collection~\cite{openai-release}. Its Theorem 1.1 claims a single uniform
+collection~\cite{openai-release}. Its Theorem~1.1 claims a single uniform
 randomized classical word-RAM algorithm with the following guarantees.
 
 \begin{itemize}
@@ -50,28 +49,28 @@ randomized classical word-RAM algorithm with the following guarantees.
   access, preprocessing, and writable storage all count toward the running
   time.
 \item The algorithm halts on every random execution and returns the correct
-  decision answer with probability at least $2/3$ for every fixed input.
+  yes/no decision answer with probability at least $2/3$ for every fixed input.
 \item For every fixed $c>0$, inputs with $b\leq n^c$ are processed in
   $C_c2^{0.49n}$ word operations for sufficiently large $n$, on every random
   execution. The stated intermediate form is
   $2^{0.489995n}\operatorname{poly}(n+b+2)$.
 \end{itemize}
 
-The claim is therefore a substantial change to the worst-case landscape, if
-correct. It is narrower than the signed-integer, witness-returning interface of
-this repository: the manuscript states a positive-integer decision theorem.
-An explicit reduction and witness reconstruction must be supplied before its
-bound can be assigned to the repository API.
+If verified, the theorem changes the worst-case decision landscape. Note that
+Theorem~1.1 states a positive-integer decision result rather than a
+signed-integer witness-recovery theorem; reducing signed inputs to positive
+weights and lifting a decision oracle to an explicit subset witness require
+separate reductions.
 
 \begin{table}[t]
 \centering
-\caption{Corrected status of the main classical regimes.}
+\caption{Status of the main classical regimes.}
 \begin{tabular}{p{4.7cm}p{3.2cm}p{4.2cm}}
 \toprule
 Setting & Bound & Status \\
 \midrule
-Positive-integer Subset Sum, polynomial-bit word RAM & $2^{0.49n}$ & claimed in a new preprint \\
-Signed-integer Subset Sum with an occurrence witness & $2^{n/2}$ baseline & no reduction or implementation here \\
+Positive-integer Subset Sum, polynomial-bit word RAM & $2^{0.49n}$ & claimed in a 2026 preprint \\
+Signed-integer Subset Sum with occurrence witness & $2^{n/2}$ baseline & reductions machine-checked in Lean; $2^{0.49n}$ core unformalized \\
 Random hard knapsacks & $2^{0.291n}$ & BCJ model; average-case \\
 Pigeonhole Equal Subset Sum & $2^{n/3}$ & randomized promise result \\
 \bottomrule
@@ -80,66 +79,72 @@ Pigeonhole Equal Subset Sum & $2^{n/3}$ & randomized promise result \\
 
 \section{Pipeline in the manuscript}
 
-The new proof is not a direct extension of the HGJ or BCJ representation
-algorithm. Its five coupled components are:
+The new proof is not a direct extension of the Howgrave-Graham--Joux or
+Becker--Coron--Joux representation algorithm. Its five coupled stages are:
 
 \begin{enumerate}
-\item \textbf{Isolation.} Random tie-breaking weights transform one input into
-  polynomially many positive-weight targets. With high constant probability, a
-  satisfiable input produces a target with exactly one representing subset.
-\item \textbf{Preliminary search.} A capped MITM procedure solves
-  instances whose random restrictions have a sufficiently small distinct
-  subset-sum support.
-\item \textbf{Modular checksum.} For a large random prime, a filtered
-  high/low-digit construction estimates a Fourier expression for each modular
-  target bin to small \emph{absolute} error. The filter uses fixed numerical
-  parameters and a finite interval-arithmetic certificate in the appendix.
-\item \textbf{Alias extraction.} A separate shared-block representation lists
-  modular false positives. Its records carry masks for the shared block; a pair
-  is compatible exactly when those masks are disjoint. Random primes bound
-  surviving nonzero integer discrepancies.
-\item \textbf{Subtraction and thresholding.} The estimated modular bin minus
-  the complete alias contribution distinguishes an empty bin from the isolated
-  one.
+\item \textbf{Isolation.} Random tie-breaking weights $u_1,\dots,u_n$ transform
+  one input $(a,t)$ into polynomially many positive-weight targets
+  $a'_i = \text{scale}\cdot a_i + u_i$ and $t'_s = \text{scale}\cdot t + s$.
+  With constant probability, a satisfiable input produces a target $t'_s$ with
+  a unique representing subset.
+\item \textbf{Preliminary search.} A capped meet-in-the-middle procedure solves
+  instances whose random restrictions have a sufficiently small set of distinct
+  subset sums.
+\item \textbf{Modular checksum.} For a large random prime $p$, a filtered
+  high/low-digit decomposition ($a'_i = q_i B + r_i$) estimates a Fourier
+  expression for each modular target bin to small \emph{absolute} error. The
+  filter uses fixed numerical parameters and a finite interval-arithmetic
+  certificate in the appendix.
+\item \textbf{Alias extraction.} A three-block shared-mask representation lists
+  modular false positives (subsets with $a'\cdot x \neq t'_s$ but
+  $a'\cdot x \equiv t'_s \pmod p$). Records carry masks on the shared block and
+  are compatible precisely when those masks are disjoint.
+\item \textbf{Subtraction and thresholding.} Subtracting the enumerated alias
+  contribution from the estimated modular bin count separates an empty bin from
+  an isolated solution.
 \end{enumerate}
 
-This structure matters for reproducibility. The claimed exponent depends on
-the interaction of checksum variance, filtering coverage, alias enumeration,
-finite precision, and caps on every randomized loop. Replacing any one part by
-an uncapped heuristic does not reproduce Theorem~1.1.
+The claimed exponent depends on the interaction of checksum variance, filtering
+coverage, alias enumeration, finite precision, and explicit caps on every
+randomized loop.
 
-\section{Audit and repository status}
+\section{Verification status}
 
-The exact manuscript path, theorem scope, and published model were checked
-against the primary PDF. The official Lean formalization catalog does not list
-this manuscript~\cite{openai-lean}. The collection release also says that
-results are at different verification stages and that not all manuscripts are
-formalized~\cite{openai-release}. Accordingly, this repository labels the
-result \emph{unreviewed until independently checked}; that label concerns the
-state of this project's audit, not a claim that the manuscript is false.
+The official Lean formalization catalog accompanying the collection does not
+list this manuscript~\cite{openai-lean}, and the release notes state that the
+manuscripts are at varying stages of verification~\cite{openai-release}. We
+therefore treat the $2^{0.49n}$ runtime bound as \emph{unreviewed until
+independently checked}.
 
-The former Python small-instance model was removed in the Lean-first migration.
-The current checked executable pipeline covers the proved reference
-meet-in-the-middle decision procedure only. A Lean formalization of the
-isolation family, shared-mask compatibility, estimator, filter-table
-construction, alias sampler, arithmetic certificate, and word-RAM engineering
-remains necessary before any end-to-end claim about this preprint.
+In our accompanying Lean 4 verification layer, the deterministic structural
+skeleton of the five-stage pipeline has been formalized and machine-checked:
+\begin{itemize}
+\item the signed-to-nonnegative and strictly positive weight reductions with an
+  involutive witness map;
+\item the tie-breaking isolation family $a'_i = \text{scale}\cdot a_i + u_i$ and
+  $t'_s = \text{scale}\cdot t + s$, including decision equivalence and witness
+  uniqueness when a tie sum $s$ is isolated;
+\item the capped distinct-sum preliminary search and the linear high/low-digit
+  subset-sum split;
+\item the three-block shared-mask compatibility solver, the exact decomposition
+  of each modular target bin into true solutions and modular aliases, and the
+  end-to-end decision equivalence after alias subtraction.
+\end{itemize}
+What remains unformalized is the quantitative probabilistic core: the
+filtered Fourier checksum variance bound, the random-prime alias-survival cap,
+the rational interval-arithmetic certificate in Appendix~A, and the word-RAM
+operation count.
 
-The historical reports record earlier three-block and PESS experiments. The
-Lean project retains a theorem for the three-block sum decomposition. Neither
-supplies the missing end-to-end implementation of the new manuscript.
-
-\section{Revised next steps}
+\section{Next verification steps}
 
 \begin{enumerate}
-\item Reproduce the modular-checksum and alias-extraction theorems on small
-  instances with explicit failure caps and a brute-force oracle.
-\item Independently check the filtering-moment inequalities and the rational
-  interval calculations in the appendix.
-\item Specify and prove a positive-to-signed reduction that preserves the
-  repository's witness semantics.
-\item Only after those steps, update the main survey's worst-case table and
-  conclusion from ``open'' to a properly qualified account of the preprint.
+\item Formalize and check the filtering-moment inequalities and Appendix~A's
+  rational interval certificate.
+\item Verify the randomized Fourier checksum estimator and capped alias
+  extractor bounds.
+\item Update the main survey's worst-case table from ``open'' only after the
+  probabilistic and word-RAM bounds are independently established.
 \end{enumerate}
 
 \begin{thebibliography}{9}

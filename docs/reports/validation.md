@@ -83,35 +83,43 @@ as a new discovery.
 
 ## Formal scope
 
-`lean/SubsetSum.lean` uses Lean 4.19.0 and `Std` only. The `HasSum` inductive
-specification chooses or skips each occurrence once.
+`lean/SubsetSum.lean` and `lean/SubsetSum/*.lean` use Lean 4.19.0 and `Std`
+only. The `HasSum` inductive specification chooses or skips each occurrence
+once.
 
-| Theorem | What it establishes |
-| --- | --- |
-| `mem_sums_iff` | Soundness and completeness of exhaustive sum enumeration |
-| `sums_length` | Exactly `2^n` enumerated entries, including repetitions |
-| `hasSum_append` | Any split reduces to two subset sums adding to the target |
-| `meetInMiddle_correct` | Executable reference matching decides the specification |
-| `hasSum_magnitude` | Every feasible sum has absolute value at most the input magnitude sum |
-| `target_outside_impossible` | A target beyond that radius cannot be feasible |
-| `restricted_work_bound` | Algebraic work envelope under `w <= 2^(n/3)` |
-| `hasSumWeight_sound` / `hasSumWeight_complete` | The weight-resolved specification is equivalent to `HasSum` (soundness / existence of a certificate) |
-| `hasSumWeight_le_length` | Selected weight never exceeds the number of occurrences |
-| `hasSumWeight_append` | Any contiguous split factors a weight-`k` certificate into disjoint parts with `ku + kv = k` (the representation decomposition `x = y + z`) |
-| `mem_residues` | Every feasible sum survives a modulus-`m` residue filter (filter completeness) |
-| `value_diff_mem_wsum_diff` | Concentration kernel: two weight-`w` sets differing in `i` vs `j` have sums differing by `a i - a j`, so value differences lie in `V - V` |
-| `value_diff_mod_mem_wsum_mod_diff` | Residue form of the concentration kernel (`Int.sub_emod`) |
-| `dvd_listSum_sub_length_mul` | `r = 1` contraction: if `p ∣ a i - ρ` for all `i` then `p ∣ listSum a s - s.length·ρ` |
-| `residue_collision_iff` | The summand of `E_p`: `a % p = b % p ↔ (a - b) % p = 0` |
+| Module | Theorem | What it establishes |
+| --- | --- | --- |
+| `SubsetSum.Basic` | `mem_sums_iff` / `sums_length` | Soundness, completeness, and `2^n` size of exhaustive sum enumeration |
+| `SubsetSum.Basic` | `hasSum_append` / `hasSum_append3` | Two- and three-block splits reduce to 2-sum / 3-set 3SUM |
+| `SubsetSum.Basic` | `meetInMiddle_correct` / `threeBlock_correct` | Executable two-block MITM and three-block 3SUM decision procedures |
+| `SubsetSum.Basic` | `hasSum_magnitude` / `target_outside_impossible` / `restricted_work_bound` | Numeric radius `W` for feasible sums and `O*(2^(n/3))` work envelope under `w <= 2^(n/3)` |
+| `SubsetSum.Witness` | `hasSum_iff_exists_mask` / `mem_sumMasks_iff` | Equivalence between `HasSum` and Boolean occurrence masks `List Bool` |
+| `SubsetSum.Witness` | `meetInMiddleWitness_sound` / `meetInMiddleWitness_isSome_iff` | Executable witness-returning MITM soundness and completeness |
+| `SubsetSum.Reductions` | `hasSum_signed_iff_nonneg` / `hasSum_signed_iff_pos` / `flipNegMask_involutive` | Bijective witness-preserving reduction from signed integers to nonnegative and strictly positive weights |
+| `SubsetSum.Reductions` | `isolation_mask_iff` / `isolation_hasSum_iff` / `isolation_unique_mask` | Tie-breaking solution isolation `scale * a_i + u_i` and `scale * b + s`: soundness, completeness, and uniqueness |
+| `SubsetSum.Representation` | `hasSumWeight_sound` / `hasSumWeight_complete` / `hasSumWeight_le_length` / `hasSumWeight_append` | Weight-resolved certificates and the representation split `x = y + z` with `ku + kv = k` |
+| `SubsetSum.Representation` | `mem_residues` | Every feasible sum survives a modulus-`m` residue filter (filter completeness) |
+| `SubsetSum.Representation` | `value_diff_mem_wsum_diff` / `value_diff_mod_mem_wsum_mod_diff` / `dvd_listSum_sub_length_mul` / `residue_collision_iff` | Mixing concentration kernel, `r = 1` prime-stripping contraction, and collision-energy summand |
+| `SubsetSum.Representation` | `collision_energy_split` | Exact decomposition `E_p = E_∞ + K_p` of modular collisions into exact and proper modular collisions |
+| `SubsetSum.Representation` | `no_coefficient_shifting_01` / `no_coefficient_shifting_pm1` | No nontrivial sumset factorization `C_1 + C_2` with `|C_1|, |C_2| >= 2` exists for `{0,1}` or `{-1,1}` (R12) |
+| `SubsetSum.SharedMask` | `maskSum_orMask_of_disjoint` | Disjoint masks satisfy `maskSum xs (orMask m1 m2) = maskSum xs m1 + maskSum xs m2` |
+| `SubsetSum.SharedMask` | `sharedMaskSolve_sound` / `sharedMaskSolve_isSome_iff` | Three-block shared-mask compatibility solver soundness and completeness |
+| `SubsetSum.SharedMask` | `modBin_alias_subtraction` / `mem_modBinTrueHits_iff` | Exact decomposition of modular target bins into true target hits and modular aliases (`s != b`) |
+| `SubsetSum.HighEnergy` | `masksDisjoint_diffMask` / `maskWeight_diffMask_le` / `maskSum_diffMask_eq_iff` / `diffMask_ne_of_ne` / `lemma_T_forced_disjoint_relation` | Stripping common elements from two distinct equal-sum subsets yields a nonempty disjoint equal-sum relation (Lemma T) |
+| `SubsetSum.HighEnergy` | `maskSum_geomWeights_inj` / `maskSum_scaled_geomWeights_inj` | Scaled geometric progressions keep all `2^n` subset sums distinct (`F = 0`) at arbitrary scale (`TRANSFER.md` barrier) |
+| `SubsetSum.HighEnergy` | `sq_sum_le_length_mul_sumSq` | Discrete Cauchy-Schwarz collision-energy bound `(∑ c_r)^2 <= k * ∑ c_r^2` |
+| `SubsetSum.HighEnergy` | `compressMitm_correct` | Compressible-core MITM over deduplicated `Σ(C)` is sound and complete |
+| `SubsetSum.HighEnergy` | `hgjSolve_sound` / `hgjSolve_isSome_of_representation` | Two-way HGJ modular-filter representation solver soundness and completeness |
+| `SubsetSum.HighEnergy` | `sumsInInterval_split_length` / `pess_crowded_halving` | PESS binary-search invariant: halving a crowded interval leaves at least one crowded half |
+| `SubsetSum.Audit049` | `maskSum_high_low_split` | High/low-digit subset-sum split `maskSum xs ms = base * maskSum high ms + maskSum low ms` |
+| `SubsetSum.Audit049` | `cappedPrelimSolve_sound` | Capped distinct-sum preliminary search soundness and completeness when `|Σ(left)| <= cap` |
+| `SubsetSum.Audit049` | `aliasSubtractedCount_eq_trueHits` / `isolated_alias_decision_iff` | End-to-end decision equivalence of isolation + modular bin alias subtraction + thresholding |
 
-The reference matcher uses linear membership; its runtime is not the sorted
-Python matcher's runtime. The Lean file does not prove a refinement of the
-Python code, the dense DP implementation, the Schroeppel–Shamir control flow,
-or operational runtime bounds. The paper supplies mathematical proofs of DP and
-Schroeppel–Shamir correctness and of the runtime bounds. Lean 4.19.0 (via
-`elan`) was run with a clean rebuild (`lake clean && lake build`); it completed
-successfully and every theorem depends only on `propext` and `Quot.sound`, with
-no `sorryAx` (R17 added the weight-resolved split and residue-filter lemmas).
+The reference matchers use linear membership; their runtime is not the sorted
+Python matcher's runtime. Lean 4.19.0 (via `elan`) was run with a clean rebuild
+(`lake clean && lake build`); it completed successfully and every theorem
+depends only on `[propext, Quot.sound]` (with zero `sorryAx` and zero
+`Classical.choice`).
 
 ## Measurements
 

@@ -45,21 +45,29 @@ core randomized pieces include prime sampling, random phases, random filtering
 tables, random restrictions, and capped match sampling.
 
 The former Python small-instance model was removed in the Lean-first migration.
-The current checked executable pipeline covers the proved reference
-meet-in-the-middle decision procedure only. A Lean formalization of the
-isolation family, shared-mask compatibility, estimator, filter tables, alias
-sampler, numerical certificate, and word-RAM implementation remains necessary
-before any end-to-end claim about this preprint.
+In the modular Lean layer (`lean/SubsetSum/Reductions.lean` and
+`lean/SubsetSum/SharedMask.lean`), the deterministic structural reductions are
+now formalized and proved:
+- signed-to-nonnegative and strictly positive weight reductions with involutive
+  witness recovery (`hasSum_signed_iff_nonneg`, `hasSum_signed_iff_pos`,
+  `flipNegMask_involutive`);
+- the tie-breaking isolation family (`isolateWeights`, `isolateTarget`,
+  `isolation_mask_iff`, `isolation_hasSum_iff`, `isolation_unique_mask`);
+- the three-block shared-mask compatibility solver (`SharedMaskRecord`,
+  `sharedMaskSolve_sound`, `sharedMaskSolve_isSome_iff`);
+- the exact modular bin alias-subtraction identity (`modBin_alias_subtraction`).
+
+A Lean formalization of the randomized Fourier checksum estimator, filter tables,
+capped alias sampler, numerical interval certificate, and word-RAM runtime bound
+remains necessary before any end-to-end claim about this preprint.
 
 ## Next audit work
 
-1. Independently reproduce Theorems 4.1 and 5.1 on small instances, including
-   every failure cap and the false-positive alias subtraction.
+1. Independently reproduce Theorems 4.1 and 5.1 (filtered checksum estimator
+   and capped alias sampler) on small instances in Lean.
 2. Audit the filtering-moment inequalities and Appendix A's rational interval
    certificate separately from the algorithmic implementation.
-3. Prove an explicit positive-to-signed reduction before exposing the result
-   through the repository's signed-integer API.
-4. Replace the survey's old worst-case landscape only after an independent
+3. Replace the survey's old worst-case landscape only after an independent
    end-to-end review establishes the theorem's stated scope.
 
 ## Work that remains useful
